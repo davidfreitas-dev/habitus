@@ -83,9 +83,7 @@ jobs:
           SOURCE: "api/"
           TARGET: "/var/www/habits/api/"
           ARGS: "-rlgoDz --delete"
-          EXCLUDE: "README.md, .git/, .gitignore, .env.example, .dockerignore,
-                    docker-compose.yml, Dockerfile, .docker/, docs/, tools/,
-                    logs/, .env"
+          EXCLUDE: ".git/,.gitignore,.env.example,.dockerignore,docker-compose.yml,Dockerfile,.docker/,docs/,tools/,logs/,.env,config/keys/,storage/"
           SCRIPT_AFTER: |
             set -e  # falha imediatamente se qualquer comando falhar
             cd /var/www/habits/api
