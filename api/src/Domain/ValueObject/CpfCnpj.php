@@ -7,13 +7,13 @@ namespace App\Domain\ValueObject;
 use App\Domain\Exception\ValidationException;
 use JsonSerializable;
 
-final readonly class CpfCnpj implements JsonSerializable
+final readonly class CpfCnpj implements JsonSerializable, \Stringable
 {
     private string $value;
 
     private function __construct(string $value)
     {
-        if (empty($value)) {
+        if ($value === '' || $value === '0') {
             throw new ValidationException('CPF/CNPJ não pode ser vazio.');
         }
 
@@ -77,7 +77,7 @@ final readonly class CpfCnpj implements JsonSerializable
 
     public function equals(?CpfCnpj $other): bool
     {
-        if ($other === null) {
+        if (!$other instanceof \App\Domain\ValueObject\CpfCnpj) {
             return false;
         }
 
@@ -116,6 +116,7 @@ final readonly class CpfCnpj implements JsonSerializable
         for ($i = 0; $i < 9; $i++) {
             $sum += ((int) $cpf[$i]) * (10 - $i);
         }
+
         $remainder = $sum % 11;
         $digit1 = $remainder < 2 ? 0 : 11 - $remainder;
 
@@ -128,6 +129,7 @@ final readonly class CpfCnpj implements JsonSerializable
         for ($i = 0; $i < 10; $i++) {
             $sum += ((int) $cpf[$i]) * (11 - $i);
         }
+
         $remainder = $sum % 11;
         $digit2 = $remainder < 2 ? 0 : 11 - $remainder;
 

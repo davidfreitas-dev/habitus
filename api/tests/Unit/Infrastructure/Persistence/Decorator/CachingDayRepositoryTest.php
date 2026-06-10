@@ -16,9 +16,13 @@ use Psr\Log\LoggerInterface;
 class CachingDayRepositoryTest extends TestCase
 {
     private DayRepositoryInterface&MockObject $decoratedRepository;
+
     private RedisCache&MockObject $redisCache;
+
     private LoggerInterface&MockObject $logger;
+
     private CachingDayRepository $cachingDayRepository;
+
     private int $cacheTtl;
 
     protected function setUp(): void
@@ -44,9 +48,7 @@ class CachingDayRepositoryTest extends TestCase
         $day = new Day($date);
         $reflection = new \ReflectionClass($day);
         $property = $reflection->getProperty('id');
-        $property->setAccessible(true);
-        $property->setValue($day, 1); // Assign a dummy ID for testing
-        $property->setAccessible(false);
+        $property->setValue($day, 1);
         return $day;
     }
 

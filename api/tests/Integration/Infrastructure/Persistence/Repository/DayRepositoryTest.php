@@ -18,9 +18,13 @@ use App\Domain\Entity\Person;
 class DayRepositoryTest extends DatabaseTestCase
 {
     private DayRepository $dayRepository;
+
     private UserRepository $userRepository;
+
     private PersonRepository $personRepository;
+
     private RoleRepository $roleRepository;
+
     private ?User $testUser = null;
 
     protected function setUp(): void
@@ -114,7 +118,7 @@ class DayRepositoryTest extends DatabaseTestCase
     {
         $stmt = self::$pdo->prepare('SELECT * FROM days WHERE id = :id');
         $stmt->execute(['id' => $dayId]);
-        
+
         return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 
@@ -125,15 +129,15 @@ class DayRepositoryTest extends DatabaseTestCase
         $fetchedPerson = $this->personRepository->findByEmail($createdPerson->getEmail());
 
         $customerRole = $this->roleRepository->findByName('customer');
-        if (!$customerRole) {
+        if (!$customerRole instanceof \App\Domain\Entity\Role) {
             throw new \RuntimeException("Perfil 'customer' não encontrada no seed do banco de dados.");
         }
 
         $user = new User(person: $fetchedPerson, role: $customerRole, password: 'password');
         $this->userRepository->create($user);
-        
+
         $fetchedUser = $this->userRepository->findByEmail($email);
-        if (!$fetchedUser) {
+        if (!$fetchedUser instanceof \App\Domain\Entity\User) {
             throw new \RuntimeException("Usuário não pôde ser criado ou encontrado.");
         }
 

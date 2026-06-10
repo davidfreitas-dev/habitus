@@ -14,7 +14,9 @@ use Tests\Functional\FunctionalTestCase;
 class RegisterTest extends FunctionalTestCase
 {
     private UserRepositoryInterface $userRepository;
+
     private UserVerificationRepositoryInterface $userVerificationRepository;
+
     private JwtService $jwtService;
 
     protected function setUp(): void
@@ -86,8 +88,8 @@ class RegisterTest extends FunctionalTestCase
     public function testRegisterWithExistingEmailReturnsConflict(): void
     {
         // Use email único baseado no timestamp para evitar conflitos com outros testes
-        $uniqueEmail = 'duplicate.' . time() . rand(1000, 9999) . '@example.com';
-        
+        $uniqueEmail = 'duplicate.' . time() . random_int(1000, 9999) . '@example.com';
+
         // Arrange: Create first user
         $payload = [
             'name' => 'First User',
@@ -123,9 +125,9 @@ class RegisterTest extends FunctionalTestCase
     public function testRegisterWithExistingCpfCnpjReturnsConflict(): void
     {
         // Use email único para evitar conflitos
-        $uniqueEmail1 = 'user1.' . time() . rand(1000, 9999) . '@example.com';
-        $uniqueEmail2 = 'user2.' . time() . rand(1000, 9999) . '@example.com';
-        
+        $uniqueEmail1 = 'user1.' . time() . random_int(1000, 9999) . '@example.com';
+        $uniqueEmail2 = 'user2.' . time() . random_int(1000, 9999) . '@example.com';
+
         // Arrange: Create first user
         $payload = [
             'name' => 'First User',
@@ -246,8 +248,8 @@ class RegisterTest extends FunctionalTestCase
     public function testVerifyEmailWithUsedTokenReturnsBadRequest(): void
     {
         // Use email único
-        $uniqueEmail = 'verify.test.' . time() . rand(1000, 9999) . '@example.com';
-        
+        $uniqueEmail = 'verify.test.' . time() . random_int(1000, 9999) . '@example.com';
+
         // Arrange: Register and verify user
         $payload = [
             'name' => 'Test User',
@@ -259,14 +261,14 @@ class RegisterTest extends FunctionalTestCase
 
         $registerResponse = $this->sendRequest('POST', '/api/v1/auth/register', $payload);
         $this->assertEquals(StatusCodeInterface::STATUS_CREATED, $registerResponse->getStatusCode());
-        
+
         $user = $this->userRepository->findByEmail($payload['email']);
-        
+
         // Verifica se o usuário foi criado
-        if (!$user) {
+        if (!$user instanceof \App\Domain\Entity\User) {
             $this->fail("O usuário não foi criado com sucesso");
         }
-        
+
         $token = $this->getLatestVerificationTokenForUser($user->getId());
 
         // First verification (should succeed) - ROTA CORRIGIDA
@@ -290,21 +292,22 @@ class RegisterTest extends FunctionalTestCase
     {
         $container = $this->app->getContainer();
         $pdo = $container->get(\PDO::class);
-        
+
         $stmt = $pdo->prepare(
             'SELECT token FROM user_verifications 
              WHERE user_id = :user_id 
              ORDER BY created_at DESC 
              LIMIT 1'
         );
-        
+
         $stmt->execute(['user_id' => $userId]);
+
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-        
+
         if (!$result) {
-            $this->fail("Nenhum token de verificação encontrado para o ID de usuário: {$userId}");
+            $this->fail('Nenhum token de verificação encontrado para o ID de usuário: ' . $userId);
         }
-        
+
         return $result['token'];
     }
 }

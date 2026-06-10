@@ -61,6 +61,25 @@ class RedisCache
         return $this->redis->flushDB();
     }
 
+    public function incr(string $key): int
+    {
+        return $this->redis->incr($key);
+    }
+
+    public function getRaw(string $key): mixed
+    {
+        return $this->redis->get($key);
+    }
+
+    public function setRaw(string $key, string $value, int $ttl = 0): bool
+    {
+        if ($ttl > 0) {
+            return $this->redis->setex($key, $ttl, $value);
+        }
+
+        return $this->redis->set($key, $value);
+    }
+
     /**
      * Add one or more members to a set.
      */

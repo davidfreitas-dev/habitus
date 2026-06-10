@@ -19,15 +19,18 @@ use Tests\Integration\DatabaseTestCase;
 class PHPMailerServiceTest extends DatabaseTestCase
 {
     private PHPMailerService $mailerService;
+
     private PersonRepository $personRepository;
+
     private RoleRepository $roleRepository;
+
     private \Faker\Generator $faker;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->faker = Factory::create('pt_BR');
-        
+
         $logger = new Logger('test-mailer');
         $logger->pushHandler(new NullHandler());
 
@@ -50,6 +53,7 @@ class PHPMailerServiceTest extends DatabaseTestCase
         $this->cleanMailHog();
     }
 
+    #[\Override]
     protected function tearDown(): void
     {
         $this->cleanMailHog();
@@ -72,6 +76,7 @@ class PHPMailerServiceTest extends DatabaseTestCase
         if ($messagesJson === false) {
             return null;
         }
+
         $messages = json_decode($messagesJson);
         return $messages->items[0] ?? null;
     }
@@ -80,16 +85,16 @@ class PHPMailerServiceTest extends DatabaseTestCase
     {
         $person = new Person(name: 'John Doe', email: 'john.doe@example.com');
         $this->personRepository->create($person);
-        
+
         $role = $this->roleRepository->findByName('customer');
 
         if (!$role instanceof Role) {
             throw new \RuntimeException("Perfil de cliente não encontrado no banco de dados de teste. Verifique a semeadura do DatabaseTestCase.");
         }
-        
-        $user = new User(person: $person, password: 'password', role: $role);
+
+        $user = new User(person: $person, role: $role, password: 'password');
         $verificationUrl = 'http://example.com/verify?token=123456';
-        
+
         $template = new EmailVerificationEmailTemplate(
             $user->getEmail(),
             $user->getPerson()->getName(),
@@ -99,12 +104,12 @@ class PHPMailerServiceTest extends DatabaseTestCase
         $this->mailerService->send($template);
 
         $email = $this->getLatestEmailFromMailHog();
-        
+
         $this->assertNotNull($email, 'Nenhum e-mail encontrado no MailHog');
 
         // Decodifica o subject MIME
-        $decodedSubject = iconv_mime_decode($email->Content->Headers->Subject[0], 0, 'UTF-8');
-        
+        $decodedSubject = iconv_mime_decode((string) $email->Content->Headers->Subject[0], 0, 'UTF-8');
+
         $this->assertEquals('Verifique Seu Endereço de E-mail', $decodedSubject);
         $this->assertEquals('John Doe <john.doe@example.com>', $email->Content->Headers->To[0]);
         $this->assertEquals('Remetente de Teste <no-reply@example.com>', $email->Content->Headers->From[0]);

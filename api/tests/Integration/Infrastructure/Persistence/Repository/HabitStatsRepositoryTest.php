@@ -18,10 +18,15 @@ use Tests\Integration\DatabaseTestCase;
 class HabitStatsRepositoryTest extends DatabaseTestCase
 {
     private HabitStatsRepository $habitStatsRepository;
+
     private HabitRepository $habitRepository;
+
     private UserRepository $userRepository;
+
     private PersonRepository $personRepository;
+
     private RoleRepository $roleRepository;
+
     private User $testUser;
 
     protected function setUp(): void
@@ -50,7 +55,7 @@ class HabitStatsRepositoryTest extends DatabaseTestCase
         // Complete it on Monday (Feb 16) and Wednesday (Feb 18)
         $dayMondayId = $this->ensureDayExists(new DateTimeImmutable('2026-02-16'));
         $dayWednesdayId = $this->ensureDayExists(new DateTimeImmutable('2026-02-18'));
-        
+
         $this->markHabitAsCompleted($dayMondayId, $createdHabit->getId());
         $this->markHabitAsCompleted($dayWednesdayId, $createdHabit->getId());
 
@@ -103,7 +108,7 @@ class HabitStatsRepositoryTest extends DatabaseTestCase
         // 2 days ago: Completed
         // 1 day ago: Completed
         // Today: Not completed (yet)
-        
+
         $this->markHabitAsCompleted($this->ensureDayExists($fourDaysAgo), $createdHabit->getId());
         $this->markHabitAsCompleted($this->ensureDayExists($twoDaysAgo), $createdHabit->getId());
         $this->markHabitAsCompleted($this->ensureDayExists($yesterday), $createdHabit->getId());
@@ -145,11 +150,11 @@ class HabitStatsRepositoryTest extends DatabaseTestCase
     {
         $person = new Person(name: $name, email: $email);
         $createdPerson = $this->personRepository->create($person);
-        
+
         $customerRole = $this->roleRepository->findByName('customer');
         $user = new User(person: $createdPerson, role: $customerRole, password: 'password');
         $this->userRepository->create($user);
-        
+
         return $this->userRepository->findByEmail($email);
     }
 
@@ -157,10 +162,10 @@ class HabitStatsRepositoryTest extends DatabaseTestCase
     {
         $stmt = self::$pdo->prepare('INSERT IGNORE INTO days (date) VALUES (:date)');
         $stmt->execute(['date' => $date->format('Y-m-d')]);
-        
+
         $stmt = self::$pdo->prepare('SELECT id FROM days WHERE date = :date');
         $stmt->execute(['date' => $date->format('Y-m-d')]);
-        
+
         return (int)$stmt->fetchColumn();
     }
 

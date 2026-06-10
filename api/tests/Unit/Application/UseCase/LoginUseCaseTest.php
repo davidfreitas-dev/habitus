@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Application\UseCase;
 
-use App\Application\DTO\LoginRequestDTO;
-use App\Application\DTO\LoginResponseDTO;
+use App\Application\DTO\Auth\LoginRequestDTO;
+use App\Application\DTO\Auth\LoginResponseDTO;
 use App\Application\UseCase\LoginUseCase;
 use App\Domain\Entity\User;
 use App\Domain\Exception\AuthenticationException;
@@ -18,9 +18,12 @@ use PHPUnit\Framework\MockObject\MockObject;
 
 class LoginUseCaseTest extends TestCase
 {
-    private UserRepositoryInterface|MockObject $userRepository;
-    private PasswordHasher|MockObject $passwordHasher;
-    private JwtService|MockObject $jwtService;
+    private \PHPUnit\Framework\MockObject\MockObject $userRepository;
+
+    private \PHPUnit\Framework\MockObject\MockObject $passwordHasher;
+
+    private \PHPUnit\Framework\MockObject\MockObject $jwtService;
+
     private LoginUseCase $loginUseCase;
 
     protected function setUp(): void

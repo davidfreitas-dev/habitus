@@ -17,9 +17,13 @@ use Faker\Factory;
 class CreateUserAdminTest extends FunctionalTestCase
 {
     private UserRepositoryInterface $userRepository;
+
     private PersonRepositoryInterface $personRepository;
+
     private RoleRepositoryInterface $roleRepository;
+
     private \Faker\Generator $faker;
+
     private string $adminToken;
 
     protected function setUp(): void
@@ -49,8 +53,8 @@ class CreateUserAdminTest extends FunctionalTestCase
 
         $user = new User(
             person: $person,
-            password: $hashedPassword,
             role: $role,
+            password: $hashedPassword,
             isActive: true,
             isVerified: true
         );
@@ -110,15 +114,15 @@ class CreateUserAdminTest extends FunctionalTestCase
 
         $user = new User(
             person: $person,
-            password: $hashedPassword,
             role: $role,
+            password: $hashedPassword,
             isActive: true,
             isVerified: true
         );
 
         return $this->userRepository->create($user);
     }
-    
+
     public function testCreateUserAsAdminReturnsCreated(): void
     {
         // Arrange

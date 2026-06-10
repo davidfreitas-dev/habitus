@@ -50,8 +50,8 @@ final class UserRepositoryTest extends TestCase
     {
         return new User(
             person: $this->createPerson($id),
-            password: 'hashed_password',
             role: $this->createRole(),
+            password: 'hashed_password',
             isActive: true,
             isVerified: true,
             createdAt: new DateTimeImmutable('2023-01-01 10:00:00'),

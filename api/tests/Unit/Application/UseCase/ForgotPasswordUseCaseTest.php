@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Application\UseCase;
 
-use App\Application\DTO\ForgotPasswordRequestDTO;
+use App\Application\DTO\Auth\ForgotPasswordRequestDTO;
 use App\Application\UseCase\ForgotPasswordUseCase;
 use App\Domain\Entity\PasswordReset;
 use App\Domain\Entity\User;

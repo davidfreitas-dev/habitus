@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Application\UseCase;
 
-use App\Application\DTO\HabitsByDayRequestDTO;
-use App\Application\DTO\HabitsByDayResponseDTO;
+use App\Application\DTO\Habit\HabitsByDayRequestDTO;
+use App\Application\DTO\Habit\HabitsByDayResponseDTO;
 use App\Application\Service\ValidationService;
 use App\Application\UseCase\GetHabitsByDayUseCase;
 use App\Domain\Entity\Habit;
@@ -21,8 +21,11 @@ use Tests\TestCase;
 class GetHabitsByDayUseCaseTest extends TestCase
 {
     private ValidationService&MockObject $validationService;
+
     private HabitRepositoryInterface&MockObject $habitRepository;
+
     private DayRepositoryInterface&MockObject $dayRepository;
+
     private GetHabitsByDayUseCase $getHabitsByDayUseCase;
 
     public function testShouldReturnHabitsByDaySuccessfully(): void

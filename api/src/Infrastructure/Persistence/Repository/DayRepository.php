@@ -25,6 +25,7 @@ class DayRepository implements DayRepositoryInterface
         $params = ['date' => $date->format('Y-m-d')];
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
+
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return $data ? $this->hydrate($data) : null;
@@ -44,17 +45,18 @@ class DayRepository implements DayRepositoryInterface
             $day->setId((int)$this->pdo->lastInsertId());
 
             return $day;
-        } catch (PDOException $e) {
+        } catch (PDOException $pdoException) {
             // Check for unique constraint violation error code (e.g., MySQL 23000)
-            if ($e->getCode() === '23000') {
+            if ($pdoException->getCode() === '23000') {
                 // If the day already exists, fetch and return it
                 $existingDay = $this->findOneByDate($date);
-                if ($existingDay) {
+                if ($existingDay instanceof \App\Domain\Entity\Day) {
                     return $existingDay;
                 }
             }
+
             // If it's another PDOException or findOneByDate failed, re-throw
-            throw $e;
+            throw $pdoException;
         }
     }
 

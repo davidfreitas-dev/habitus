@@ -20,9 +20,13 @@ use App\Infrastructure\Persistence\MySQL\DatabaseErrorLogRepository;
 class DatabaseErrorLogRepositoryTest extends DatabaseTestCase
 {
     private DatabaseErrorLogRepository $errorLogRepository;
+
     private UserRepository $userRepository;
+
     private PersonRepository $personRepository;
+
     private RoleRepository $roleRepository;
+
     private \Faker\Generator $faker;
 
     protected function setUp(): void
@@ -47,14 +51,14 @@ class DatabaseErrorLogRepositoryTest extends DatabaseTestCase
         $role = $this->roleRepository->findById($roleId);
         if (!$role instanceof Role) {
             throw new \App\Domain\Exception\NotFoundException(
-                "Perfil com ID {$roleId} não encontrado. Certifique-se de que foi semeado."
+                sprintf('Perfil com ID %d não encontrado. Certifique-se de que foi semeado.', $roleId)
             );
         }
 
         $user = new User(
             person: $person,
-            password: 'password123',
-            role: $role
+            role: $role,
+            password: 'password123'
         );
         return $this->userRepository->create($user);
     }
@@ -66,7 +70,7 @@ class DatabaseErrorLogRepositoryTest extends DatabaseTestCase
             message: $this->faker->sentence,
             context: ['file' => $this->faker->filePath(), 'line' => $this->faker->randomNumber()],
             createdAt: new DateTimeImmutable(),
-            resolvedAt: $resolvedBy ? new DateTimeImmutable() : null,
+            resolvedAt: $resolvedBy instanceof \App\Domain\Entity\User ? new DateTimeImmutable() : null,
             resolvedBy: $resolvedBy?->getId()
         );
 

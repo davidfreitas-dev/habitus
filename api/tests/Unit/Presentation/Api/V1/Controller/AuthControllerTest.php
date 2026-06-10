@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Presentation\Api\V1\Controller;
 
-use App\Application\DTO\PasswordResetResponseDTO;
-use App\Application\DTO\LoginResponseDTO;
-use App\Application\DTO\RegisterUserRequestDTO;
-use App\Application\DTO\UserResponseDTO;
+use App\Application\DTO\Auth\PasswordResetResponseDTO;
+use App\Application\DTO\Auth\LoginResponseDTO;
+use App\Application\DTO\Auth\RegisterUserRequestDTO;
+use App\Application\DTO\User\UserResponseDTO;
 use App\Application\Exception\EmailSendingFailedException;
 use App\Application\Service\ValidationService;
 use App\Application\UseCase\ForgotPasswordUseCase;
@@ -34,17 +34,29 @@ use Slim\Psr7\Response as SlimResponse;
 class AuthControllerTest extends TestCase
 {
     private RegisterUserUseCase&MockObject $registerUseCase;
+
     private LoginUseCase&MockObject $loginUseCase;
+
     private ForgotPasswordUseCase&MockObject $forgotPasswordUseCase;
+
     private ResetPasswordUseCase&MockObject $resetPasswordUseCase;
+
     private ValidateResetCodeUseCase&MockObject $validateResetCodeUseCase;
+
     private VerifyEmailUseCase&MockObject $verifyEmailUseCase;
+
     private UserRepositoryInterface&MockObject $userRepository;
+
     private JwtService&MockObject $jwtService;
+
     private LoggerInterface&MockObject $logger;
+
     private JsonResponseFactory&MockObject $jsonResponseFactory;
+
     private ValidationService&MockObject $validationService;
+
     private AuthController $authController;
+
     private Response $response;
 
     protected function setUp(): void
@@ -60,7 +72,7 @@ class AuthControllerTest extends TestCase
         $this->logger = $this->createMock(LoggerInterface::class);
         $this->jsonResponseFactory = $this->createMock(JsonResponseFactory::class);
         $this->validationService = $this->createMock(ValidationService::class);
-        
+
         $this->authController = new AuthController(
             $this->registerUseCase,
             $this->loginUseCase,
@@ -75,7 +87,7 @@ class AuthControllerTest extends TestCase
             $this->validationService
         );
 
-        $this->response = (new ResponseFactory())->createResponse();
+        $this->response = new ResponseFactory()->createResponse();
     }
 
     public function testRegisterSuccess(): void
@@ -91,16 +103,14 @@ class AuthControllerTest extends TestCase
         $request->method('getParsedBody')->willReturn($requestBody);
 
         $registerUserRequestDTO = RegisterUserRequestDTO::fromArray($requestBody);
-        $this->validationService->expects($this->once())->method('validate')->with($this->callback(function($dto) use ($registerUserRequestDTO) {
-            return $dto->name === $registerUserRequestDTO->name && $dto->email === $registerUserRequestDTO->email;
-        }));
+        $this->validationService->expects($this->once())->method('validate')->with($this->callback(fn($dto): bool => $dto->name === $registerUserRequestDTO->name && $dto->email === $registerUserRequestDTO->email));
 
         $userResponseDto = new UserResponseDTO(
             id: 1,
             name: 'Test User',
             email: 'test@example.com',
-            roleId: 2,
             roleName: 'user',
+            roleId: 2,
             isActive: true,
             isVerified: false,
             phone: '11987654321',
@@ -109,9 +119,7 @@ class AuthControllerTest extends TestCase
 
         $this->registerUseCase->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($dto) use ($registerUserRequestDTO) {
-                return $dto->name === $registerUserRequestDTO->name && $dto->email === $registerUserRequestDTO->email;
-            }))
+            ->with($this->callback(fn($dto): bool => $dto->name === $registerUserRequestDTO->name && $dto->email === $registerUserRequestDTO->email))
             ->willReturn($userResponseDto);
 
         $this->jwtService->expects($this->once())->method('generateAccessToken')->with(1, 'test@example.com')->willReturn('mock_access_token');
@@ -126,7 +134,7 @@ class AuthControllerTest extends TestCase
         ];
 
         // Mock the JsonResponseFactory's success method
-        $mockedResponse = (new ResponseFactory())->createResponse(201);
+        $mockedResponse = new ResponseFactory()->createResponse(201);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'success',
             'data' => $expectedResponseData,
@@ -172,7 +180,7 @@ class AuthControllerTest extends TestCase
 
         $this->logger->expects($this->once())->method('warning');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(409);
+        $mockedResponse = new ResponseFactory()->createResponse(409);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => null,
@@ -210,7 +218,7 @@ class AuthControllerTest extends TestCase
 
         $this->logger->expects($this->once())->method('warning');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(400);
+        $mockedResponse = new ResponseFactory()->createResponse(400);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => $validationErrors,
@@ -250,8 +258,8 @@ class AuthControllerTest extends TestCase
             id: 1,
             name: 'Test User',
             email: 'test@example.com',
-            roleId: 1,
             roleName: 'user',
+            roleId: 1,
             isActive: true,
             isVerified: false,
             phone: '11987654321',
@@ -270,7 +278,7 @@ class AuthControllerTest extends TestCase
 
         $this->logger->expects($this->once())->method('error'); // Should log the error
 
-        $mockedResponse = (new ResponseFactory())->createResponse(500);
+        $mockedResponse = new ResponseFactory()->createResponse(500);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'error',
             'data' => null,
@@ -315,7 +323,7 @@ class AuthControllerTest extends TestCase
 
         $this->logger->expects($this->once())->method('error');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(500);
+        $mockedResponse = new ResponseFactory()->createResponse(500);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'error',
             'data' => null,
@@ -360,9 +368,7 @@ class AuthControllerTest extends TestCase
 
         $this->loginUseCase->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($dto) use ($requestBody) {
-                return $dto->email === $requestBody['email'] && $dto->password === $requestBody['password'];
-            }))
+            ->with($this->callback(fn($dto): bool => $dto->email === $requestBody['email'] && $dto->password === $requestBody['password']))
             ->willReturn($loginResponseDto);
 
         $expectedResponseData = [
@@ -372,7 +378,7 @@ class AuthControllerTest extends TestCase
             'expires_in' => 3600,
         ];
 
-        $mockedResponse = (new ResponseFactory())->createResponse(200);
+        $mockedResponse = new ResponseFactory()->createResponse(200);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'success',
             'data' => $expectedResponseData,
@@ -409,7 +415,7 @@ class AuthControllerTest extends TestCase
 
         $this->logger->expects($this->once())->method('warning');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(400);
+        $mockedResponse = new ResponseFactory()->createResponse(400);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => $validationErrors,
@@ -447,7 +453,7 @@ class AuthControllerTest extends TestCase
 
         $this->logger->expects($this->once())->method('warning');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(401);
+        $mockedResponse = new ResponseFactory()->createResponse(401);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => null,
@@ -485,7 +491,7 @@ class AuthControllerTest extends TestCase
 
         $this->logger->expects($this->once())->method('error');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(500);
+        $mockedResponse = new ResponseFactory()->createResponse(500);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'error',
             'data' => null,
@@ -528,7 +534,7 @@ class AuthControllerTest extends TestCase
         $userMock->method('getPerson')->willReturn($personMock);
 
         $this->userRepository->expects($this->once())->method('findById')->with(1)->willReturn($userMock);
-        
+
         $this->jwtService->expects($this->once())->method('revokeRefreshToken')->with('jwt_id_123');
         $this->jwtService->expects($this->once())->method('generateAccessToken')->with(1, 'test@example.com')->willReturn('new_access_token');
         $this->jwtService->expects($this->once())->method('generateRefreshToken')->with(1)->willReturn('new_refresh_token');
@@ -541,7 +547,7 @@ class AuthControllerTest extends TestCase
             'expires_in' => 3600,
         ];
 
-        $mockedResponse = (new ResponseFactory())->createResponse(200);
+        $mockedResponse = new ResponseFactory()->createResponse(200);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'success',
             'data' => $expectedResponseData,
@@ -574,7 +580,7 @@ class AuthControllerTest extends TestCase
             ->with('')
             ->willThrowException(new \App\Domain\Exception\AuthenticationException('Token inválido', 401));
 
-        $mockedResponse = (new ResponseFactory())->createResponse(401);
+        $mockedResponse = new ResponseFactory()->createResponse(401);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => null,
@@ -608,7 +614,7 @@ class AuthControllerTest extends TestCase
             ->with($refreshToken)
             ->willThrowException(new \App\Domain\Exception\AuthenticationException('Malformed JWT', 401));
 
-        $mockedResponse = (new ResponseFactory())->createResponse(401);
+        $mockedResponse = new ResponseFactory()->createResponse(401);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => null,
@@ -639,7 +645,7 @@ class AuthControllerTest extends TestCase
         $decodedToken = (object)['type' => 'access', 'jti' => 'jwt_id_123', 'sub' => 1]; // Wrong type
         $this->jwtService->expects($this->once())->method('validateToken')->with($refreshToken)->willReturn($decodedToken);
 
-        $mockedResponse = (new ResponseFactory())->createResponse(401);
+        $mockedResponse = new ResponseFactory()->createResponse(401);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => null,
@@ -671,7 +677,7 @@ class AuthControllerTest extends TestCase
         $this->jwtService->expects($this->once())->method('validateToken')->with($refreshToken)->willReturn($decodedToken);
         $this->jwtService->expects($this->once())->method('isRefreshTokenValid')->with('jwt_id_revoked')->willReturn(false);
 
-        $mockedResponse = (new ResponseFactory())->createResponse(401);
+        $mockedResponse = new ResponseFactory()->createResponse(401);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => null,
@@ -704,7 +710,7 @@ class AuthControllerTest extends TestCase
         $this->jwtService->expects($this->once())->method('isRefreshTokenValid')->with('jwt_id_valid')->willReturn(true);
         $this->userRepository->expects($this->once())->method('findById')->with(999)->willReturn(null);
 
-        $mockedResponse = (new ResponseFactory())->createResponse(404);
+        $mockedResponse = new ResponseFactory()->createResponse(404);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => null,
@@ -743,7 +749,7 @@ class AuthControllerTest extends TestCase
         $userMock->method('getPerson')->willReturn($personMock);
 
         $this->userRepository->expects($this->once())->method('findById')->with(1)->willReturn($userMock);
-        
+
         // Simulate a generic exception during the process (e.g., during revokeRefreshToken)
         $this->jwtService->expects($this->once())
             ->method('revokeRefreshToken')
@@ -751,7 +757,7 @@ class AuthControllerTest extends TestCase
 
         $this->logger->expects($this->once())->method('error');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(500);
+        $mockedResponse = new ResponseFactory()->createResponse(500);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'error',
             'data' => null,
@@ -780,7 +786,7 @@ class AuthControllerTest extends TestCase
     {
         $jti = 'jwt_unique_id';
         $exp = time() + 3600; // Example expiration time
-        
+
         $request = $this->createMock(Request::class);
         $request->method('getAttribute')
             ->willReturnMap([
@@ -790,7 +796,7 @@ class AuthControllerTest extends TestCase
 
         $this->jwtService->expects($this->once())->method('blockToken')->with($jti, $exp);
 
-        $mockedResponse = (new ResponseFactory())->createResponse(200);
+        $mockedResponse = new ResponseFactory()->createResponse(200);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'success',
             'data' => null,
@@ -830,7 +836,7 @@ class AuthControllerTest extends TestCase
 
         $this->logger->expects($this->once())->method('error');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(500);
+        $mockedResponse = new ResponseFactory()->createResponse(500);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'error',
             'data' => null,
@@ -862,11 +868,11 @@ class AuthControllerTest extends TestCase
         $request->method('getParsedBody')->willReturn($requestBody);
         $request->method('getServerParams')->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
 
-        $forgotPasswordRequestDto = new \App\Application\DTO\ForgotPasswordRequestDTO('user@example.com', '127.0.0.1');
-        $this->validationService->expects($this->once())->method('validate')->with($this->isInstanceOf(\App\Application\DTO\ForgotPasswordRequestDTO::class));
-        $this->forgotPasswordUseCase->expects($this->once())->method('execute')->with($this->isInstanceOf(\App\Application\DTO\ForgotPasswordRequestDTO::class));
+        $forgotPasswordRequestDto = new \App\Application\DTO\Auth\ForgotPasswordRequestDTO('user@example.com', '127.0.0.1');
+        $this->validationService->expects($this->once())->method('validate')->with($this->isInstanceOf(\App\Application\DTO\Auth\ForgotPasswordRequestDTO::class));
+        $this->forgotPasswordUseCase->expects($this->once())->method('execute')->with($this->isInstanceOf(\App\Application\DTO\Auth\ForgotPasswordRequestDTO::class));
 
-        $mockedResponse = (new ResponseFactory())->createResponse(200);
+        $mockedResponse = new ResponseFactory()->createResponse(200);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'success',
             'data' => null,
@@ -894,16 +900,16 @@ class AuthControllerTest extends TestCase
         $request->method('getParsedBody')->willReturn($requestBody);
         $request->method('getServerParams')->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
 
-        $forgotPasswordRequestDto = new \App\Application\DTO\ForgotPasswordRequestDTO('invalid-email', '127.0.0.1');
+        $forgotPasswordRequestDto = new \App\Application\DTO\Auth\ForgotPasswordRequestDTO('invalid-email', '127.0.0.1');
         $validationErrors = ['O e-mail "{{ value }}" não é um e-mail válido.'];
         $this->validationService->expects($this->once())
             ->method('validate')
-            ->with($this->isInstanceOf(\App\Application\DTO\ForgotPasswordRequestDTO::class))
+            ->with($this->isInstanceOf(\App\Application\DTO\Auth\ForgotPasswordRequestDTO::class))
             ->willThrowException(new ValidationException('Falha na validação', $validationErrors));
 
         $this->logger->expects($this->once())->method('warning');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(400);
+        $mockedResponse = new ResponseFactory()->createResponse(400);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => $validationErrors,
@@ -931,16 +937,16 @@ class AuthControllerTest extends TestCase
         $request->method('getParsedBody')->willReturn($requestBody);
         $request->method('getServerParams')->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
 
-        $forgotPasswordRequestDto = new \App\Application\DTO\ForgotPasswordRequestDTO('user@example.com', '127.0.0.1');
-        $this->validationService->expects($this->once())->method('validate')->with($this->isInstanceOf(\App\Application\DTO\ForgotPasswordRequestDTO::class));
+        $forgotPasswordRequestDto = new \App\Application\DTO\Auth\ForgotPasswordRequestDTO('user@example.com', '127.0.0.1');
+        $this->validationService->expects($this->once())->method('validate')->with($this->isInstanceOf(\App\Application\DTO\Auth\ForgotPasswordRequestDTO::class));
         $this->forgotPasswordUseCase->expects($this->once())
             ->method('execute')
-            ->with($this->isInstanceOf(\App\Application\DTO\ForgotPasswordRequestDTO::class))
+            ->with($this->isInstanceOf(\App\Application\DTO\Auth\ForgotPasswordRequestDTO::class))
             ->willThrowException(new EmailSendingFailedException('Failed to send password reset email.'));
 
         $this->logger->expects($this->once())->method('error');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(500);
+        $mockedResponse = new ResponseFactory()->createResponse(500);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'error',
             'data' => null,
@@ -968,16 +974,16 @@ class AuthControllerTest extends TestCase
         $request->method('getParsedBody')->willReturn($requestBody);
         $request->method('getServerParams')->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
 
-        $forgotPasswordRequestDto = new \App\Application\DTO\ForgotPasswordRequestDTO('user@example.com', '127.0.0.1');
-        $this->validationService->expects($this->once())->method('validate')->with($this->isInstanceOf(\App\Application\DTO\ForgotPasswordRequestDTO::class));
+        $forgotPasswordRequestDto = new \App\Application\DTO\Auth\ForgotPasswordRequestDTO('user@example.com', '127.0.0.1');
+        $this->validationService->expects($this->once())->method('validate')->with($this->isInstanceOf(\App\Application\DTO\Auth\ForgotPasswordRequestDTO::class));
         $this->forgotPasswordUseCase->expects($this->once())
             ->method('execute')
-            ->with($this->isInstanceOf(\App\Application\DTO\ForgotPasswordRequestDTO::class))
+            ->with($this->isInstanceOf(\App\Application\DTO\Auth\ForgotPasswordRequestDTO::class))
             ->willThrowException(new \Exception('Something unexpected happened.'));
 
         $this->logger->expects($this->once())->method('error');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(500);
+        $mockedResponse = new ResponseFactory()->createResponse(500);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'error',
             'data' => null,
@@ -1008,26 +1014,26 @@ class AuthControllerTest extends TestCase
         $request = $this->createMock(Request::class);
         $request->method('getParsedBody')->willReturn($requestBody);
 
-        $validateResetCodeRequestDto = new \App\Application\DTO\ValidateResetCodeRequestDTO('user@example.com', '123456'); // Changed to valid 6-digit numeric code
-        $this->validationService->expects($this->once())->method('validate')->with($this->isInstanceOf(\App\Application\DTO\ValidateResetCodeRequestDTO::class));
+        $validateResetCodeRequestDto = new \App\Application\DTO\Auth\ValidateResetCodeRequestDTO('user@example.com', '123456'); // Changed to valid 6-digit numeric code
+        $this->validationService->expects($this->once())->method('validate')->with($this->isInstanceOf(\App\Application\DTO\Auth\ValidateResetCodeRequestDTO::class));
 
         // Create a mock PasswordResetResponseDTO to be returned by the use case
         $passwordResetResponseDto = new PasswordResetResponseDTO(
             id: 1,
             userId: 1,
             code: '123456', // Changed to valid 6-digit numeric code
-            expiresAt: (new \DateTimeImmutable())->modify('+1 hour')->format(\DateTimeImmutable::ATOM),
+            expiresAt: new \DateTimeImmutable()->modify('+1 hour')->format(\DateTimeImmutable::ATOM),
             usedAt: null,
             ipAddress: '127.0.0.1'
         );
         $this->validateResetCodeUseCase->expects($this->once())
             ->method('execute')
-            ->with($this->isInstanceOf(\App\Application\DTO\ValidateResetCodeRequestDTO::class))
+            ->with($this->isInstanceOf(\App\Application\DTO\Auth\ValidateResetCodeRequestDTO::class))
             ->willReturn($passwordResetResponseDto);
 
 
 
-        $mockedResponse = (new ResponseFactory())->createResponse(200);
+        $mockedResponse = new ResponseFactory()->createResponse(200);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'success',
             'data' => null,
@@ -1054,7 +1060,7 @@ class AuthControllerTest extends TestCase
         $request = $this->createMock(Request::class);
         $request->method('getParsedBody')->willReturn($requestBody);
 
-        $validateResetCodeRequestDto = new \App\Application\DTO\ValidateResetCodeRequestDTO('invalid-email', 'abc');
+        $validateResetCodeRequestDto = new \App\Application\DTO\Auth\ValidateResetCodeRequestDTO('invalid-email', 'abc');
         $validationErrors = [
             'O e-mail "{{ value }}" não é um e-mail válido.',
             'O código deve ter exatamente 6 dígitos.',
@@ -1062,12 +1068,12 @@ class AuthControllerTest extends TestCase
         ];
         $this->validationService->expects($this->exactly(1))
             ->method('validate')
-            ->with($this->isInstanceOf(\App\Application\DTO\ValidateResetCodeRequestDTO::class))
+            ->with($this->isInstanceOf(\App\Application\DTO\Auth\ValidateResetCodeRequestDTO::class))
             ->willThrowException(new ValidationException('Falha na validação', $validationErrors));
 
         $this->logger->expects($this->exactly(1))->method('warning');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(400);
+        $mockedResponse = new ResponseFactory()->createResponse(400);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => $validationErrors,
@@ -1096,16 +1102,16 @@ class AuthControllerTest extends TestCase
 
         $this->validationService->expects($this->exactly(1))
             ->method('validate')
-            ->with($this->isInstanceOf(\App\Application\DTO\ValidateResetCodeRequestDTO::class));
+            ->with($this->isInstanceOf(\App\Application\DTO\Auth\ValidateResetCodeRequestDTO::class));
 
         $this->validateResetCodeUseCase->expects($this->exactly(1))
             ->method('execute')
-            ->with($this->isInstanceOf(\App\Application\DTO\ValidateResetCodeRequestDTO::class))
+            ->with($this->isInstanceOf(\App\Application\DTO\Auth\ValidateResetCodeRequestDTO::class))
             ->willThrowException(new \App\Domain\Exception\NotFoundException('E-mail ou código inválido.'));
 
         $this->logger->expects($this->exactly(1))->method('warning');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(404);
+        $mockedResponse = new ResponseFactory()->createResponse(404);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => null,
@@ -1134,16 +1140,16 @@ class AuthControllerTest extends TestCase
 
         $this->validationService->expects($this->exactly(1))
             ->method('validate')
-            ->with($this->isInstanceOf(\App\Application\DTO\ValidateResetCodeRequestDTO::class));
+            ->with($this->isInstanceOf(\App\Application\DTO\Auth\ValidateResetCodeRequestDTO::class));
 
         $this->validateResetCodeUseCase->expects($this->exactly(1))
             ->method('execute')
-            ->with($this->isInstanceOf(\App\Application\DTO\ValidateResetCodeRequestDTO::class))
+            ->with($this->isInstanceOf(\App\Application\DTO\Auth\ValidateResetCodeRequestDTO::class))
             ->willThrowException(new \Exception('Something unexpected happened.'));
 
         $this->logger->expects($this->exactly(1))->method('error');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(500);
+        $mockedResponse = new ResponseFactory()->createResponse(500);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'error',
             'data' => null,
@@ -1182,13 +1188,13 @@ class AuthControllerTest extends TestCase
 
         $this->validationService->expects($this->once())
             ->method('validate')
-            ->with($this->isInstanceOf(\App\Application\DTO\ResetPasswordRequestDTO::class));
+            ->with($this->isInstanceOf(\App\Application\DTO\Auth\ResetPasswordRequestDTO::class));
 
         $passwordResetResponseDto = new PasswordResetResponseDTO(
             id: 1,
             userId: 1,
             code: '123456',
-            expiresAt: (new \DateTimeImmutable())->modify('+1 hour')->format(\DateTimeImmutable::ATOM),
+            expiresAt: new \DateTimeImmutable()->modify('+1 hour')->format(\DateTimeImmutable::ATOM),
             usedAt: null,
             ipAddress: '127.0.0.1'
         );
@@ -1200,7 +1206,7 @@ class AuthControllerTest extends TestCase
         $this->resetPasswordUseCase->expects($this->once())
             ->method('execute');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(200);
+        $mockedResponse = new ResponseFactory()->createResponse(200);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'success',
             'data' => null,
@@ -1234,7 +1240,7 @@ class AuthControllerTest extends TestCase
 
         $this->validationService->expects($this->once())
             ->method('validate')
-            ->with($this->isInstanceOf(\App\Application\DTO\ResetPasswordRequestDTO::class));
+            ->with($this->isInstanceOf(\App\Application\DTO\Auth\ResetPasswordRequestDTO::class));
 
         $this->validateResetCodeUseCase->expects($this->once())
             ->method('execute')
@@ -1242,7 +1248,7 @@ class AuthControllerTest extends TestCase
 
         $this->logger->expects($this->once())->method('warning');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(404);
+        $mockedResponse = new ResponseFactory()->createResponse(404);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => null,
@@ -1281,7 +1287,7 @@ class AuthControllerTest extends TestCase
 
         $this->logger->expects($this->once())->method('warning');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(400);
+        $mockedResponse = new ResponseFactory()->createResponse(400);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => $validationErrors,
@@ -1319,7 +1325,7 @@ class AuthControllerTest extends TestCase
 
         $this->logger->expects($this->once())->method('error');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(500);
+        $mockedResponse = new ResponseFactory()->createResponse(500);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'error',
             'message' => 'Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.'
@@ -1351,14 +1357,14 @@ class AuthControllerTest extends TestCase
             'token_type' => 'Bearer',
             'expires_in' => 3600,
         ];
-        $verifyEmailResponseDto = new \App\Application\DTO\VerifyEmailResponseDTO($tokenData, true); // Already verified
+        $verifyEmailResponseDto = new \App\Application\DTO\Auth\VerifyEmailResponseDTO($tokenData, true); // Already verified
 
         $this->verifyEmailUseCase->expects($this->once())
             ->method('execute')
             ->with($token)
             ->willReturn($verifyEmailResponseDto);
 
-        $mockedResponse = (new ResponseFactory())->createResponse(200);
+        $mockedResponse = new ResponseFactory()->createResponse(200);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'success',
             'data' => $tokenData,
@@ -1391,14 +1397,14 @@ class AuthControllerTest extends TestCase
             'token_type' => 'Bearer',
             'expires_in' => 3600,
         ];
-        $verifyEmailResponseDto = new \App\Application\DTO\VerifyEmailResponseDTO($tokenData, false); // Newly verified
+        $verifyEmailResponseDto = new \App\Application\DTO\Auth\VerifyEmailResponseDTO($tokenData, false); // Newly verified
 
         $this->verifyEmailUseCase->expects($this->once())
             ->method('execute')
             ->with($token)
             ->willReturn($verifyEmailResponseDto);
 
-        $mockedResponse = (new ResponseFactory())->createResponse(200);
+        $mockedResponse = new ResponseFactory()->createResponse(200);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'success',
             'data' => $tokenData,
@@ -1424,7 +1430,7 @@ class AuthControllerTest extends TestCase
         $request = $this->createMock(Request::class);
         $request->method('getQueryParams')->willReturn([]); // No token in query params
 
-        $mockedResponse = (new ResponseFactory())->createResponse(400);
+        $mockedResponse = new ResponseFactory()->createResponse(400);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => null,
@@ -1458,7 +1464,7 @@ class AuthControllerTest extends TestCase
 
         $this->logger->expects($this->once())->method('warning');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(404);
+        $mockedResponse = new ResponseFactory()->createResponse(404);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => null,
@@ -1492,7 +1498,7 @@ class AuthControllerTest extends TestCase
 
         $this->logger->expects($this->once())->method('warning');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(400);
+        $mockedResponse = new ResponseFactory()->createResponse(400);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => null,
@@ -1526,7 +1532,7 @@ class AuthControllerTest extends TestCase
 
         $this->logger->expects($this->once())->method('error');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(500);
+        $mockedResponse = new ResponseFactory()->createResponse(500);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'error',
             'data' => null,

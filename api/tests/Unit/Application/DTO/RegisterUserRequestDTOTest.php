@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Application\DTO;
 
-use App\Application\DTO\RegisterUserRequestDTO;
+use App\Application\DTO\Auth\RegisterUserRequestDTO;
 use App\Domain\Exception\ValidationException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;

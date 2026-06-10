@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Presentation\Api\V1\Controller;
 
-use App\Application\DTO\CreateHabitRequestDTO;
-use App\Application\DTO\HabitsByDayRequestDTO;
-use App\Application\DTO\ToggleHabitRequestDTO;
-use App\Application\DTO\UpdateHabitRequestDTO;
+use App\Application\DTO\Habit\CreateHabitRequestDTO;
+use App\Application\DTO\Habit\HabitsByDayRequestDTO;
+use App\Application\DTO\Habit\HabitStatsRequestDTO;
+use App\Application\DTO\Habit\ToggleHabitRequestDTO;
+use App\Application\DTO\Habit\UpdateHabitRequestDTO;
 use App\Application\Service\ValidationService;
 use App\Application\UseCase\CreateHabitUseCase;
 use App\Application\UseCase\DeleteHabitUseCase;
@@ -59,8 +60,8 @@ class HabitController
             $habits = $this->getAllHabitsUseCase->execute($userId);
 
             return $this->jsonResponseFactory->success($habits, 'Lista de hábitos obtida com sucesso.');
-        } catch (Throwable $e) {
-            $this->logger->error('Erro inesperado ao buscar todos os hábitos', ['exception' => $e]);
+        } catch (Throwable $throwable) {
+            $this->logger->error('Erro inesperado ao buscar todos os hábitos', ['exception' => $throwable]);
             return $this->jsonResponseFactory->error(
                 'Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.',
                 null,
@@ -78,13 +79,17 @@ class HabitController
             }
 
             $queryParams = $request->getQueryParams();
-            $period = $queryParams['period'] ?? 'W';
-            $dateString = $queryParams['date'] ?? null;
-            $date = $dateString ? new DateTimeImmutable($dateString) : null;
+            $dto = HabitStatsRequestDTO::fromArray($queryParams);
 
-            $stats = $this->getHabitStatsUseCase->execute($userId, $period, $date);
+            $this->validationService->validate($dto);
+
+            $date = $dto->date ? new DateTimeImmutable($dto->date) : null;
+
+            $stats = $this->getHabitStatsUseCase->execute($userId, $dto->period, $date);
 
             return $this->jsonResponseFactory->success($stats, 'Estatísticas obtidas com sucesso.');
+        } catch (ValidationException $e) {
+            return $this->jsonResponseFactory->fail($e->getErrors(), $e->getMessage(), 400);
         } catch (Throwable $e) {
             $this->logger->error('Erro ao obter estatísticas de hábitos', [
                 'exception' => $e,
@@ -182,8 +187,8 @@ class HabitController
             $summary = $this->getHabitsSummaryUseCase->execute($userId, $date);
 
             return $this->jsonResponseFactory->success($summary, 'Resumo de hábitos obtido com sucesso.');
-        } catch (Throwable $e) {
-            $this->logger->error('Erro inesperado ao buscar resumo de hábitos', ['exception' => $e]);
+        } catch (Throwable $throwable) {
+            $this->logger->error('Erro inesperado ao buscar resumo de hábitos', ['exception' => $throwable]);
             return $this->jsonResponseFactory->error(
                 'Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.',
                 null,

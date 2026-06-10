@@ -20,9 +20,13 @@ use Fig\Http\Message\StatusCodeInterface;
 class validateResetCodeTest extends FunctionalTestCase
 {
     private UserRepositoryInterface $userRepository;
+
     private PersonRepositoryInterface $personRepository;
+
     private PasswordResetRepositoryInterface $passwordResetRepository;
+
     private RoleRepositoryInterface $roleRepository;
+
     private \Faker\Generator $faker;
 
     protected function setUp(): void
@@ -55,8 +59,8 @@ class validateResetCodeTest extends FunctionalTestCase
 
         $user = new User(
             person: $person,
-            password: $hashedPassword,
             role: $role,
+            password: $hashedPassword,
             isActive: true,
             isVerified: true
         );
@@ -65,7 +69,7 @@ class validateResetCodeTest extends FunctionalTestCase
 
         // This will trigger the creation of a reset token
         $this->sendRequest('POST', '/api/v1/auth/forgot-password', ['email' => 'test@example.com']);
-        
+
         $code = $this->getLatestPasswordResetCodeForUser($user->getId());
 
         $payload = [
@@ -77,7 +81,7 @@ class validateResetCodeTest extends FunctionalTestCase
         $response = $this->sendRequest('POST', '/api/v1/auth/validate-reset-code', $payload);
         $response->getBody()->rewind();
         $body = $response->getBody()->getContents();
-        
+
         // Assert
         $this->assertEquals(StatusCodeInterface::STATUS_OK, $response->getStatusCode());
         $responseData = json_decode($body, true);
@@ -107,21 +111,22 @@ class validateResetCodeTest extends FunctionalTestCase
     {
         $container = $this->app->getContainer();
         $pdo = $container->get(\PDO::class);
-        
+
         $stmt = $pdo->prepare(
             'SELECT code FROM password_resets 
              WHERE user_id = :user_id 
              ORDER BY created_at DESC 
              LIMIT 1'
         );
-        
+
         $stmt->execute(['user_id' => $userId]);
+
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-        
+
         if (!$result) {
-            $this->fail("Nenhum token de redefinição de senha encontrado para o ID de usuário: {$userId}");
+            $this->fail('Nenhum token de redefinição de senha encontrado para o ID de usuário: ' . $userId);
         }
-        
+
         return $result['code'];
     }
 }

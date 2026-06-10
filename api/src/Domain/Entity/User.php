@@ -139,8 +139,8 @@ class User implements JsonSerializable
 
         return new self(
             person: $person,
-            password: $data['password'],
             role: $role,
+            password: $data['password'],
             isActive: $data['is_active'],
             isVerified: $data['is_verified'],
             createdAt: new DateTimeImmutable($data['created_at']),

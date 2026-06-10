@@ -22,10 +22,15 @@ use Tests\Integration\DatabaseTestCase;
 class CachingUserRepositoryTest extends DatabaseTestCase
 {
     private CachingUserRepository $cachingUserRepository;
+
     private UserRepository $userRepository;
+
     private PersonRepository $personRepository;
+
     private RoleRepository $roleRepository;
+
     private RedisCache $redisCache;
+
     private \Faker\Generator $faker;
 
     protected function setUp(): void
@@ -56,7 +61,7 @@ class CachingUserRepositoryTest extends DatabaseTestCase
         }
 
         $this->redisCache = new RedisCache($redis);
-        
+
         $logger = new Logger('test');
         $logger->pushHandler(new NullHandler());
 
@@ -65,7 +70,7 @@ class CachingUserRepositoryTest extends DatabaseTestCase
             $this->redisCache,
             $logger
         );
-        
+
         $this->faker = Factory::create('pt_BR');
     }
 
@@ -75,7 +80,7 @@ class CachingUserRepositoryTest extends DatabaseTestCase
         $role = $this->roleRepository->findById($roleId);
 
         if (!$role instanceof Role) {
-            throw new \RuntimeException("Role with ID {$roleId} not found in test database. Check DatabaseTestCase seeding.");
+            throw new \RuntimeException(sprintf('Role with ID %d not found in test database. Check DatabaseTestCase seeding.', $roleId));
         }
 
         $person = new Person(
@@ -87,10 +92,10 @@ class CachingUserRepositoryTest extends DatabaseTestCase
 
         $user = new User(
             person: $person,
-            password: 'password123',
-            role: $role
+            role: $role,
+            password: 'password123'
         );
-        
+
         return $this->userRepository->create($user);
     }
 
@@ -112,13 +117,13 @@ class CachingUserRepositoryTest extends DatabaseTestCase
         // Mock the decorated repository to ensure the next call hits the cache
         $mockedRepo = $this->createMock(UserRepository::class);
         $mockedRepo->expects($this->never())->method('findById');
-        
+
         $cachingRepoWithMock = new CachingUserRepository(
             $mockedRepo,
             $this->redisCache,
             new Logger('test', [new NullHandler()])
         );
-        
+
         // Second call, should hit cache
         $cachedUser = $cachingRepoWithMock->findById($userId);
         $this->assertNotNull($cachedUser);
@@ -143,13 +148,13 @@ class CachingUserRepositoryTest extends DatabaseTestCase
         // Mock the decorated repository to ensure the next call hits the cache
         $mockedRepo = $this->createMock(UserRepository::class);
         $mockedRepo->expects($this->never())->method('findByEmail');
-        
+
         $cachingRepoWithMock = new CachingUserRepository(
             $mockedRepo,
             $this->redisCache,
             new Logger('test', [new NullHandler()])
         );
-        
+
         // Second call, should hit cache
         $cachedUser = $cachingRepoWithMock->findByEmail($userEmail);
         $this->assertNotNull($cachedUser);
@@ -165,7 +170,7 @@ class CachingUserRepositoryTest extends DatabaseTestCase
         // Prime the cache
         $this->cachingUserRepository->findById($userId);
         $this->cachingUserRepository->findByEmail($oldEmail);
-        
+
         $this->assertNotNull($this->redisCache->get('user:id:' . $userId));
         $this->assertNotNull($this->redisCache->get('user:email:' . $oldEmail));
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Application\UseCase;
 
-use App\Application\DTO\HabitResponseDTO;
+use App\Application\DTO\Habit\HabitResponseDTO;
 use App\Application\UseCase\GetHabitDetailsUseCase;
 use App\Domain\Entity\Habit;
 use App\Domain\Entity\HabitWeekDay;
@@ -19,6 +19,7 @@ use Tests\TestCase;
 class GetHabitDetailsUseCaseTest extends TestCase
 {
     private HabitRepositoryInterface&MockObject $habitRepository;
+
     private GetHabitDetailsUseCase $getHabitDetailsUseCase;
 
     public function testShouldReturnHabitDetailsSuccessfully(): void

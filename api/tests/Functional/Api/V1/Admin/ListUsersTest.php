@@ -17,9 +17,13 @@ use Faker\Factory;
 class ListUsersTest extends FunctionalTestCase
 {
     private UserRepositoryInterface $userRepository;
+
     private PersonRepositoryInterface $personRepository;
+
     private RoleRepositoryInterface $roleRepository;
+
     private string $adminToken;
+
     private \Faker\Generator $faker;
 
     protected function setUp(): void
@@ -49,8 +53,8 @@ class ListUsersTest extends FunctionalTestCase
 
         $user = new User(
             person: $person,
-            password: $hashedPassword,
             role: $role,
+            password: $hashedPassword,
             isActive: true,
             isVerified: true
         );

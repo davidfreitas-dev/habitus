@@ -22,8 +22,11 @@ use Tests\TestCase;
 class JwtAuthMiddlewareTest extends TestCase
 {
     private JwtService&MockObject $jwtService;
+
     private JsonResponseFactory&MockObject $jsonResponseFactory;
+
     private UserRepositoryInterface&MockObject $userRepository;
+
     private JwtAuthMiddleware $middleware;
 
     protected function setUp(): void

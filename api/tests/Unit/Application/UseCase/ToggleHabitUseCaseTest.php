@@ -22,9 +22,13 @@ use Tests\TestCase;
 class ToggleHabitUseCaseTest extends TestCase
 {
     private PDO&MockObject $pdo;
+
     private HabitRepositoryInterface&MockObject $habitRepository;
+
     private DayRepositoryInterface&MockObject $dayRepository;
+
     private DayHabitRepositoryInterface&MockObject $dayHabitRepository;
+
     private ToggleHabitUseCase $toggleHabitUseCase;
 
     public function testShouldToggleHabitSuccessfullyWhenDayExists(): void

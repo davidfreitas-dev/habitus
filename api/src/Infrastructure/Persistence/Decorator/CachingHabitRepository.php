@@ -12,13 +12,19 @@ use Psr\Log\LoggerInterface;
 
 class CachingHabitRepository implements HabitRepositoryInterface
 {
-    private const CACHE_PREFIX_ID = 'habit:id:';
-    private const CACHE_PREFIX_TITLE = 'habit:title:';
-    private const CACHE_PREFIX_POSSIBLE = 'habit:possible:';
-    private const CACHE_PREFIX_COMPLETED = 'habit:completed:';
-    private const CACHE_PREFIX_SUMMARY = 'habit:summary:';
-    private const CACHE_PREFIX_ALL = 'habit:all:';
-    private const CACHE_TTL = 3600; // 1 hour for habits
+    private const string CACHE_PREFIX_ID = 'habit:id:';
+
+    private const string CACHE_PREFIX_TITLE = 'habit:title:';
+
+    private const string CACHE_PREFIX_POSSIBLE = 'habit:possible:';
+
+    private const string CACHE_PREFIX_COMPLETED = 'habit:completed:';
+
+    private const string CACHE_PREFIX_SUMMARY = 'habit:summary:';
+
+    private const string CACHE_PREFIX_ALL = 'habit:all:';
+
+    private const int CACHE_TTL = 3600; // 1 hour for habits
 
     public function __construct(
         private readonly HabitRepositoryInterface $decoratedRepository,
@@ -127,7 +133,7 @@ class CachingHabitRepository implements HabitRepositoryInterface
 
         $habits = $this->decoratedRepository->findPossibleHabits($date, $userId);
 
-        if (!empty($habits)) {
+        if ($habits !== []) {
             $this->cache->set($cacheKey, serialize($habits), self::CACHE_TTL);
         }
 
@@ -149,7 +155,7 @@ class CachingHabitRepository implements HabitRepositoryInterface
 
         $habits = $this->decoratedRepository->findCompletedHabits($date, $userId);
 
-        if (!empty($habits)) {
+        if ($habits !== []) {
             $this->cache->set($cacheKey, serialize($habits), self::CACHE_TTL);
         }
 
@@ -158,7 +164,7 @@ class CachingHabitRepository implements HabitRepositoryInterface
 
     public function getHabitsSummary(int $userId, ?DateTimeImmutable $date = null): array
     {
-        $dateSuffix = $date ? $date->format('Y-m-d') : 'all';
+        $dateSuffix = $date instanceof \DateTimeImmutable ? $date->format('Y-m-d') : 'all';
         $cacheKey = self::CACHE_PREFIX_SUMMARY . $userId . ':' . $dateSuffix;
 
         $cachedSummary = $this->cache->get($cacheKey);
@@ -172,7 +178,7 @@ class CachingHabitRepository implements HabitRepositoryInterface
 
         $summary = $this->decoratedRepository->getHabitsSummary($userId, $date);
 
-        if (!empty($summary)) {
+        if ($summary !== []) {
             $this->cache->set($cacheKey, serialize($summary), self::CACHE_TTL);
         }
 
@@ -194,7 +200,7 @@ class CachingHabitRepository implements HabitRepositoryInterface
 
         $habits = $this->decoratedRepository->findAllByUserId($userId);
 
-        if (!empty($habits)) {
+        if ($habits !== []) {
             $this->cache->set($cacheKey, serialize($habits), self::CACHE_TTL);
         }
 

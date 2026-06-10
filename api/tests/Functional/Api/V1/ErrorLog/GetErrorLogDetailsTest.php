@@ -17,8 +17,11 @@ use Tests\Functional\FunctionalTestCase;
 class GetErrorLogDetailsTest extends FunctionalTestCase
 {
     protected User $adminUser;
+
     protected string $adminToken;
+
     protected User $regularUser;
+
     protected string $regularUserToken;
 
     protected function setUp(): void
@@ -50,8 +53,8 @@ class GetErrorLogDetailsTest extends FunctionalTestCase
 
         $this->adminUser = new User(
             person: $person,
-            password: password_hash('password', PASSWORD_DEFAULT),
-            role: $adminRole
+            role: $adminRole,
+            password: password_hash('password', PASSWORD_DEFAULT)
         );
         $this->adminUser->markAsVerified();
 
@@ -74,8 +77,8 @@ class GetErrorLogDetailsTest extends FunctionalTestCase
 
         $this->regularUser = new User(
             person: $person,
-            password: password_hash('password', PASSWORD_DEFAULT),
-            role: $userRole
+            role: $userRole,
+            password: password_hash('password', PASSWORD_DEFAULT)
         );
         $this->regularUser->markAsVerified();
 

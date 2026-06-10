@@ -20,11 +20,17 @@ use Faker\Factory;
 class UploadProfileImageTest extends FunctionalTestCase
 {
     private UserRepositoryInterface $userRepository;
+
     private PersonRepositoryInterface $personRepository;
+
     private RoleRepositoryInterface $roleRepository;
+
     private User $user;
+
     private string $accessToken;
+
     private \Faker\Generator $faker;
+
     private array $uploadedFiles = [];
 
     protected function setUp(): void
@@ -37,6 +43,7 @@ class UploadProfileImageTest extends FunctionalTestCase
         $this->setUpUser();
     }
 
+    #[\Override]
     protected function tearDown(): void
     {
         foreach ($this->uploadedFiles as $filepath) {
@@ -44,6 +51,7 @@ class UploadProfileImageTest extends FunctionalTestCase
                 unlink($filepath);
             }
         }
+
         parent::tearDown();
     }
 
@@ -65,8 +73,8 @@ class UploadProfileImageTest extends FunctionalTestCase
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         $this->user = new User(
             person: $person,
-            password: $hashedPassword,
             role: $role,
+            password: $hashedPassword,
             isActive: true,
             isVerified: true
         );
@@ -117,7 +125,7 @@ class UploadProfileImageTest extends FunctionalTestCase
         );
 
         $responseBody = json_decode((string) $response->getBody(), true);
-        
+
         // Assert
         $this->assertEquals(StatusCodeInterface::STATUS_OK, $response->getStatusCode());
         $this->assertEquals('success', $responseBody['status']);

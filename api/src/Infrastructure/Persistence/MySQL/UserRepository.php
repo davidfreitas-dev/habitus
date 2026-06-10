@@ -194,8 +194,8 @@ class UserRepository implements UserRepositoryInterface
 
         return new User(
             person: $person,
-            password: $data['password'],
             role: $role,
+            password: $data['password'],
             isActive: (bool)$data['is_active'],
             isVerified: (bool)$data['is_verified'],
             createdAt: new DateTimeImmutable($data['user_created_at']),

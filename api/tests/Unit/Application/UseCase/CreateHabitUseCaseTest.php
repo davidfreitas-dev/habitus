@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Application\UseCase;
 
-use App\Application\DTO\CreateHabitRequestDTO;
-use App\Application\DTO\HabitResponseDTO;
+use App\Application\DTO\Habit\CreateHabitRequestDTO;
+use App\Application\DTO\Habit\HabitResponseDTO;
 use App\Application\Service\ValidationService;
 use App\Application\UseCase\CreateHabitUseCase;
 use App\Domain\Entity\Habit;
@@ -25,9 +25,13 @@ use Tests\TestCase;
 class CreateHabitUseCaseTest extends TestCase
 {
     private PDO&MockObject $pdo;
+
     private ValidationService&MockObject $validationService;
+
     private HabitRepositoryInterface&MockObject $habitRepository;
+
     private UserRepositoryInterface&MockObject $userRepository;
+
     private CreateHabitUseCase $createHabitUseCase;
 
     protected function setUp(): void
@@ -53,7 +57,7 @@ class CreateHabitUseCaseTest extends TestCase
             'Read a book',
             [0, 1, 2, 3, 4, 5, 6],
             '10:30',
-            (new \DateTimeImmutable())->format('Y-m-d H:i:s')
+            new \DateTimeImmutable()->format('Y-m-d H:i:s')
         );
 
         /** @var User&MockObject $user */
@@ -65,7 +69,7 @@ class CreateHabitUseCaseTest extends TestCase
         $habit->method('getTitle')->willReturn($dto->title);
         $habit->method('getUser')->willReturn($user);
         $habit->method('getReminderTime')->willReturn($dto->reminderTime);
-        
+
         $mockHabitWeekDays = [];
         foreach ($dto->weekDays as $weekDay) {
             /** @var HabitWeekDay&MockObject $habitWeekDayMock */
@@ -73,6 +77,7 @@ class CreateHabitUseCaseTest extends TestCase
             $habitWeekDayMock->method('getWeekDay')->willReturn($weekDay);
             $mockHabitWeekDays[] = $habitWeekDayMock;
         }
+
         $habit->method('getHabitWeekDays')->willReturn(new ArrayCollection($mockHabitWeekDays));
 
         /** @var Habit&MockObject $createdHabit */
@@ -114,7 +119,7 @@ class CreateHabitUseCaseTest extends TestCase
             'Read a book',
             [0],
             null,
-            (new \DateTimeImmutable())->format('Y-m-d H:i:s')
+            new \DateTimeImmutable()->format('Y-m-d H:i:s')
         );
 
         $this->validationService->expects($this->once())->method('validate')->with($dto);
@@ -135,7 +140,7 @@ class CreateHabitUseCaseTest extends TestCase
             'Read a book',
             [0],
             null,
-            (new \DateTimeImmutable())->format('Y-m-d H:i:s')
+            new \DateTimeImmutable()->format('Y-m-d H:i:s')
         );
 
         /** @var User&MockObject $user */
@@ -177,7 +182,7 @@ class CreateHabitUseCaseTest extends TestCase
             'Read a book',
             [0],
             null,
-            (new \DateTimeImmutable())->format('Y-m-d H:i:s')
+            new \DateTimeImmutable()->format('Y-m-d H:i:s')
         );
 
         /** @var User&MockObject $user */

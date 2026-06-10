@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Application\UseCase;
 
-use App\Application\DTO\CreateHabitRequestDTO;
-use App\Application\DTO\HabitResponseDTO;
+use App\Application\DTO\Habit\CreateHabitRequestDTO;
+use App\Application\DTO\Habit\HabitResponseDTO;
 use App\Application\Service\ValidationService;
 use App\Domain\Entity\Habit;
 use App\Domain\Exception\HabitAlreadyExistsException;
@@ -38,11 +38,11 @@ class CreateHabitUseCase
         $this->validationService->validate($dto);
 
         $user = $this->userRepository->findById($userId);
-        if (!$user) {
+        if (!$user instanceof \App\Domain\Entity\User) {
             throw new NotFoundException('Usuário não encontrado.');
         }
 
-        if ($this->habitRepository->findByTitle($dto->title, $user->getId())) {
+        if ($this->habitRepository->findByTitle($dto->title, $user->getId()) instanceof \App\Domain\Entity\Habit) {
             throw new HabitAlreadyExistsException('Já existe um hábito com este título.');
         }
 

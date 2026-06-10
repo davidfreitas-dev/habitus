@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Application\DTO;
 
-use App\Application\DTO\UserProfileResponseDTO;
+use App\Application\DTO\User\UserProfileResponseDTO;
 use App\Domain\Entity\Person;
 use App\Domain\Entity\Role;
 use App\Domain\Entity\User;

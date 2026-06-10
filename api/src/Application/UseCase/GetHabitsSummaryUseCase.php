@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Application\UseCase;
 
-use App\Application\DTO\HabitsSummaryResponseDTO;
-use App\Application\DTO\HabitSummaryItemDTO;
+use App\Application\DTO\Habit\HabitsSummaryResponseDTO;
+use App\Application\DTO\Habit\HabitSummaryItemDTO;
 use App\Domain\Repository\HabitRepositoryInterface;
 use DateTimeImmutable;
 
@@ -26,7 +26,7 @@ class GetHabitsSummaryUseCase
         $summaryData = $this->habitRepository->getHabitsSummary($userId, $date);
 
         $items = array_map(
-            fn (array $item) => new HabitSummaryItemDTO(
+            fn (array $item): \App\Application\DTO\Habit\HabitSummaryItemDTO => new HabitSummaryItemDTO(
                 date: $item['date'],
                 completed: (int) $item['completed'],
                 total: (int) $item['total'],

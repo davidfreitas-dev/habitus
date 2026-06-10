@@ -40,7 +40,7 @@ final class DatabaseErrorLogRepositoryTest extends TestCase
 
         $stmt->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function (array $params) use ($errorLog) {
+            ->with($this->callback(function (array $params) use ($errorLog): true {
                 self::assertArrayHasKey('severity', $params);
                 self::assertSame($errorLog->getSeverity(), $params['severity']);
                 self::assertArrayHasKey('message', $params);
@@ -226,7 +226,7 @@ final class DatabaseErrorLogRepositoryTest extends TestCase
             'resolved_at' => null,
             'resolved_by' => null,
         ];
-        
+
         $pdo = $this->createMock(PDO::class);
         $stmt = $this->createMock(PDOStatement::class);
 

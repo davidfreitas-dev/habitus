@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Application\UseCase;
 
-use App\Application\DTO\CreateUserAdminRequestDTO;
-use App\Application\DTO\UserResponseDTO;
+use App\Application\DTO\User\CreateUserAdminRequestDTO;
+use App\Application\DTO\User\UserResponseDTO;
 use App\Domain\Entity\Person;
 use App\Domain\Entity\Role;
 use App\Domain\Entity\User;
@@ -66,8 +66,8 @@ class CreateUserAdminUseCase
 
             $user = new User(
                 person: $person,
-                password: $hashedPassword,
                 role: $role,
+                password: $hashedPassword,
                 isActive: true,
                 isVerified: true, // Admin-created users are pre-verified
             );
@@ -90,7 +90,7 @@ class CreateUserAdminUseCase
             isActive: $createdUser->isActive(),
             isVerified: $createdUser->isVerified(),
             phone: $createdUser->getPerson()->getPhone(),
-            cpfcnpj: $createdUser->getPerson()->getCpfCnpj() ? $createdUser->getPerson()->getCpfCnpj()->value() : null,
+            cpfcnpj: $createdUser->getPerson()->getCpfCnpj() instanceof \App\Domain\ValueObject\CpfCnpj ? $createdUser->getPerson()->getCpfCnpj()->value() : null,
             avatarUrl: null,
             createdAt: $createdUser->getCreatedAt()->format('Y-m-d H:i:s'),
             updatedAt: $createdUser->getUpdatedAt()->format('Y-m-d H:i:s'),

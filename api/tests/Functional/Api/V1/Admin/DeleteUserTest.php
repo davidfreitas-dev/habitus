@@ -19,9 +19,13 @@ use Fig\Http\Message\StatusCodeInterface;
 class DeleteUserTest extends FunctionalTestCase
 {
     private UserRepositoryInterface $userRepository;
+
     private PersonRepositoryInterface $personRepository;
+
     private RoleRepositoryInterface $roleRepository;
+
     private string $adminToken;
+
     private \Faker\Generator $faker;
 
     protected function setUp(): void
@@ -54,8 +58,8 @@ class DeleteUserTest extends FunctionalTestCase
 
         $user = new User(
             person: $person,
-            password: $hashedPassword,
             role: $role,
+            password: $hashedPassword,
             isActive: true,
             isVerified: true
         );
@@ -98,15 +102,15 @@ class DeleteUserTest extends FunctionalTestCase
 
         $user = new User(
             person: $person,
-            password: $hashedPassword,
             role: $role,
+            password: $hashedPassword,
             isActive: true,
             isVerified: true
         );
 
         return $this->userRepository->create($user);
     }
-    
+
     public function testDeleteUserAsAdminReturnsOk(): void
     {
         // Arrange

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Presentation\Api\V1\Controller;
 
-use App\Application\DTO\ErrorLogListResponseDTO;
-use App\Application\DTO\ErrorLogResponseDTO;
+use App\Application\DTO\ErrorLog\ErrorLogListResponseDTO;
+use App\Application\DTO\ErrorLog\ErrorLogResponseDTO;
 use App\Application\UseCase\GetErrorLogDetailsUseCase;
 use App\Application\UseCase\ListErrorLogsUseCase;
 use App\Application\UseCase\ResolveErrorLogUseCase;

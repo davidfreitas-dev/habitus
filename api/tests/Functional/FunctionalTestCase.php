@@ -110,11 +110,11 @@ abstract class FunctionalTestCase extends DatabaseTestCase
     
         $request = $factory->createServerRequest($method, $uri, $serverParams);
     
-        if (!empty($body)) {
+        if ($body !== []) {
             $request = $request->withParsedBody($body);
         }
     
-        if (!empty($files)) {
+        if ($files !== []) {
             $request = $request->withUploadedFiles($files);
         }
     

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Application\UseCase;
 
-use App\Application\DTO\ErrorLogListResponseDTO;
-use App\Application\DTO\ErrorLogResponseDTO;
+use App\Application\DTO\ErrorLog\ErrorLogListResponseDTO;
+use App\Application\DTO\ErrorLog\ErrorLogResponseDTO;
 use App\Domain\Entity\ErrorLog;
 use App\Domain\Repository\ErrorLogRepositoryInterface;
 

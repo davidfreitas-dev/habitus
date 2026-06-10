@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Application\UseCase;
 
-use App\Application\DTO\PasswordResetResponseDTO;
-use App\Application\DTO\ValidateResetCodeRequestDTO;
+use App\Application\DTO\Auth\PasswordResetResponseDTO;
+use App\Application\DTO\Auth\ValidateResetCodeRequestDTO;
 use App\Domain\Exception\NotFoundException;
 use App\Domain\Repository\PasswordResetRepositoryInterface;
 use App\Domain\Repository\UserRepositoryInterface;

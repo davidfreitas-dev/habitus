@@ -99,9 +99,7 @@ final class ErrorMiddlewareTest extends TestCase
             ->method('error')
             ->with(
                 'Falha na validação',
-                $this->callback(function (array $context) use ($exception) {
-                    return $context['exception'] === $exception::class;
-                }),
+                $this->callback(fn(array $context): bool => $context['exception'] === $exception::class),
             );
 
         $expectedResponse = $this->getJsonResponseMock(
@@ -494,9 +492,7 @@ final class ErrorMiddlewareTest extends TestCase
             ->method('error')
             ->with(
                 'Erro interno do servidor',
-                $this->callback(function (?array $data) {
-                    return isset($data['debug']['file'], $data['debug']['line'], $data['debug']['trace']);
-                }),
+                $this->callback(fn(?array $data): bool => isset($data['debug']['file'], $data['debug']['line'], $data['debug']['trace'])),
                 StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR,
             )
             ->willReturn($expectedResponse);
@@ -535,9 +531,7 @@ final class ErrorMiddlewareTest extends TestCase
             ->method('error')
             ->with(
                 'Erro genérico',
-                $this->callback(function (?array $data) {
-                    return isset($data['debug']['file'], $data['debug']['line'], $data['debug']['trace']);
-                }),
+                $this->callback(fn(?array $data): bool => isset($data['debug']['file'], $data['debug']['line'], $data['debug']['trace'])),
                 StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR,
             )
             ->willReturn($expectedResponse);

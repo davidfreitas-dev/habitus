@@ -18,6 +18,7 @@ class DayHabitRepository implements DayHabitRepositoryInterface
         // Check if the habit belongs to the user
         $habitCheckStmt = $this->pdo->prepare('SELECT user_id FROM habits WHERE id = :habit_id');
         $habitCheckStmt->execute(['habit_id' => $habitId]);
+
         $ownerUserId = $habitCheckStmt->fetchColumn();
 
         if ((int)$ownerUserId !== $userId) {
@@ -56,6 +57,7 @@ class DayHabitRepository implements DayHabitRepositoryInterface
         // First, check if the habit belongs to the user
         $habitCheckStmt = $this->pdo->prepare('SELECT user_id FROM habits WHERE id = :habit_id');
         $habitCheckStmt->execute(['habit_id' => $habitId]);
+
         $ownerUserId = $habitCheckStmt->fetchColumn();
 
         if ((int)$ownerUserId !== $userId) {

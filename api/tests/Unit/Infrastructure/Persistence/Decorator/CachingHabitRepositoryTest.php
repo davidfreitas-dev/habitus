@@ -17,17 +17,23 @@ use Psr\Log\LoggerInterface;
 class CachingHabitRepositoryTest extends TestCase
 {
     private HabitRepositoryInterface&MockObject $decoratedRepository;
+
     private RedisCache&MockObject $redisCache;
+
     private LoggerInterface&MockObject $logger;
+
     private CachingHabitRepository $cachingHabitRepository;
+
     private int $userId;
+
     private User&MockObject $user;
+
     private int $cacheTtl;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->decoratedRepository = $this->createMock(HabitRepositoryInterface::class);
         $this->redisCache = $this->createMock(RedisCache::class);
         $this->logger = $this->createMock(LoggerInterface::class);
@@ -36,7 +42,7 @@ class CachingHabitRepositoryTest extends TestCase
         // Mock User entity and its dependencies
         /** @var \App\Domain\Entity\Person&MockObject $personMock */
         $personMock = $this->createMock(\App\Domain\Entity\Person::class);
-        
+
         /** @var \App\Domain\Entity\Role&MockObject $roleMock */
         $roleMock = $this->createMock(\App\Domain\Entity\Role::class);
 
@@ -257,7 +263,7 @@ class CachingHabitRepositoryTest extends TestCase
         $cacheKeyId = 'habit:id:' . $habitId . ':' . $this->userId;
         $cacheKeyAll = 'habit:all:' . $this->userId;
         $cacheKeyNewTitle = 'habit:title:' . md5($newTitle) . ':' . $this->userId;
-        
+
         $this->decoratedRepository->expects($this->once())
             ->method('update')
             ->with($oldHabit, $weekDays)
@@ -270,7 +276,7 @@ class CachingHabitRepositoryTest extends TestCase
                 $this->equalTo($cacheKeyAll)
             ))
             ->willReturn(true);
-        
+
         $this->redisCache->expects($this->exactly(3))
             ->method('deleteByPattern')
             ->willReturnOnConsecutiveCalls(0, 0, 0);
@@ -340,7 +346,7 @@ class CachingHabitRepositoryTest extends TestCase
                 )
             )
             ->willReturn(true);
-        
+
         $this->redisCache->expects($this->exactly(3))
             ->method('deleteByPattern')
             ->willReturnOnConsecutiveCalls(0, 0, 0);

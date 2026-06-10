@@ -19,11 +19,17 @@ use Faker\Factory;
 class ToggleHabitTest extends FunctionalTestCase
 {
     protected UserRepositoryInterface $userRepository;
+
     protected PersonRepositoryInterface $personRepository;
+
     protected RoleRepositoryInterface $roleRepository;
+
     protected HabitRepositoryInterface $habitRepository;
+
     protected \Faker\Generator $faker;
+
     protected ?User $testUser = null;
+
     protected string $accessToken;
 
     protected function setUp(): void
@@ -58,8 +64,8 @@ class ToggleHabitTest extends FunctionalTestCase
 
         $user = new User(
             person: $person,
-            password: $hashedPassword,
             role: $role,
+            password: $hashedPassword,
             isActive: true,
             isVerified: true
         );
@@ -91,7 +97,7 @@ class ToggleHabitTest extends FunctionalTestCase
         $pdo = $this->app->getContainer()->get(\PDO::class);
         $stmt = $pdo->prepare('SELECT * FROM habits WHERE id = :id');
         $stmt->execute(['id' => $habitId]);
-        
+
         return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 
@@ -100,8 +106,8 @@ class ToggleHabitTest extends FunctionalTestCase
         $pdo = $this->app->getContainer()->get(\PDO::class);
         $stmt = $pdo->prepare('SELECT week_day FROM habit_week_days WHERE habit_id = :habit_id ORDER BY week_day ASC');
         $stmt->execute(['habit_id' => $habitId]);
-        
-        return array_map('intval', $stmt->fetchAll(\PDO::FETCH_COLUMN));
+
+        return array_map(intval(...), $stmt->fetchAll(\PDO::FETCH_COLUMN));
     }
 
     protected function createHabit(string $title, array $weekDays): int
@@ -109,7 +115,7 @@ class ToggleHabitTest extends FunctionalTestCase
         $payload = [
             'title' => $title,
             'week_days' => $weekDays,
-            'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+            'created_at' => new \DateTimeImmutable()->format('Y-m-d H:i:s'),
         ];
 
         $response = $this->sendRequest('POST', '/api/v1/habits', $payload, [
@@ -135,18 +141,18 @@ class ToggleHabitTest extends FunctionalTestCase
         $stmt->execute(['habit_id' => $habitId, 'date' => $date]);
         return (bool) $stmt->fetchColumn();
     }
-    
+
     public function testToggleReturnsOk(): void
     {
         // Arrange
         $habitId = $this->createHabit($this->faker->sentence(3), [1, 2, 3]);
-        $dateToToggle = (new \DateTimeImmutable())->format('Y-m-d');
+        $dateToToggle = new \DateTimeImmutable()->format('Y-m-d');
 
         // Initially not completed
         $this->assertFalse($this->isHabitCompletedInDatabase($habitId, $dateToToggle));
 
         // Act - Toggle ON
-        $response = $this->sendRequest('PATCH', "/api/v1/habits/{$habitId}/toggle", ['date' => $dateToToggle], [
+        $response = $this->sendRequest('PATCH', sprintf('/api/v1/habits/%d/toggle', $habitId), ['date' => $dateToToggle], [
             'Authorization' => 'Bearer ' . $this->accessToken,
         ]);
 
@@ -160,7 +166,7 @@ class ToggleHabitTest extends FunctionalTestCase
         $this->assertTrue($this->isHabitCompletedInDatabase($habitId, $dateToToggle));
 
         // Act - Toggle OFF
-        $response = $this->sendRequest('PATCH', "/api/v1/habits/{$habitId}/toggle", ['date' => $dateToToggle], [
+        $response = $this->sendRequest('PATCH', sprintf('/api/v1/habits/%d/toggle', $habitId), ['date' => $dateToToggle], [
             'Authorization' => 'Bearer ' . $this->accessToken,
         ]);
 

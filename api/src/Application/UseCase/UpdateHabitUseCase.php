@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Application\UseCase;
 
-use App\Application\DTO\HabitResponseDTO;
-use App\Application\DTO\UpdateHabitRequestDTO;
+use App\Application\DTO\Habit\HabitResponseDTO;
+use App\Application\DTO\Habit\UpdateHabitRequestDTO;
 use App\Application\Service\ValidationService;
 use App\Domain\Exception\HabitAlreadyExistsException;
 use App\Domain\Exception\HabitNotFoundException;

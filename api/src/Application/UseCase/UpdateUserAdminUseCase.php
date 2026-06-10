@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Application\UseCase;
 
-use App\Application\DTO\UpdateUserAdminRequestDTO;
-use App\Application\DTO\UserResponseDTO;
+use App\Application\DTO\User\UpdateUserAdminRequestDTO;
+use App\Application\DTO\User\UserResponseDTO;
 use App\Domain\Entity\Role;
 use App\Domain\Exception\ConflictException;
 use App\Domain\Exception\NotFoundException;
@@ -89,7 +89,7 @@ class UpdateUserAdminUseCase
                 isActive: $updatedUser->isActive(),
                 isVerified: $updatedUser->isVerified(),
                 phone: $updatedUser->getPerson()->getPhone(),
-                cpfcnpj: $updatedUser->getPerson()->getCpfCnpj() ? $updatedUser->getPerson()->getCpfCnpj()->value() : null,
+                cpfcnpj: $updatedUser->getPerson()->getCpfCnpj() instanceof \App\Domain\ValueObject\CpfCnpj ? $updatedUser->getPerson()->getCpfCnpj()->value() : null,
                 createdAt: $updatedUser->getCreatedAt()->format('Y-m-d H:i:s'),
                 updatedAt: $updatedUser->getUpdatedAt()->format('Y-m-d H:i:s'),
             );

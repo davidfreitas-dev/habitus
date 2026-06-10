@@ -16,8 +16,10 @@ use Tests\TestCase;
 
 class PHPMailerServiceTest extends TestCase
 {
-    private MockObject|LoggerInterface $logger;
-    private MockObject|PHPMailer $mailerMock;
+    private \PHPUnit\Framework\MockObject\MockObject $logger;
+
+    private \PHPUnit\Framework\MockObject\MockObject $mailerMock;
+
     private PHPMailerService $mailerService;
 
     protected function setUp(): void
@@ -41,14 +43,9 @@ class PHPMailerServiceTest extends TestCase
             'from@example.com',
             'Test Sender',
             'http://localhost',
-            'Test App'
+            'Test App',
+            $this->mailerMock
         );
-
-        // Use reflection to replace the mailer instance with our mock
-        $reflection = new ReflectionClass($this->mailerService);
-        $mailerProperty = $reflection->getProperty('mailer');
-
-        $mailerProperty->setValue($this->mailerService, $this->mailerMock);
     }
 
     public function testSendSuccessful(): void

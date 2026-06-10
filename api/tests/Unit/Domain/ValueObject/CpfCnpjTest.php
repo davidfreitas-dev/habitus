@@ -11,16 +11,22 @@ use PHPUnit\Framework\TestCase;
 final class CpfCnpjTest extends TestCase
 {
     // CPF Test Data
-    private const VALID_CPF_UNFORMATTED = '11144477735';
-    private const VALID_CPF_FORMATTED = '111.444.777-35';
-    private const INVALID_CPF = '11144477736';
-    private const ALL_SAME_DIGITS_CPF = '11111111111';
+    private const string VALID_CPF_UNFORMATTED = '11144477735';
+
+    private const string VALID_CPF_FORMATTED = '111.444.777-35';
+
+    private const string INVALID_CPF = '11144477736';
+
+    private const string ALL_SAME_DIGITS_CPF = '11111111111';
 
     // CNPJ Test Data
-    private const VALID_CNPJ_UNFORMATTED = '11444777000161';
-    private const VALID_CNPJ_FORMATTED = '11.444.777/0001-61';
-    private const INVALID_CNPJ = '11444777000162';
-    private const ALL_SAME_DIGITS_CNPJ = '11111111111111';
+    private const string VALID_CNPJ_UNFORMATTED = '11444777000161';
+
+    private const string VALID_CNPJ_FORMATTED = '11.444.777/0001-61';
+
+    private const string INVALID_CNPJ = '11444777000162';
+
+    private const string ALL_SAME_DIGITS_CNPJ = '11111111111111';
 
     public function testFromStringWithValidCpf(): void
     {

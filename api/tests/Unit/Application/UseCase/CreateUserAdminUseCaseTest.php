@@ -6,8 +6,8 @@ namespace Tests\Unit\Application\UseCase;
 
 use PDO;
 use Tests\TestCase;
-use App\Application\DTO\CreateUserAdminRequestDTO;
-use App\Application\DTO\UserResponseDTO;
+use App\Application\DTO\User\CreateUserAdminRequestDTO;
+use App\Application\DTO\User\UserResponseDTO;
 use App\Application\UseCase\CreateUserAdminUseCase;
 use App\Domain\Entity\Person;
 use App\Domain\Entity\Role;
@@ -23,10 +23,15 @@ use PHPUnit\Framework\MockObject\MockObject;
 class CreateUserAdminUseCaseTest extends TestCase
 {
     private PDO&MockObject $pdo;
+
     private PersonRepositoryInterface&MockObject $personRepository;
+
     private UserRepositoryInterface&MockObject $userRepository;
+
     private RoleRepositoryInterface&MockObject $roleRepository;
+
     private PasswordHasher&MockObject $passwordHasher;
+
     private CreateUserAdminUseCase $createUserAdminUseCase;
 
     protected function setUp(): void

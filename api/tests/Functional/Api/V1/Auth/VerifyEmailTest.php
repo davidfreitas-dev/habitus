@@ -22,9 +22,13 @@ use Fig\Http\Message\StatusCodeInterface;
 class VerifyEmailTest extends FunctionalTestCase
 {
     private PersonRepositoryInterface $personRepository;
+
     private UserRepositoryInterface $userRepository;
+
     private UserVerificationRepositoryInterface $userVerificationRepository;
+
     private RoleRepositoryInterface $roleRepository;
+
     private \Faker\Generator $faker;
 
     protected function setUp(): void
@@ -54,8 +58,8 @@ class VerifyEmailTest extends FunctionalTestCase
 
         $user = new User(
             person: $person,
-            password: 'hashedpassword',
             role: $role,
+            password: 'hashedpassword',
             isActive: true,
             isVerified: false
         );
@@ -111,8 +115,8 @@ class VerifyEmailTest extends FunctionalTestCase
 
         $user = new User(
             person: $person,
-            password: 'hashedpassword',
             role: $role,
+            password: 'hashedpassword',
             isActive: true,
             isVerified: false
         );
@@ -150,8 +154,8 @@ class VerifyEmailTest extends FunctionalTestCase
 
         $user = new User(
             person: $person,
-            password: 'hashedpassword',
             role: $role,
+            password: 'hashedpassword',
             isActive: true,
             isVerified: true
         );
@@ -207,8 +211,8 @@ class VerifyEmailTest extends FunctionalTestCase
 
         $user = new User(
             person: $person,
-            password: 'hashedpassword',
             role: $role,
+            password: 'hashedpassword',
             isActive: true,
             isVerified: false
         );

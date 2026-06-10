@@ -19,10 +19,15 @@ use Fig\Http\Message\StatusCodeInterface;
 class UpdateProfileTest extends FunctionalTestCase
 {
     private UserRepositoryInterface $userRepository;
+
     private PersonRepositoryInterface $personRepository;
+
     private RoleRepositoryInterface $roleRepository;
+
     private User $user;
+
     private \Faker\Generator $faker;
+
     private string $accessToken;
 
     protected function setUp(): void
@@ -53,8 +58,8 @@ class UpdateProfileTest extends FunctionalTestCase
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         $this->user = new User(
             person: $person,
-            password: $hashedPassword,
             role: $role,
+            password: $hashedPassword,
             isActive: true,
             isVerified: true
         );
@@ -151,13 +156,14 @@ class UpdateProfileTest extends FunctionalTestCase
             cpfcnpj: CpfCnpj::fromString($this->faker->cpf())
         ));
         $anotherRole = $this->roleRepository->findByName('user');
-        if (!$anotherRole) {
+        if (!$anotherRole instanceof \App\Domain\Entity\Role) {
             throw new NotFoundException("Perfil 'user' não encontrado no banco de dados. Certifique-se de que os perfis foram semeados para o teste.");
         }
+
         $anotherUser = new User(
             person: $anotherPerson,
-            password: password_hash('password', PASSWORD_DEFAULT),
             role: $anotherRole,
+            password: password_hash('password', PASSWORD_DEFAULT),
             isActive: true,
             isVerified: true
         );

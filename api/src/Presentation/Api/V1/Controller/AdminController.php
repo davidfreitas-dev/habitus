@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Presentation\Api\V1\Controller;
 
-use App\Application\DTO\CreateUserAdminRequestDTO;
-use App\Application\DTO\UpdateUserAdminRequestDTO;
+use App\Application\DTO\User\CreateUserAdminRequestDTO;
+use App\Application\DTO\User\ListUsersRequestDTO;
+use App\Application\DTO\User\UpdateUserAdminRequestDTO;
+use App\Application\Service\ValidationService;
 use App\Application\UseCase\CreateUserAdminUseCase;
 use App\Application\UseCase\DeleteUserUseCase;
 use App\Application\UseCase\GetUserUseCase;
@@ -25,6 +27,7 @@ class AdminController
     public function __construct(
         private readonly JsonResponseFactory $jsonResponseFactory,
         private readonly LoggerInterface $logger,
+        private readonly ValidationService $validationService,
         private readonly CreateUserAdminUseCase $createUserAdminUseCase,
         private readonly ListUsersUseCase $listUsersUseCase,
         private readonly GetUserUseCase $getUserUseCase,
@@ -39,14 +42,16 @@ class AdminController
         $dto = CreateUserAdminRequestDTO::fromArray($data);
 
         try {
+            $this->validationService->validate($dto);
             $userResponseDto = $this->createUserAdminUseCase->execute($dto);
 
             return $this->jsonResponseFactory->success($userResponseDto->jsonSerialize(), 'Usuário criado com sucesso.', 201);
-        } catch (ConflictException | NotFoundException | ValidationException $e) {
+        } catch (ValidationException $e) {
+            return $this->jsonResponseFactory->fail($e->getErrors(), $e->getMessage(), 400);
+        } catch (ConflictException | NotFoundException $e) {
             $this->logger->warning('Falha na criação de usuário admin: ' . $e->getMessage());
 
-            $errors = $e instanceof ValidationException ? $e->getErrors() : null;
-            return $this->jsonResponseFactory->fail($errors, $e->getMessage(), $e->getStatusCode());
+            return $this->jsonResponseFactory->fail(null, $e->getMessage(), $e->getStatusCode());
         } catch (Throwable $e) {
             $this->logger->error('Ocorreu um erro inesperado durante a criação de usuário admin', ['exception' => $e]);
 
@@ -56,13 +61,21 @@ class AdminController
 
     public function listUsers(Request $request): Response
     {
-        $params = $request->getQueryParams();
-        $limit = isset($params['limit']) ? (int)$params['limit'] : 20;
-        $offset = isset($params['offset']) ? (int)$params['offset'] : 0;
+        try {
+            $params = $request->getQueryParams();
+            $dto = ListUsersRequestDTO::fromArray($params);
 
-        $userListResponseDTO = $this->listUsersUseCase->execute($limit, $offset);
+            $this->validationService->validate($dto);
 
-        return $this->jsonResponseFactory->success($userListResponseDTO);
+            $userListResponseDTO = $this->listUsersUseCase->execute($dto->limit, $dto->offset);
+
+            return $this->jsonResponseFactory->success($userListResponseDTO);
+        } catch (ValidationException $e) {
+            return $this->jsonResponseFactory->fail($e->getErrors(), $e->getMessage(), 400);
+        } catch (Throwable $e) {
+            $this->logger->error('Erro inesperado ao listar usuários', ['exception' => $e]);
+            return $this->jsonResponseFactory->error('Ocorreu um erro inesperado.');
+        }
     }
 
     public function getUser(Request $request, Response $response, array $args): Response
@@ -85,14 +98,16 @@ class AdminController
         $dto = UpdateUserAdminRequestDTO::fromArray($userId, $data);
 
         try {
+            $this->validationService->validate($dto);
             $userResponseDto = $this->updateUserAdminUseCase->execute($dto);
 
             return $this->jsonResponseFactory->success($userResponseDto->jsonSerialize(), 'Usuário atualizado com sucesso.');
-        } catch (NotFoundException | ConflictException | ValidationException $e) {
+        } catch (ValidationException $e) {
+            return $this->jsonResponseFactory->fail($e->getErrors(), $e->getMessage(), 400);
+        } catch (NotFoundException | ConflictException $e) {
             $this->logger->warning('Falha na atualização de usuário admin: ' . $e->getMessage());
 
-            $errors = $e instanceof ValidationException ? $e->getErrors() : null;
-            return $this->jsonResponseFactory->fail($errors, $e->getMessage(), $e->getStatusCode());
+            return $this->jsonResponseFactory->fail(null, $e->getMessage(), $e->getStatusCode());
         } catch (Throwable $e) {
             $this->logger->error('Ocorreu um erro inesperado durante a atualização de usuário admin', ['exception' => $e]);
 

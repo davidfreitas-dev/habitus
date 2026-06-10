@@ -19,8 +19,11 @@ use App\Domain\Repository\PersonRepositoryInterface;
 class LoginTest extends FunctionalTestCase
 {
     private UserRepositoryInterface $userRepository;
+
     private PersonRepositoryInterface $personRepository;
+
     private RoleRepositoryInterface $roleRepository;
+
     private \Faker\Generator $faker;
 
     protected function setUp(): void
@@ -55,8 +58,8 @@ class LoginTest extends FunctionalTestCase
         // Criar User com Person que já tem ID
         $user = new User(
             person: $person,
-            password: $hashedPassword,
             role: $role,
+            password: $hashedPassword,
             isActive: true,
             isVerified: false
         );
@@ -84,7 +87,7 @@ class LoginTest extends FunctionalTestCase
         // Assert
         $this->assertEquals(StatusCodeInterface::STATUS_OK, $response->getStatusCode());
         $this->assertNotNull($responseData, 'O corpo da resposta não é um JSON válido: ' . $body);
-        $this->assertArrayHasKey('data', $responseData, 'Resposta sem a chave \'data\': ' . $body);
+        $this->assertArrayHasKey('data', $responseData, "Resposta sem a chave 'data': " . $body);
         $this->assertArrayHasKey('access_token', $responseData['data']);
         $this->assertArrayHasKey('refresh_token', $responseData['data']);
         $this->assertArrayHasKey('token_type', $responseData['data']);

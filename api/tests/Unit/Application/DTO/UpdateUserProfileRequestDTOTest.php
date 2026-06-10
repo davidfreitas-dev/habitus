@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Application\DTO;
 
-use App\Application\DTO\UpdateUserProfileRequestDTO;
+use App\Application\DTO\User\UpdateUserProfileRequestDTO;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Psr\Http\Message\UploadedFileInterface;
 use Tests\TestCase;

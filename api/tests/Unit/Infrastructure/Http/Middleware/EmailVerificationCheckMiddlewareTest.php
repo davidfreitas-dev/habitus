@@ -20,6 +20,7 @@ use stdClass;
 final class EmailVerificationCheckMiddlewareTest extends TestCase
 {
     private RequestFactory $requestFactory;
+
     private ResponseFactory $responseFactory;
 
     protected function setUp(): void
@@ -52,13 +53,13 @@ final class EmailVerificationCheckMiddlewareTest extends TestCase
     private function createMockedHandler(?ResponseInterface $response = null): RequestHandlerInterface
     {
         $handler = $this->createMock(RequestHandlerInterface::class);
-        
-        if ($response !== null) {
+
+        if ($response instanceof \Psr\Http\Message\ResponseInterface) {
             $handler->expects($this->once())
                 ->method('handle')
                 ->willReturn($response);
         }
-        
+
         return $handler;
     }
 
@@ -82,7 +83,7 @@ final class EmailVerificationCheckMiddlewareTest extends TestCase
     public function testProcessReturnsResponseWhenEmailIsVerified(): void
     {
         $middleware = $this->createMiddleware();
-        
+
         $jwt = new stdClass();
         $jwt->is_verified = true;
 
@@ -103,7 +104,7 @@ final class EmailVerificationCheckMiddlewareTest extends TestCase
     public function testProcessThrowsAuthorizationExceptionWhenEmailIsNotVerified(): void
     {
         $middleware = $this->createMiddleware();
-        
+
         $this->expectException(AuthorizationException::class);
         $this->expectExceptionMessage('E-mail não verificado. O acesso a este recurso é restrito.');
         $this->expectExceptionCode(403);
@@ -122,7 +123,7 @@ final class EmailVerificationCheckMiddlewareTest extends TestCase
     public function testProcessThrowsAuthorizationExceptionWhenJwtPayloadMissingIsVerifiedClaim(): void
     {
         $middleware = $this->createMiddleware();
-        
+
         $this->expectException(AuthorizationException::class);
         $this->expectExceptionMessage('Erro de autenticação: Payload JWT faltando a reivindicação is_verified');
         $this->expectExceptionCode(403);

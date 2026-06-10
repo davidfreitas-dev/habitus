@@ -19,10 +19,15 @@ use DateTimeImmutable;
 class GetHabitStatsTest extends FunctionalTestCase
 {
     protected UserRepositoryInterface $userRepository;
+
     protected PersonRepositoryInterface $personRepository;
+
     protected RoleRepositoryInterface $roleRepository;
+
     protected \Faker\Generator $faker;
+
     protected ?User $testUser = null;
+
     protected string $accessToken;
 
     protected function setUp(): void
@@ -50,11 +55,11 @@ class GetHabitStatsTest extends FunctionalTestCase
         $person = $this->personRepository->create($person);
 
         $role = $this->roleRepository->findByName('user');
-        
+
         $user = new User(
             person: $person,
-            password: $hashedPassword,
             role: $role,
+            password: $hashedPassword,
             isActive: true,
             isVerified: true
         );
@@ -80,13 +85,13 @@ class GetHabitStatsTest extends FunctionalTestCase
         $payload = [
             'title' => $title,
             'week_days' => $weekDays,
-            'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+            'created_at' => new \DateTimeImmutable()->format('Y-m-d H:i:s'),
         ];
 
         $response = $this->sendRequest('POST', '/api/v1/habits', $payload, [
             'Authorization' => 'Bearer ' . $this->accessToken,
         ]);
-        
+
         $response->getBody()->rewind();
         $body = json_decode((string) $response->getBody(), true);
 
@@ -102,14 +107,14 @@ class GetHabitStatsTest extends FunctionalTestCase
         // Arrange
         // Create a habit that is active every day
         $habitId = $this->createHabit('Stats Habit', [0, 1, 2, 3, 4, 5, 6]);
-        
+
         $today = new DateTimeImmutable();
         $todayFormatted = $today->format('Y-m-d');
 
         // Toggle habit for today
         $this->sendRequest(
             'PATCH',
-            "/api/v1/habits/{$habitId}/toggle",
+            sprintf('/api/v1/habits/%d/toggle', $habitId),
             ['date' => $todayFormatted],
             ['Authorization' => 'Bearer ' . $this->accessToken]
         );
@@ -126,7 +131,7 @@ class GetHabitStatsTest extends FunctionalTestCase
         $this->assertEquals(StatusCodeInterface::STATUS_OK, $response->getStatusCode());
         $this->assertEquals('success', $body['status']);
         $this->assertEquals('Estatísticas obtidas com sucesso.', $body['message']);
-        
+
         $this->assertIsArray($body['data']['daily_stats']);
         $this->assertCount(7, $body['data']['daily_stats']);
         $this->assertArrayHasKey('current_streak', $body['data']);
@@ -144,6 +149,7 @@ class GetHabitStatsTest extends FunctionalTestCase
                 break;
             }
         }
+
         $this->assertTrue($foundToday);
     }
 

@@ -6,7 +6,7 @@ namespace Tests\Unit\Application\UseCase;
 
 use App\Application\UseCase\GetHabitStatsUseCase;
 use App\Domain\Repository\HabitStatsRepositoryInterface;
-use App\Application\DTO\HabitStatsResponseDTO;
+use App\Application\DTO\Habit\HabitStatsResponseDTO;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\TestCase;
 use DateTimeImmutable;
@@ -15,6 +15,7 @@ use InvalidArgumentException;
 class GetHabitStatsUseCaseTest extends TestCase
 {
     private HabitStatsRepositoryInterface&MockObject $habitStatsRepository;
+
     private GetHabitStatsUseCase $getHabitStatsUseCase;
 
     protected function setUp(): void
@@ -28,7 +29,7 @@ class GetHabitStatsUseCaseTest extends TestCase
     {
         $userId = 1;
         $period = 'W';
-        
+
         $mockStats = [
             ['week_day' => 1, 'completed' => 2, 'total' => 3],
             ['week_day' => 3, 'completed' => 1, 'total' => 1],
@@ -50,7 +51,7 @@ class GetHabitStatsUseCaseTest extends TestCase
         $this->assertCount(7, $response->dailyStats);
         $this->assertEquals(5, $response->currentStreak);
         $this->assertEquals(10, $response->longestStreak);
-        
+
         // Monday (1)
         $this->assertEquals(1, $response->dailyStats[1]->weekDay);
         $this->assertEquals('S', $response->dailyStats[1]->label);
@@ -76,7 +77,7 @@ class GetHabitStatsUseCaseTest extends TestCase
     {
         $userId = 1;
         $period = 'M';
-        
+
         $mockStats = [
             ['week_day' => 0, 'completed' => 10, 'total' => 20],
         ];

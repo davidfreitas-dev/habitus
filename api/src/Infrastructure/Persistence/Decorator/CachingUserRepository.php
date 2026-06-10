@@ -11,11 +11,11 @@ use Psr\Log\LoggerInterface;
 
 class CachingUserRepository implements UserRepositoryInterface
 {
-    private const CACHE_PREFIX_ID = 'user:id:';
+    private const string CACHE_PREFIX_ID = 'user:id:';
 
-    private const CACHE_PREFIX_EMAIL = 'user:email:';
+    private const string CACHE_PREFIX_EMAIL = 'user:email:';
 
-    private const CACHE_TTL = 3600; // 1 hour
+    private const int CACHE_TTL = 3600; // 1 hour
 
     public function __construct(
         private readonly UserRepositoryInterface $decoratedRepository,

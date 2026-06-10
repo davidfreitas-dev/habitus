@@ -19,8 +19,11 @@ use App\Domain\Repository\PersonRepositoryInterface;
 class ForgotPasswordTest extends FunctionalTestCase
 {
     private UserRepositoryInterface $userRepository;
+
     private PersonRepositoryInterface $personRepository;
+
     private RoleRepositoryInterface $roleRepository;
+
     private \Faker\Generator $faker;
 
     protected function setUp(): void
@@ -52,8 +55,8 @@ class ForgotPasswordTest extends FunctionalTestCase
 
         $user = new User(
             person: $person,
-            password: $hashedPassword,
             role: $role,
+            password: $hashedPassword,
             isActive: true,
             isVerified: true
         );

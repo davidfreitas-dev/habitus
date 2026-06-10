@@ -10,20 +10,20 @@ use Slim\Psr7\UploadedFile;
 use App\Domain\Entity\Person;
 use PHPUnit\Framework\TestCase;
 use Slim\Psr7\Factory\ResponseFactory;
-use App\Application\DTO\UserResponseDTO;
-use App\Application\DTO\PersonResponseDTO;
+use App\Application\DTO\User\UserResponseDTO;
+use App\Application\DTO\Common\PersonResponseDTO;
 use App\Domain\Exception\ConflictException;
 use App\Domain\Exception\NotFoundException;
 use PHPUnit\Framework\MockObject\MockObject;
 use App\Domain\Exception\ValidationException;
 use App\Application\Service\ValidationService;
 use App\Application\UseCase\DeleteUserUseCase;
-use App\Application\DTO\UserProfileResponseDTO;
-use App\Application\DTO\ChangePasswordRequestDTO;
+use App\Application\DTO\User\UserProfileResponseDTO;
+use App\Application\DTO\User\ChangePasswordRequestDTO;
 use App\Application\UseCase\ChangePasswordUseCase;
 use App\Domain\Repository\UserRepositoryInterface;
 use Psr\Http\Message\ResponseInterface as Response;
-use App\Application\DTO\UpdateUserProfileRequestDTO;
+use App\Application\DTO\User\UpdateUserProfileRequestDTO;
 use App\Application\UseCase\UpdateUserProfileUseCase;
 use App\Presentation\Api\V1\Controller\UserController;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -32,12 +32,19 @@ use App\Infrastructure\Http\Response\JsonResponseFactory;
 class UserControllerTest extends TestCase
 {
     private UpdateUserProfileUseCase&MockObject $updateUserProfileUseCase;
+
     private ChangePasswordUseCase&MockObject $changePasswordUseCase;
+
     private DeleteUserUseCase&MockObject $deleteUserUseCase;
+
     private UserRepositoryInterface&MockObject $userRepository;
+
     private JsonResponseFactory&MockObject $jsonResponseFactory;
+
     private ValidationService&MockObject $validationService;
+
     private UserController $userController;
+
     private Response $response;
 
     protected function setUp(): void
@@ -48,7 +55,7 @@ class UserControllerTest extends TestCase
         $this->userRepository = $this->createMock(UserRepositoryInterface::class);
         $this->jsonResponseFactory = $this->createMock(JsonResponseFactory::class);
         $this->validationService = $this->createMock(ValidationService::class);
-        
+
         $this->userController = new UserController(
             $this->updateUserProfileUseCase,
             $this->changePasswordUseCase,
@@ -58,7 +65,7 @@ class UserControllerTest extends TestCase
             $this->validationService
         );
 
-        $this->response = (new ResponseFactory())->createResponse();
+        $this->response = new ResponseFactory()->createResponse();
     }
 
     public function testGetSuccess(): void
@@ -77,13 +84,13 @@ class UserControllerTest extends TestCase
 
                                 $person->method('getPhone')->willReturn('11999999999');
 
-                                
+
 
                                 // Temporarily return null for CpfCnpj to avoid validation exception in test environment
 
                                 $person->method('getCpfCnpj')->willReturn(null);
 
-                        
+
 
                                 $person->method('getAvatarUrl')->willReturn('http://example.com/avatar.jpg');
 
@@ -95,7 +102,7 @@ class UserControllerTest extends TestCase
 
                                         $user->method('isVerified')->willReturn(true); // Corrected method name
 
-                                
+
 
                                 $role = $this->createMock(\App\Domain\Entity\Role::class);
 
@@ -105,7 +112,7 @@ class UserControllerTest extends TestCase
 
                                 $user->method('getRole')->willReturn($role);
 
-                        
+
 
                                 $now = new DateTimeImmutable();
 
@@ -113,7 +120,7 @@ class UserControllerTest extends TestCase
 
                                 $user->method('getUpdatedAt')->willReturn($now);
 
-                        
+
 
                                 $this->userRepository->expects($this->once())
 
@@ -123,7 +130,7 @@ class UserControllerTest extends TestCase
 
                                     ->willReturn($user);
 
-                        
+
 
                                 // Manually create UserProfileResponseDTO to inject roleId and roleName for testing purposes
 
@@ -155,7 +162,7 @@ class UserControllerTest extends TestCase
 
                                 );
 
-        $mockedResponse = (new ResponseFactory())->createResponse(200);
+        $mockedResponse = new ResponseFactory()->createResponse(200);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'success',
             'data' => $userProfileDTO->jsonSerialize(),
@@ -187,7 +194,7 @@ class UserControllerTest extends TestCase
             ->with($userId)
             ->willReturn(null);
 
-        $mockedResponse = (new ResponseFactory())->createResponse(404);
+        $mockedResponse = new ResponseFactory()->createResponse(404);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => null,
@@ -226,11 +233,9 @@ class UserControllerTest extends TestCase
 
         $this->validationService->expects($this->once())
             ->method('validate')
-            ->with($this->callback(function($arg) use ($dto) {
-                return $arg instanceof UpdateUserProfileRequestDTO 
-                    && $arg->userId === $dto->userId
-                    && $arg->name === $dto->name;
-            }));
+            ->with($this->callback(fn($arg): bool => $arg instanceof UpdateUserProfileRequestDTO 
+                && $arg->userId === $dto->userId
+                && $arg->name === $dto->name));
 
         $userResponseDto = new UserResponseDTO(
             id: $userId,
@@ -249,11 +254,9 @@ class UserControllerTest extends TestCase
 
         $this->updateUserProfileUseCase->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($arg) use ($dto) {
-                return $arg instanceof UpdateUserProfileRequestDTO
-                    && $arg->userId === $dto->userId
-                    && $arg->name === $dto->name;
-            }))
+            ->with($this->callback(fn($arg): bool => $arg instanceof UpdateUserProfileRequestDTO
+                && $arg->userId === $dto->userId
+                && $arg->name === $dto->name))
             ->willReturn($userResponseDto);
 
         $responseData = [
@@ -271,7 +274,7 @@ class UserControllerTest extends TestCase
             'updated_at' => $userResponseDto->updatedAt,
         ];
 
-        $mockedResponse = (new ResponseFactory())->createResponse(200);
+        $mockedResponse = new ResponseFactory()->createResponse(200);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'success',
             'data' => $responseData,
@@ -343,7 +346,7 @@ class UserControllerTest extends TestCase
             'updated_at' => $userResponseDto->updatedAt,
         ];
 
-        $mockedResponse = (new ResponseFactory())->createResponse(200);
+        $mockedResponse = new ResponseFactory()->createResponse(200);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'success',
             'data' => $responseData,
@@ -378,7 +381,7 @@ class UserControllerTest extends TestCase
             ->method('validate')
             ->willThrowException(new ValidationException('Falha na validação', $validationErrors));
 
-        $mockedResponse = (new ResponseFactory())->createResponse(400);
+        $mockedResponse = new ResponseFactory()->createResponse(400);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => $validationErrors,
@@ -415,7 +418,7 @@ class UserControllerTest extends TestCase
             ->method('execute')
             ->willThrowException(new ConflictException('Email already in use.'));
 
-        $mockedResponse = (new ResponseFactory())->createResponse(409);
+        $mockedResponse = new ResponseFactory()->createResponse(409);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => null,
@@ -452,7 +455,7 @@ class UserControllerTest extends TestCase
             ->method('execute')
             ->willThrowException(new \Exception('Unexpected error.'));
 
-        $mockedResponse = (new ResponseFactory())->createResponse(500);
+        $mockedResponse = new ResponseFactory()->createResponse(500);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'error',
             'data' => null,
@@ -493,7 +496,7 @@ class UserControllerTest extends TestCase
             ->method('execute')
             ->with($this->isInstanceOf(ChangePasswordRequestDTO::class));
 
-        $mockedResponse = (new ResponseFactory())->createResponse(200);
+        $mockedResponse = new ResponseFactory()->createResponse(200);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'success',
             'data' => null,
@@ -531,7 +534,7 @@ class UserControllerTest extends TestCase
             ->method('validate')
             ->willThrowException(new ValidationException('Falha na validação', $validationErrors));
 
-        $mockedResponse = (new ResponseFactory())->createResponse(400);
+        $mockedResponse = new ResponseFactory()->createResponse(400);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => $validationErrors,
@@ -571,7 +574,7 @@ class UserControllerTest extends TestCase
             ->method('execute')
             ->willThrowException(new NotFoundException('User not found or old password incorrect.'));
 
-        $mockedResponse = (new ResponseFactory())->createResponse(404);
+        $mockedResponse = new ResponseFactory()->createResponse(404);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => null,
@@ -611,7 +614,7 @@ class UserControllerTest extends TestCase
             ->method('execute')
             ->willThrowException(new \Exception('Internal error.'));
 
-        $mockedResponse = (new ResponseFactory())->createResponse(500);
+        $mockedResponse = new ResponseFactory()->createResponse(500);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'error',
             'data' => null,
@@ -655,7 +658,7 @@ class UserControllerTest extends TestCase
         $this->jsonResponseFactory->expects($this->once())
             ->method('success')
             ->with(null, 'Conta excluída com sucesso.')
-            ->willReturn((new ResponseFactory())->createResponse(200)->withStatus(200));
+            ->willReturn(new ResponseFactory()->createResponse(200)->withStatus(200));
 
         $response = $this->userController->delete($request);
 
@@ -676,7 +679,7 @@ class UserControllerTest extends TestCase
         $this->jsonResponseFactory->expects($this->once())
             ->method('fail')
             ->with(null, 'Usuário não encontrado.', 404)
-            ->willReturn((new ResponseFactory())->createResponse(404)->withStatus(404));
+            ->willReturn(new ResponseFactory()->createResponse(404)->withStatus(404));
 
         $this->deleteUserUseCase->expects($this->never())
             ->method('execute');
@@ -705,7 +708,7 @@ class UserControllerTest extends TestCase
         $this->jsonResponseFactory->expects($this->once())
             ->method('fail')
             ->with(null, 'Administradores não podem excluir a própria conta.', 403)
-            ->willReturn((new ResponseFactory())->createResponse(403)->withStatus(403));
+            ->willReturn(new ResponseFactory()->createResponse(403)->withStatus(403));
 
         $this->deleteUserUseCase->expects($this->never())
             ->method('execute');

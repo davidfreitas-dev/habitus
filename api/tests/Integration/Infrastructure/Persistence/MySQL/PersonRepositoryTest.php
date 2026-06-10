@@ -13,6 +13,7 @@ use Tests\Integration\DatabaseTestCase;
 class PersonRepositoryTest extends DatabaseTestCase
 {
     private PersonRepository $personRepository;
+
     private \Faker\Generator $faker;
 
     protected function setUp(): void
@@ -30,7 +31,7 @@ class PersonRepositoryTest extends DatabaseTestCase
             phone: $this->faker->phoneNumber,
             cpfcnpj: CpfCnpj::fromString($this->faker->unique()->cpf), // Generate a valid CPF
         );
-        
+
         return $this->personRepository->create($person);
     }
 
@@ -76,15 +77,15 @@ class PersonRepositoryTest extends DatabaseTestCase
 
         $newName = 'Updated Name ' . $this->faker->name;
         $newEmail = $this->faker->unique()->email;
-        
+
         $createdPerson->setName($newName);
         $createdPerson->setEmail($newEmail);
 
         $this->personRepository->update($createdPerson);
 
         $updatedPerson = $this->personRepository->findById($createdPerson->getId());
-        
-        
+
+
         $this->assertNotNull($updatedPerson, 'Pessoa atualizada deve ser encontrada');
         $this->assertEquals($newName, $updatedPerson->getName(), 'O nome da pessoa deve ser atualizado');
         $this->assertEquals($newEmail, $updatedPerson->getEmail(), 'O e-mail da pessoa deve ser atualizado');

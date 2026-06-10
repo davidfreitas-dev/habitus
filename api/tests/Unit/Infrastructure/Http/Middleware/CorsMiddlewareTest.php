@@ -37,7 +37,7 @@ final class CorsMiddlewareTest extends TestCase
     public function testPreflightRequestWithAllowedOrigin(): void
     {
         $settings = $this->getDefaultSettings();
-        $request = (new RequestFactory())
+        $request = new RequestFactory()
             ->createRequest('OPTIONS', '/test')
             ->withHeader('Origin', 'http://localhost:3000')
             ->withHeader('Access-Control-Request-Method', 'POST')
@@ -61,11 +61,11 @@ final class CorsMiddlewareTest extends TestCase
     public function testSimpleRequestWithAllowedOrigin(): void
     {
         $settings = $this->getDefaultSettings();
-        $request = (new RequestFactory())
+        $request = new RequestFactory()
             ->createRequest('GET', '/test')
             ->withHeader('Origin', 'http://localhost:3000');
 
-        $expectedResponse = (new ResponseFactory())->createResponse()->withStatus(200)->withHeader('X-Test', 'true');
+        $expectedResponse = new ResponseFactory()->createResponse()->withStatus(200)->withHeader('X-Test', 'true');
         $handler = $this->createMock(RequestHandlerInterface::class);
         $handler->expects($this->once())
             ->method('handle')
@@ -87,11 +87,11 @@ final class CorsMiddlewareTest extends TestCase
     public function testRequestWithWildcardAllowedOrigin(): void
     {
         $settings = array_merge($this->getDefaultSettings(), ['allowed_origins' => ['*']]);
-        $request = (new RequestFactory())
+        $request = new RequestFactory()
             ->createRequest('GET', '/test')
             ->withHeader('Origin', 'http://anydomain.com');
 
-        $expectedResponse = (new ResponseFactory())->createResponse()->withStatus(200);
+        $expectedResponse = new ResponseFactory()->createResponse()->withStatus(200);
         $handler = $this->createMock(RequestHandlerInterface::class);
         $handler->expects($this->once())->method('handle')->willReturn($expectedResponse);
 
@@ -104,11 +104,11 @@ final class CorsMiddlewareTest extends TestCase
     public function testRequestWithDisallowedOrigin(): void
     {
         $settings = $this->getDefaultSettings();
-        $request = (new RequestFactory())
+        $request = new RequestFactory()
             ->createRequest('GET', '/test')
             ->withHeader('Origin', 'http://malicious.com');
 
-        $expectedResponse = (new ResponseFactory())->createResponse()->withStatus(200);
+        $expectedResponse = new ResponseFactory()->createResponse()->withStatus(200);
         $handler = $this->createMock(RequestHandlerInterface::class);
         $handler->expects($this->once())->method('handle')->willReturn($expectedResponse);
 
@@ -121,10 +121,10 @@ final class CorsMiddlewareTest extends TestCase
     public function testRequestWithoutOriginHeader(): void
     {
         $settings = $this->getDefaultSettings();
-        $request = (new RequestFactory())
+        $request = new RequestFactory()
             ->createRequest('GET', '/test');
 
-        $expectedResponse = (new ResponseFactory())->createResponse()->withStatus(200);
+        $expectedResponse = new ResponseFactory()->createResponse()->withStatus(200);
         $handler = $this->createMock(RequestHandlerInterface::class);
         $handler->expects($this->once())->method('handle')->willReturn($expectedResponse);
 
@@ -137,11 +137,11 @@ final class CorsMiddlewareTest extends TestCase
     public function testNoCredentialsAllowed(): void
     {
         $settings = array_merge($this->getDefaultSettings(), ['allow_credentials' => false]);
-        $request = (new RequestFactory())
+        $request = new RequestFactory()
             ->createRequest('GET', '/test')
             ->withHeader('Origin', 'http://localhost:3000');
 
-        $expectedResponse = (new ResponseFactory())->createResponse()->withStatus(200);
+        $expectedResponse = new ResponseFactory()->createResponse()->withStatus(200);
         $handler = $this->createMock(RequestHandlerInterface::class);
         $handler->expects($this->once())->method('handle')->willReturn($expectedResponse);
 

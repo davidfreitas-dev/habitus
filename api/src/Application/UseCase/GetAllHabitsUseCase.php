@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\UseCase;
 
-use App\Application\DTO\HabitResponseDTO;
-use App\Domain\Entity\Habit;
+use App\Application\DTO\Habit\HabitResponseDTO;
 use App\Domain\Repository\HabitRepositoryInterface;
 
 class GetAllHabitsUseCase
@@ -23,7 +22,7 @@ class GetAllHabitsUseCase
         $habits = $this->habitRepository->findAllByUserId($userId);
 
         return array_map(
-            static fn (Habit $habit): HabitResponseDTO => HabitResponseDTO::fromEntity($habit),
+            HabitResponseDTO::fromEntity(...),
             $habits,
         );
     }

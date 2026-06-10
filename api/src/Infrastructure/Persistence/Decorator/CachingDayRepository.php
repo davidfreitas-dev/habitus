@@ -35,7 +35,7 @@ class CachingDayRepository implements DayRepositoryInterface
         $this->logger->info('Cache de dia não encontrado para a data: ' . $dateString);
         $day = $this->decoratedRepository->findOneByDate($date);
 
-        if ($day !== null) {
+        if ($day instanceof \App\Domain\Entity\Day) {
             $this->cache->set($cacheKey, $day, self::CACHE_TTL);
             $this->logger->info('Dia salvo no cache para a data: ' . $dateString);
         }

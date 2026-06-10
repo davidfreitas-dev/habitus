@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Application\UseCase;
 
-use App\Application\DTO\ChangePasswordRequestDTO;
+use App\Application\DTO\User\ChangePasswordRequestDTO;
 use App\Application\UseCase\ChangePasswordUseCase;
 use App\Domain\Entity\User;
 use App\Domain\Exception\AuthenticationException;

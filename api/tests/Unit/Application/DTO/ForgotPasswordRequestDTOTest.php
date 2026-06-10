@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Application\DTO;
 
-use App\Application\DTO\ForgotPasswordRequestDTO;
+use App\Application\DTO\Auth\ForgotPasswordRequestDTO;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 

@@ -42,9 +42,10 @@ class ToggleHabitUseCase
         try {
             $day = $this->dayRepository->findOneByDate($date);
 
-            if (!$day) {
+            if (!$day instanceof \App\Domain\Entity\Day) {
                 $day = $this->dayRepository->create($date);
             }
+
             $isCompleted = $this->dayHabitRepository->toggle($day->getId(), $habit->getId(), $userId);
 
             $this->pdo->commit();

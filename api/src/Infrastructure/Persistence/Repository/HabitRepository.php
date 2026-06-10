@@ -14,9 +14,11 @@ use RuntimeException;
 
 class HabitRepository implements HabitRepositoryInterface
 {
-    private const DATE_FORMAT = 'Y-m-d H:i:s';
-    private const DATE_ONLY_FORMAT = 'Y-m-d';
-    private const WEEK_DAY_FORMAT = 'w';
+    private const string DATE_FORMAT = 'Y-m-d H:i:s';
+
+    private const string DATE_ONLY_FORMAT = 'Y-m-d';
+
+    private const string WEEK_DAY_FORMAT = 'w';
 
     public function __construct(
         private readonly PDO $pdo,
@@ -29,6 +31,7 @@ class HabitRepository implements HabitRepositoryInterface
         $sql = 'SELECT * FROM habits WHERE id = :id AND user_id = :user_id';
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['id' => $id, 'user_id' => $userId]);
+
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return $data ? $this->hydrate($data) : null;
@@ -39,6 +42,7 @@ class HabitRepository implements HabitRepositoryInterface
         $sql = 'SELECT * FROM habits WHERE title = :title AND user_id = :user_id';
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['title' => $title, 'user_id' => $userId]);
+
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return $data ? $this->hydrate($data) : null;
@@ -65,7 +69,7 @@ class HabitRepository implements HabitRepositoryInterface
 
         // Re-fetch the habit to ensure its weekDays collection is populated
         $fullyHydratedHabit = $this->findById($habitId, $habit->getUser()->getId());
-        if (!$fullyHydratedHabit) {
+        if (!$fullyHydratedHabit instanceof \App\Domain\Entity\Habit) {
             throw new RuntimeException("Falha ao buscar novamente o hábito recém-criado.");
         }
 
@@ -92,7 +96,7 @@ class HabitRepository implements HabitRepositoryInterface
 
         // Re-fetch the habit to ensure its weekDays collection and updated timestamp are populated
         $fullyHydratedHabit = $this->findById($habit->getId(), $habit->getUser()->getId());
-        if (!$fullyHydratedHabit) {
+        if (!$fullyHydratedHabit instanceof \App\Domain\Entity\Habit) {
             throw new RuntimeException("Falha ao buscar novamente o hábito recém-atualizado.");
         }
 
@@ -200,7 +204,7 @@ class HabitRepository implements HabitRepositoryInterface
 
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        return array_map(fn ($row) => [
+        return array_map(fn (array $row): array => [
             'date' => $row['date'],
             'completed' => (int) $row['completed'],
             'total' => (int) $row['total'],
@@ -231,7 +235,7 @@ class HabitRepository implements HabitRepositoryInterface
 
     private function insertWeekDays(int $habitId, array $weekDays): void
     {
-        if (empty($weekDays)) {
+        if ($weekDays === []) {
             return;
         }
 
@@ -260,7 +264,7 @@ class HabitRepository implements HabitRepositoryInterface
     {
         $user = $this->userRepository->findById((int) $data['user_id']);
 
-        if (!$user) {
+        if (!$user instanceof \App\Domain\Entity\User) {
             throw new RuntimeException(
                 sprintf('Usuário com ID %d não encontrado para hidratação do hábito', $data['user_id']),
             );
@@ -288,7 +292,7 @@ class HabitRepository implements HabitRepositoryInterface
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['habit_id' => $habitId]);
 
-        $weekDaysFromDb = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+        $weekDaysFromDb = array_map(intval(...), $stmt->fetchAll(PDO::FETCH_COLUMN));
         return $weekDaysFromDb;
     }
 

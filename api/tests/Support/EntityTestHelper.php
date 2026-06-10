@@ -13,24 +13,31 @@ use DateTimeImmutable;
 trait EntityTestHelper
 {
     private const DEFAULT_USER_ID = 1;
+
     private const DEFAULT_ROLE_ID = 1;
+
     private const DEFAULT_PERSON_NAME = 'John Doe';
+
     private const DEFAULT_PERSON_EMAIL = 'john.doe@example.com';
+
     private const DEFAULT_ROLE_NAME = 'user';
+
     private const DEFAULT_ROLE_DESCRIPTION = 'User role';
+
     private const DEFAULT_PASSWORD = 'password';
+
     private const DEFAULT_HABIT_TITLE = 'Read a book';
 
     private function setEntityId(object $entity, int $id): void
     {
         $reflection = new \ReflectionClass($entity);
         $property = $reflection->getProperty('id');
-        
+
         // Skip if property is readonly (PHP 8.1+)
         if ($property->isReadOnly()) {
             return;
         }
-        
+
         $property->setValue($entity, $id);
     }
 
@@ -47,7 +54,7 @@ trait EntityTestHelper
             'updatedAt' => new DateTimeImmutable(),
         ];
         $mergedData = array_merge($defaults, $data);
-        
+
         $person = new Person(
             name: $mergedData['name'],
             email: $mergedData['email'],

@@ -166,7 +166,7 @@ class PasswordHasherTest extends TestCase
             
             $this->assertTrue(
                 $this->passwordHasher->verify($password, $hash),
-                "Failed to verify password: {$password}"
+                'Failed to verify password: ' . $password
             );
         }
     }

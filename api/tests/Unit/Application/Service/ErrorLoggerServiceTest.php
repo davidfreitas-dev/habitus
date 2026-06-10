@@ -12,7 +12,8 @@ use PHPUnit\Framework\TestCase;
 
 class ErrorLoggerServiceTest extends TestCase
 {
-    private ErrorLogRepositoryInterface $mockErrorLogRepository;
+    private \PHPUnit\Framework\MockObject\MockObject $mockErrorLogRepository;
+
     private ErrorLoggerService $errorLoggerService;
 
     protected function setUp(): void
@@ -40,7 +41,7 @@ class ErrorLoggerServiceTest extends TestCase
         $this->mockErrorLogRepository
             ->expects(self::once())
             ->method('save')
-            ->with(self::callback(function (ErrorLog $errorLog) use ($severity, $message, $context) {
+            ->with(self::callback(function (ErrorLog $errorLog) use ($severity, $message, $context): true {
                 $this->assertSame($severity, $errorLog->getSeverity());
                 $this->assertSame($message, $errorLog->getMessage());
                 $this->assertSame($context, $errorLog->getContext());
@@ -74,7 +75,7 @@ class ErrorLoggerServiceTest extends TestCase
         $this->mockErrorLogRepository
             ->expects(self::once())
             ->method('save')
-            ->with(self::callback(function (ErrorLog $errorLog) use ($severity, $message, $context, $resolvedBy) {
+            ->with(self::callback(function (ErrorLog $errorLog) use ($severity, $message, $context, $resolvedBy): true {
                 $this->assertSame($severity, $errorLog->getSeverity());
                 $this->assertSame($message, $errorLog->getMessage());
                 $this->assertSame($context, $errorLog->getContext());

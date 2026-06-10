@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Application\UseCase;
 
-use App\Application\DTO\UserProfileResponseDTO;
+use App\Application\DTO\User\UserProfileResponseDTO;
 use App\Application\UseCase\UploadProfileImageUseCase;
 use App\Domain\Entity\Person;
 use App\Domain\Entity\Role;
@@ -95,12 +95,12 @@ class UploadProfileImageUseCaseTest extends TestCase
 
         // Store the avatarUrl internally within the mock to simulate state change
         $mockAvatarUrl = null;
-        $person->method('getAvatarUrl')->willReturnCallback(function () use (&$mockAvatarUrl) {
+        $person->method('getAvatarUrl')->willReturnCallback(function () use (&$mockAvatarUrl): ?string {
             return $mockAvatarUrl;
         });
         $person->expects($this->once())
                ->method('setAvatarUrl')
-               ->willReturnCallback(function (?string $avatarUrl) use (&$mockAvatarUrl) {
+               ->willReturnCallback(function (?string $avatarUrl) use (&$mockAvatarUrl): void {
                    $mockAvatarUrl = $avatarUrl;
                });
 

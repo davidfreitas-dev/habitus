@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Application\DTO;
 
-use App\Application\DTO\ChangePasswordRequestDTO;
+use App\Application\DTO\User\ChangePasswordRequestDTO;
 use Tests\TestCase;
 
 class ChangePasswordRequestDTOTest extends TestCase

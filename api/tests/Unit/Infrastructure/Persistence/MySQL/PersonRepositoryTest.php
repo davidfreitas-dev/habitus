@@ -58,7 +58,7 @@ final class PersonRepositoryTest extends TestCase
 
         $stmt->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function (array $params) {
+            ->with($this->callback(function (array $params): true {
                 self::assertArrayHasKey('name', $params);
                 self::assertSame('John Doe', $params['name']);
                 self::assertArrayHasKey('email', $params);
@@ -98,7 +98,7 @@ final class PersonRepositoryTest extends TestCase
 
         $stmt->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function (array $params) {
+            ->with($this->callback(function (array $params): true {
                 self::assertSame('12345678909', $params['cpfcnpj']); // Sanitized
                 return true;
             }))
@@ -322,7 +322,7 @@ final class PersonRepositoryTest extends TestCase
 
         $stmt->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function (array $params) use ($person) {
+            ->with($this->callback(function (array $params) use ($person): true {
                 self::assertArrayHasKey('id', $params);
                 self::assertSame($person->getId(), $params['id']);
                 self::assertArrayHasKey('name', $params);

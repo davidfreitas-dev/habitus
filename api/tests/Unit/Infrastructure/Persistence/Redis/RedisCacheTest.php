@@ -13,7 +13,8 @@ use Redis;
  */
 final class RedisCacheTest extends TestCase
 {
-    private Redis $redisMock;
+    private \PHPUnit\Framework\MockObject\MockObject $redisMock;
+
     private RedisCache $redisCache;
 
     protected function setUp(): void

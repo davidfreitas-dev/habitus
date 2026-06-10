@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Presentation\Api\V1\Controller;
 
-use App\Application\DTO\ChangePasswordRequestDTO;
-use App\Application\DTO\UpdateUserProfileRequestDTO;
-use App\Application\DTO\UserProfileResponseDTO;
+use App\Application\DTO\User\ChangePasswordRequestDTO;
+use App\Application\DTO\User\UpdateUserProfileRequestDTO;
+use App\Application\DTO\User\UserProfileResponseDTO;
 use App\Application\Service\ValidationService;
 use App\Application\UseCase\ChangePasswordUseCase;
 use App\Application\UseCase\DeleteUserUseCase;
@@ -73,7 +73,7 @@ class UserController
             return $this->jsonResponseFactory->fail($e->getErrors(), $e->getMessage(), 400);
         } catch (ConflictException $e) {
             return $this->jsonResponseFactory->fail(null, $e->getMessage(), 409);
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return $this->jsonResponseFactory->error('Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.', null, 500);
         }
     }
@@ -93,7 +93,7 @@ class UserController
             return $this->jsonResponseFactory->fail($e->getErrors(), $e->getMessage(), 400);
         } catch (NotFoundException $e) {
             return $this->jsonResponseFactory->fail(message: $e->getMessage(), statusCode: 404);
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             // Log the exception for debugging purposes
             // $this->logger->error($e->getMessage());
             return $this->jsonResponseFactory->error('Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.', null, 500);
@@ -120,7 +120,7 @@ class UserController
             return $this->jsonResponseFactory->success(message: 'Conta excluída com sucesso.');
         } catch (NotFoundException $notFoundException) {
             return $this->jsonResponseFactory->fail(message: $notFoundException->getMessage(), statusCode: 404);
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             // Log the exception for debugging purposes
             // $this->logger->error($e->getMessage());
             return $this->jsonResponseFactory->error('Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.', null, 500);

@@ -11,6 +11,7 @@ use Redis;
 abstract class DatabaseTestCase extends TestCase
 {
     protected static ?PDO $pdo = null;
+
     protected static ?Redis $redis = null;
 
     public static function setUpBeforeClass(): void
@@ -34,7 +35,7 @@ abstract class DatabaseTestCase extends TestCase
                 $db['database'],
                 $db['charset']
             );
-            
+
             self::$pdo = new PDO($dsn, $db['username'], $db['password'], [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_AUTOCOMMIT => 1,
@@ -43,7 +44,7 @@ abstract class DatabaseTestCase extends TestCase
             ]);
         }
 
-        if (self::$redis === null) {
+        if (!self::$redis instanceof \Redis) {
             self::$redis = self::createRedisConnection();
         }
     }
@@ -53,7 +54,7 @@ abstract class DatabaseTestCase extends TestCase
         $testDatabaseName = $_ENV['DB_TEST_NAME'] ?? '';
         $testHost = $_ENV['DB_TEST_HOST'] ?? '';
 
-        if (!str_contains($testDatabaseName, 'test') && $testHost !== 'database_test') {
+        if (!str_contains((string) $testDatabaseName, 'test') && $testHost !== 'database_test') {
             throw new \RuntimeException(
                 'ATENÇÃO: Os testes não estão configurados para usar o banco de testes! ' .
                 'Banco atual: ' . $testDatabaseName . ' no host: ' . $testHost . '. ' .
@@ -76,7 +77,7 @@ abstract class DatabaseTestCase extends TestCase
             }
 
             $redis = new Redis();
-            
+
             $connected = $redis->connect(
                 $_ENV['REDIS_HOST'] ?? 'redis',
                 (int)($_ENV['REDIS_PORT'] ?? 6379),
@@ -114,6 +115,7 @@ abstract class DatabaseTestCase extends TestCase
         if (self::$pdo->inTransaction()) {
             self::$pdo->rollBack();
         }
+
         $this->cleanCache();
     }
 
@@ -135,22 +137,22 @@ abstract class DatabaseTestCase extends TestCase
     {
         $maxRetries = 3;
         $retry = 0;
-        
+
         while ($retry < $maxRetries) {
             try {
                 $this->executeCleanDatabase();
                 return; // Sucesso, sai do método
             } catch (\PDOException $e) {
                 $retry++;
-                
+
                 // Se for lock/timeout, tenta novamente
                 if ($retry < $maxRetries && $this->isLockError($e)) {
                     usleep(100000); // Aguarda 100ms antes de tentar novamente
                     continue;
                 }
-                
+
                 // Se não for erro de lock ou esgotou tentativas, lança exceção
-                error_log("Erro ao limpar banco (tentativa {$retry}/{$maxRetries}): " . $e->getMessage());
+                error_log(sprintf('Erro ao limpar banco (tentativa %d/%d): ', $retry, $maxRetries) . $e->getMessage());
                 throw $e;
             }
         }
@@ -163,24 +165,17 @@ abstract class DatabaseTestCase extends TestCase
             1213, // Deadlock
             1317, // Query interrupted
         ];
-        
-        foreach ($lockErrorCodes as $code) {
-            if (str_contains($e->getMessage(), (string)$code)) {
-                return true;
-            }
-        }
-        
-        return false;
+        return array_any($lockErrorCodes, fn($code): bool => str_contains($e->getMessage(), (string)$code));
     }
 
     private function executeCleanDatabase(): void
     {
         // Força rollback de qualquer transação pendente
         $this->ensureNoActiveTransaction();
-        
+
         // Desabilita foreign keys
         self::$pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
-        
+
         try {
             // Trunca tabelas na ordem correta (dependentes primeiro)
             $tables = [
@@ -195,9 +190,9 @@ abstract class DatabaseTestCase extends TestCase
                 'persons',
                 'roles',
             ];
-            
+
             foreach ($tables as $table) {
-                self::$pdo->exec("TRUNCATE TABLE {$table}");
+                self::$pdo->exec('TRUNCATE TABLE ' . $table);
             }
 
             // Reset auto-increment
@@ -207,7 +202,7 @@ abstract class DatabaseTestCase extends TestCase
             // Add auto-increment reset for new tables
             self::$pdo->exec('ALTER TABLE habits AUTO_INCREMENT = 1');
             self::$pdo->exec('ALTER TABLE days AUTO_INCREMENT = 1');
-            
+
             // Re-seed roles em uma única query
             self::$pdo->exec("
                 INSERT INTO roles (name, description) VALUES 
@@ -215,7 +210,7 @@ abstract class DatabaseTestCase extends TestCase
                 ('user', 'Funcionário que presta atendimento aos clientes'),
                 ('admin', 'Administrador com acesso total ao sistema')
             ");
-            
+
         } finally {
             // SEMPRE reabilita foreign keys, mesmo em caso de erro
             self::$pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
@@ -241,9 +236,9 @@ abstract class DatabaseTestCase extends TestCase
                 if (self::$pdo->inTransaction()) {
                     self::$pdo->rollBack();
                 }
-                
+
                 self::$pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
-                
+
                 $tables = [
                     'password_resets',
                     'user_verifications',
@@ -256,11 +251,11 @@ abstract class DatabaseTestCase extends TestCase
                     'persons',
                     'roles',
                 ];
-                
+
                 foreach ($tables as $table) {
-                    self::$pdo->exec("TRUNCATE TABLE {$table}");
+                    self::$pdo->exec('TRUNCATE TABLE ' . $table);
                 }
-                
+
                 self::$pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
             } catch (\Exception $e) {
                 // Garante que foreign keys sejam restauradas
@@ -269,7 +264,7 @@ abstract class DatabaseTestCase extends TestCase
                 } catch (\Exception) {
                     // Ignora
                 }
-                
+
                 error_log("Erro no tearDownAfterClass: " . $e->getMessage());
             }
 

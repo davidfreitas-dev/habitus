@@ -15,14 +15,17 @@ use Psr\Log\LoggerInterface;
 class CachingRoleRepositoryTest extends TestCase
 {
     private RoleRepositoryInterface&MockObject $decoratedRepository;
+
     private RedisCache&MockObject $redisCache;
+
     private LoggerInterface&MockObject $logger;
+
     private CachingRoleRepository $cachingRoleRepository;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->decoratedRepository = $this->createMock(RoleRepositoryInterface::class);
         $this->redisCache = $this->createMock(RedisCache::class);
         $this->logger = $this->createMock(LoggerInterface::class);

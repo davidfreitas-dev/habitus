@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Application\UseCase;
 
-use App\Application\DTO\VerifyEmailResponseDTO;
+use App\Application\DTO\Auth\VerifyEmailResponseDTO;
 use App\Application\UseCase\VerifyEmailUseCase;
 use App\Domain\Entity\User;
 use App\Domain\Entity\UserVerification;

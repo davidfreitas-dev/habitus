@@ -7,8 +7,8 @@ namespace Tests\Unit\Application\UseCase;
 use PDO;
 use Exception;
 use Tests\TestCase;
-use App\Application\DTO\RegisterUserRequestDTO;
-use App\Application\DTO\UserResponseDTO;
+use App\Application\DTO\Auth\RegisterUserRequestDTO;
+use App\Application\DTO\User\UserResponseDTO;
 use App\Application\UseCase\RegisterUserUseCase;
 use App\Domain\Entity\Person;
 use App\Domain\Entity\Role;
@@ -24,14 +24,21 @@ use PHPUnit\Framework\MockObject\MockObject;
 class RegisterUserUseCaseTest extends TestCase
 {
     private PDO&MockObject $pdo;
+
     private PersonRepositoryInterface&MockObject $personRepository;
+
     private UserRepositoryInterface&MockObject $userRepository;
+
     private UserVerificationRepositoryInterface&MockObject $userVerificationRepository;
+
     private PasswordHasher&MockObject $passwordHasher;
+
     private MailerInterface&MockObject $mailer;
+
     private Role&MockObject $defaultUserRole;
+
     private RegisterUserUseCase $registerUserUseCase;
-    
+
     protected function setUp(): void
     {
         parent::setUp();

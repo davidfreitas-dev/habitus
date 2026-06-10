@@ -5,6 +5,7 @@ declare(strict_types=1);
 // PSR Interfaces
 use App\Application\{
     Service\ErrorLoggerService,
+    Service\FileUploaderService,
     Service\ValidationService,
     UseCase\ChangePasswordUseCase,
     UseCase\CreateHabitUseCase,
@@ -23,6 +24,7 @@ use App\Application\{
     UseCase\ResolveErrorLogUseCase,
     UseCase\ToggleHabitUseCase,
     UseCase\UpdateHabitUseCase,
+    UseCase\UpdateProfileImageUseCase,
     UseCase\UpdateUserAdminUseCase,
     UseCase\UpdateUserProfileUseCase,
     UseCase\ValidateResetCodeUseCase,
@@ -69,6 +71,7 @@ use App\Infrastructure\{
 // Domain Layer
 use App\Presentation\Api\V1\Controller\ErrorLogController;
 use App\Presentation\Api\V1\Controller\HabitController;
+use App\Presentation\Api\V1\Controller\UserController;
 // Application Layer
 // Infrastructure Layer
 use Monolog\{Handler\StreamHandler, Level, Logger};
@@ -277,6 +280,8 @@ return [
         );
     },
 
+    FileUploaderService::class => fn () => new FileUploaderService(),
+
     // Use Cases
     ListErrorLogsUseCase::class => fn (ContainerInterface $c) => new ListErrorLogsUseCase(
         $c->get(ErrorLogRepositoryInterface::class),
@@ -292,6 +297,13 @@ return [
 
     UpdateUserProfileUseCase::class => fn (ContainerInterface $c) => new UpdateUserProfileUseCase(
         $c->get(PDO::class),
+        $c->get(UserRepositoryInterface::class),
+        $c->get(PersonRepositoryInterface::class),
+        $c->get(FileUploaderService::class),
+        $c->get('settings')['paths']['upload_path'],
+    ),
+
+    UpdateProfileImageUseCase::class => fn (ContainerInterface $c) => new UpdateProfileImageUseCase(
         $c->get(UserRepositoryInterface::class),
         $c->get(PersonRepositoryInterface::class),
         $c->get('settings')['paths']['upload_path'],
@@ -424,6 +436,16 @@ return [
         $c->get(ResolveErrorLogUseCase::class),
         $c->get(LoggerInterface::class),
     ),
+    AdminController::class => fn (ContainerInterface $c) => new AdminController(
+        $c->get(JsonResponseFactory::class),
+        $c->get(LoggerInterface::class),
+        $c->get(ValidationService::class),
+        $c->get(CreateUserAdminUseCase::class),
+        $c->get(ListUsersUseCase::class),
+        $c->get(GetUserUseCase::class),
+        $c->get(UpdateUserAdminUseCase::class),
+        $c->get(DeleteUserUseCase::class),
+    ),
     HabitController::class => fn (ContainerInterface $c) => new HabitController(
         $c->get(CreateHabitUseCase::class),
         $c->get(GetHabitsByDayUseCase::class),
@@ -437,6 +459,14 @@ return [
         $c->get(ValidationService::class),
         $c->get(JsonResponseFactory::class),
         $c->get(LoggerInterface::class),
+    ),
+    UserController::class => fn (ContainerInterface $c) => new UserController(
+        $c->get(UpdateUserProfileUseCase::class),
+        $c->get(ChangePasswordUseCase::class),
+        $c->get(DeleteUserUseCase::class),
+        $c->get(UserRepositoryInterface::class),
+        $c->get(JsonResponseFactory::class),
+        $c->get(ValidationService::class),
     ),
 
 

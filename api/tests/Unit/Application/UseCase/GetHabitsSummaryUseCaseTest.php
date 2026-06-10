@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Application\UseCase;
 
-use App\Application\DTO\HabitsSummaryResponseDTO;
+use App\Application\DTO\Habit\HabitsSummaryResponseDTO;
 use App\Application\UseCase\GetHabitsSummaryUseCase;
 use App\Domain\Repository\HabitRepositoryInterface;
 use DateTimeImmutable;
@@ -14,13 +14,14 @@ use Tests\TestCase;
 class GetHabitsSummaryUseCaseTest extends TestCase
 {
     private HabitRepositoryInterface&MockObject $habitRepository;
+
     private GetHabitsSummaryUseCase $getHabitsSummaryUseCase;
 
     public function testShouldReturnHabitSummarySuccessfully(): void
     {
         $userId = 1;
         $summaryData = [
-            'date' => (new DateTimeImmutable())->format('Y-m-d'), // Use current date for testability
+            'date' => new DateTimeImmutable()->format('Y-m-d'), // Use current date for testability
             'completed' => 5,
             'total' => 10,
         ];

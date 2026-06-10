@@ -24,30 +24,39 @@ use App\Infrastructure\Persistence\MySQL\PersonRepository;
 class JwtServiceTest extends DatabaseTestCase
 {
     private JwtService $jwtService;
+
     private UserRepository $userRepository;
+
     private PersonRepository $personRepository;
+
     private RoleRepository $roleRepository;
+
     private RedisCache $cache;
+
     private \Faker\Generator $faker;
-    
+
     private string $privateKeyPath;
+
     private string $publicKeyPath;
+
     private string $algorithm = 'RS256';
+
     private int $accessTokenExpire = 900;
+
     private int $refreshTokenExpire = 604800;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Inicializar repositórios
         $this->personRepository = new PersonRepository(self::$pdo);
         $this->roleRepository = new RoleRepository(self::$pdo);
         $this->userRepository = new UserRepository(self::$pdo, $this->personRepository, $this->roleRepository);
-        
+
         // Inicializar cache
         $this->cache = new RedisCache(self::$redis);
-        
+
         // Inicializar Faker
         $this->faker = Factory::create('pt_BR');
 
@@ -66,12 +75,14 @@ class JwtServiceTest extends DatabaseTestCase
         );
     }
 
+    #[\Override]
     protected function tearDown(): void
     {
         // Remover chaves temporárias
         if (file_exists($this->privateKeyPath)) {
             unlink($this->privateKeyPath);
         }
+
         if (file_exists($this->publicKeyPath)) {
             unlink($this->publicKeyPath);
         }
@@ -114,17 +125,17 @@ class JwtServiceTest extends DatabaseTestCase
 
         $user = new User(
             person: $person,
-            password: 'password123',
-            role: $role
+            role: $role,
+            password: 'password123'
         );
-        
+
         return $this->userRepository->create($user);
     }
 
     public function testGenerateAndValidateAccessTokenWithRealDatabase(): void
     {
         $_ENV['APP_URL'] = 'http://localhost:8000';
-        
+
         $user = $this->createTestUser();
 
         // Gerar token
@@ -148,7 +159,7 @@ class JwtServiceTest extends DatabaseTestCase
     public function testGenerateRefreshTokenAndStoreInRedis(): void
     {
         $_ENV['APP_URL'] = 'http://localhost:8000';
-        
+
         $user = $this->createTestUser();
 
         // Gerar refresh token
@@ -175,7 +186,7 @@ class JwtServiceTest extends DatabaseTestCase
     public function testBlockToken(): void
     {
         $_ENV['APP_URL'] = 'http://localhost:8000';
-        
+
         $user = $this->createTestUser();
 
         // Gerar token
@@ -196,7 +207,7 @@ class JwtServiceTest extends DatabaseTestCase
 
         // Verificar que agora está bloqueado
         $this->assertTrue($this->jwtService->isTokenBlocked($decoded->jti));
-        
+
         // Verificar no Redis diretamente
         $exists = self::$redis->exists('blocked_token:' . $decoded->jti);
         $this->assertEquals(1, $exists);
@@ -205,7 +216,7 @@ class JwtServiceTest extends DatabaseTestCase
     public function testValidateBlockedTokenThrowsException(): void
     {
         $_ENV['APP_URL'] = 'http://localhost:8000';
-        
+
         $user = $this->createTestUser();
 
         // Gerar token
@@ -236,7 +247,7 @@ class JwtServiceTest extends DatabaseTestCase
     public function testRevokeRefreshTokenFromRedis(): void
     {
         $_ENV['APP_URL'] = 'http://localhost:8000';
-        
+
         $user = $this->createTestUser();
 
         // Gerar refresh token
@@ -263,14 +274,14 @@ class JwtServiceTest extends DatabaseTestCase
     public function testInvalidateAllUserRefreshTokensFromRedis(): void
     {
         $_ENV['APP_URL'] = 'http://localhost:8000';
-        
+
         $user = $this->createTestUser();
 
         // Gerar múltiplos refresh tokens
         $jtis = [];
         for ($i = 0; $i < 3; $i++) {
             $token = $this->jwtService->generateRefreshToken($user->getId());
-            
+
             $publicKey = file_get_contents($this->publicKeyPath);
             $decoded = JWT::decode($token, new Key($publicKey, $this->algorithm));
             $jtis[] = $decoded->jti;
@@ -280,7 +291,7 @@ class JwtServiceTest extends DatabaseTestCase
         foreach ($jtis as $jti) {
             $this->assertTrue(
                 $this->jwtService->isRefreshTokenValid($jti),
-                "Token {$jti} should be valid before invalidation"
+                sprintf('Token %s should be valid before invalidation', $jti)
             );
         }
 
@@ -291,7 +302,7 @@ class JwtServiceTest extends DatabaseTestCase
         foreach ($jtis as $jti) {
             $this->assertFalse(
                 $this->jwtService->isRefreshTokenValid($jti),
-                "Token {$jti} should be invalid after invalidation"
+                sprintf('Token %s should be invalid after invalidation', $jti)
             );
         }
 
@@ -303,7 +314,7 @@ class JwtServiceTest extends DatabaseTestCase
     public function testRefreshTokenWorkflowCompleto(): void
     {
         $_ENV['APP_URL'] = 'http://localhost:8000';
-        
+
         $user = $this->createTestUser();
 
         // 1. Gerar access e refresh token
@@ -337,7 +348,7 @@ class JwtServiceTest extends DatabaseTestCase
     public function testExpiredTokenValidation(): void
     {
         $_ENV['APP_URL'] = 'http://localhost:8000';
-        
+
         $user = $this->createTestUser();
 
         // Criar JwtService com tempo de expiração muito curto
@@ -369,7 +380,7 @@ class JwtServiceTest extends DatabaseTestCase
     public function testMultipleUsersRefreshTokensAreIsolated(): void
     {
         $_ENV['APP_URL'] = 'http://localhost:8000';
-        
+
         $user1 = $this->createTestUser();
         $user2 = $this->createTestUser();
 
@@ -392,14 +403,14 @@ class JwtServiceTest extends DatabaseTestCase
     public function testGetAccessTokenExpire(): void
     {
         $expire = $this->jwtService->getAccessTokenExpire();
-        
+
         $this->assertEquals($this->accessTokenExpire, $expire);
     }
 
     public function testGetRefreshTokenExpire(): void
     {
         $expire = $this->jwtService->getRefreshTokenExpire();
-        
+
         $this->assertEquals($this->refreshTokenExpire, $expire);
     }
 

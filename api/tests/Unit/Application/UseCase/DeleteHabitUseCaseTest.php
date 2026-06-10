@@ -15,6 +15,7 @@ use Tests\TestCase;
 class DeleteHabitUseCaseTest extends TestCase
 {
     private HabitRepositoryInterface&MockObject $habitRepository;
+
     private DeleteHabitUseCase $deleteHabitUseCase;
 
     public function testShouldDeleteHabitSuccessfully(): void

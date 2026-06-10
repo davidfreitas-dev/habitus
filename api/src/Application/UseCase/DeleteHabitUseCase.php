@@ -21,7 +21,7 @@ class DeleteHabitUseCase
     {
         $habit = $this->habitRepository->findById($habitId, $userId);
 
-        if (!$habit) {
+        if (!$habit instanceof \App\Domain\Entity\Habit) {
             throw new HabitNotFoundException('Hábito não encontrado.');
         }
 

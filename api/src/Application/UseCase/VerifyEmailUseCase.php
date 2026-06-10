@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\UseCase;
 
-use App\Application\DTO\VerifyEmailResponseDTO;
+use App\Application\DTO\Auth\VerifyEmailResponseDTO;
 use App\Domain\Enum\JsonResponseKey;
 use App\Domain\Exception\NotFoundException;
 use App\Domain\Exception\ValidationException;

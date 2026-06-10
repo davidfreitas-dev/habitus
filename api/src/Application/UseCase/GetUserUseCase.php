@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\UseCase;
 
-use App\Application\DTO\UserResponseDTO;
+use App\Application\DTO\User\UserResponseDTO;
 use App\Domain\Exception\NotFoundException;
 use App\Domain\Repository\UserRepositoryInterface;
 
@@ -31,7 +31,7 @@ class GetUserUseCase
             isActive: $user->isActive(),
             isVerified: $user->isVerified(),
             phone: $user->getPerson()->getPhone(),
-            cpfcnpj: $user->getPerson()->getCpfCnpj() ? $user->getPerson()->getCpfCnpj()->value() : null,
+            cpfcnpj: $user->getPerson()->getCpfCnpj() instanceof \App\Domain\ValueObject\CpfCnpj ? $user->getPerson()->getCpfCnpj()->value() : null,
             avatarUrl: $user->getPerson()->getAvatarUrl(),
             createdAt: $user->getCreatedAt()->format('Y-m-d H:i:s'),
             updatedAt: $user->getUpdatedAt()->format('Y-m-d H:i:s'),

@@ -7,8 +7,8 @@ namespace Tests\Unit\Application\UseCase;
 use PDO;
 use Faker\Factory;
 use Tests\TestCase;
-use App\Application\DTO\UserResponseDTO;
-use App\Application\DTO\UpdateUserProfileRequestDTO;
+use App\Application\DTO\User\UserResponseDTO;
+use App\Application\DTO\User\UpdateUserProfileRequestDTO;
 use App\Application\UseCase\UpdateUserProfileUseCase;
 use App\Domain\Entity\Person;
 use App\Domain\Entity\User;
@@ -18,13 +18,20 @@ use App\Domain\Repository\PersonRepositoryInterface;
 use App\Domain\Repository\UserRepositoryInterface;
 use App\Domain\ValueObject\CpfCnpj;
 use PHPUnit\Framework\MockObject\MockObject;
+use App\Application\Service\FileUploaderService;
 
 class UpdateUserProfileUseCaseTest extends TestCase
 {
     private PDO&MockObject $pdo;
+
     private UserRepositoryInterface&MockObject $userRepository;
+
     private PersonRepositoryInterface&MockObject $personRepository;
+
+    private FileUploaderService&MockObject $fileUploaderService;
+
     private UpdateUserProfileUseCase $updateUserProfileUseCase;
+
     private \Faker\Generator $faker;
 
     protected function setUp(): void
@@ -33,12 +40,14 @@ class UpdateUserProfileUseCaseTest extends TestCase
         $this->pdo = $this->createMock(PDO::class);
         $this->userRepository = $this->createMock(UserRepositoryInterface::class);
         $this->personRepository = $this->createMock(PersonRepositoryInterface::class);
+        $this->fileUploaderService = $this->createMock(FileUploaderService::class);
         $this->faker = Factory::create('pt_BR');
 
         $this->updateUserProfileUseCase = new UpdateUserProfileUseCase(
             $this->pdo,
             $this->userRepository,
             $this->personRepository,
+            $this->fileUploaderService,
             '/tmp/uploads'
         );
     }
@@ -124,7 +133,7 @@ class UpdateUserProfileUseCaseTest extends TestCase
         /** @var Person&MockObject $userPerson */
         $userPerson = $this->createMock(Person::class);
         $userPerson->method('getId')->willReturn(1);
-        
+
         /** @var User&MockObject $userMock */
         $userMock = $this->createMock(User::class);
         $userMock->method('getPerson')->willReturn($userPerson);
@@ -145,7 +154,7 @@ class UpdateUserProfileUseCaseTest extends TestCase
 
         /** @var Person&MockObject $personMock */
         $personMock = $this->createMock(Person::class);
-        
+
         /** @var User&MockObject $userMock */
         $userMock = $this->createMock(User::class);
         $userMock->method('getPerson')->willReturn($personMock);

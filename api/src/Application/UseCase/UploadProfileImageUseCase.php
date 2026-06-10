@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\UseCase;
 
-use App\Application\DTO\UserProfileResponseDTO;
+use App\Application\DTO\User\UserProfileResponseDTO;
 use App\Domain\Exception\NotFoundException;
 use App\Domain\Exception\ValidationException;
 use App\Domain\Repository\PersonRepositoryInterface;
@@ -15,7 +15,7 @@ use RuntimeException;
 
 class UploadProfileImageUseCase
 {
-    private const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif'];
+    private const array ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif'];
 
     private const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 

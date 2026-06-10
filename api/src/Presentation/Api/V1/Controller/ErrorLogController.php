@@ -48,8 +48,8 @@ class ErrorLogController
                 'Logs de erro recuperados com sucesso',
                 200,
             );
-        } catch (Throwable $e) {
-            $this->logger->error('Ocorreu um erro inesperado ao listar logs de erro', ['exception' => $e]);
+        } catch (Throwable $throwable) {
+            $this->logger->error('Ocorreu um erro inesperado ao listar logs de erro', ['exception' => $throwable]);
             return $this->jsonResponseFactory->error('Ocorreu um erro inesperado.', null, 500);
         }
     }
@@ -69,7 +69,7 @@ class ErrorLogController
             $errorLogId = (int)$args['id'];
             $errorLog = $this->getErrorLogDetailsUseCase->execute($errorLogId);
 
-            if (!$errorLog) {
+            if (!$errorLog instanceof \App\Application\DTO\ErrorLog\ErrorLogResponseDTO) {
                 return $this->jsonResponseFactory->error(
                     'Log de erro não encontrado',
                     null,
@@ -82,8 +82,8 @@ class ErrorLogController
                 'Detalhes do log de erro recuperados com sucesso',
                 200,
             );
-        } catch (Throwable $e) {
-            $this->logger->error('Ocorreu um erro inesperado ao obter detalhes do log de erro', ['exception' => $e]);
+        } catch (Throwable $throwable) {
+            $this->logger->error('Ocorreu um erro inesperado ao obter detalhes do log de erro', ['exception' => $throwable]);
             return $this->jsonResponseFactory->error('Ocorreu um erro inesperado.', null, 500);
         }
     }
@@ -119,8 +119,8 @@ class ErrorLogController
                 'Log de erro resolvido com sucesso',
                 200,
             );
-        } catch (Throwable $e) {
-            $this->logger->error('Ocorreu um erro inesperado ao resolver log de erro', ['exception' => $e]);
+        } catch (Throwable $throwable) {
+            $this->logger->error('Ocorreu um erro inesperado ao resolver log de erro', ['exception' => $throwable]);
             return $this->jsonResponseFactory->error('Ocorreu um erro inesperado.', null, 500);
         }
     }

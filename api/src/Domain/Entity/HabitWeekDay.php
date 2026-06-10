@@ -10,24 +10,18 @@ use JsonSerializable;
 class HabitWeekDay implements JsonSerializable
 {
     private ?int $id = null;
-    private int $habitId;
     private int $weekDay;
-    private DateTimeImmutable $createdAt;
-    private DateTimeImmutable $updatedAt;
 
     public function __construct(
-        int $habitId,
+        private readonly int $habitId,
         int $weekDay,
-        ?DateTimeImmutable $createdAt = null,
-        ?DateTimeImmutable $updatedAt = null,
+        private readonly ?DateTimeImmutable $createdAt = new DateTimeImmutable(),
+        private ?DateTimeImmutable $updatedAt = new DateTimeImmutable(),
     ) {
         if ($weekDay < 0 || $weekDay > 6) {
             throw new \InvalidArgumentException('O dia da semana deve ser entre 0 (Domingo) e 6 (Sábado).');
         }
-        $this->habitId = $habitId;
         $this->weekDay = $weekDay;
-        $this->createdAt = $createdAt ?? new DateTimeImmutable();
-        $this->updatedAt = $updatedAt ?? new DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -40,6 +34,7 @@ class HabitWeekDay implements JsonSerializable
         if ($this->id !== null) {
             return;
         }
+
         $this->id = $id;
     }
 
@@ -58,6 +53,7 @@ class HabitWeekDay implements JsonSerializable
         if ($weekDay < 0 || $weekDay > 6) {
             throw new \InvalidArgumentException('O dia da semana deve ser entre 0 (Domingo) e 6 (Sábado).');
         }
+
         if ($this->weekDay !== $weekDay) {
             $this->weekDay = $weekDay;
             $this->touch();

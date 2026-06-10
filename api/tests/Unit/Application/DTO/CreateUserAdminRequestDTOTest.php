@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Application\DTO;
 
-use App\Application\DTO\CreateUserAdminRequestDTO;
+use App\Application\DTO\User\CreateUserAdminRequestDTO;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 

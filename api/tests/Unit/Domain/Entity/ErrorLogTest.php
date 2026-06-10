@@ -29,9 +29,11 @@ class ErrorLogTest extends TestCase
         if ($id !== null) {
             $log->setId($id);
         }
-        if ($resolvedAt !== null) {
+
+        if ($resolvedAt instanceof \DateTimeImmutable) {
             $log->setResolvedAt($resolvedAt);
         }
+
         if ($resolvedBy !== null) {
             $log->setResolvedBy($resolvedBy);
         }

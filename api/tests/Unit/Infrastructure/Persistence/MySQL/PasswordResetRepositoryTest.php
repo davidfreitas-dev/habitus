@@ -37,15 +37,15 @@ final class PasswordResetRepositoryTest extends TestCase
 
         $pdo->expects($this->once())
             ->method('prepare')
-            ->with($this->callback(function ($sql) {
-                $normalizedSql = strtolower(preg_replace('/\s+/', ' ', trim($sql)));
+            ->with($this->callback(function ($sql): bool {
+                $normalizedSql = strtolower((string) preg_replace('/\s+/', ' ', trim($sql)));
                 return str_contains($normalizedSql, 'insert into password_resets');
             }))
             ->willReturn($stmt);
 
         $stmt->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function (array $params) use ($passwordReset) {
+            ->with($this->callback(function (array $params) use ($passwordReset): true {
                 self::assertArrayHasKey('user_id', $params);
                 self::assertSame($passwordReset->getUserId(), $params['user_id']);
                 self::assertArrayHasKey('code', $params);
@@ -84,9 +84,9 @@ final class PasswordResetRepositoryTest extends TestCase
 
         $pdo->expects($this->once())
             ->method('prepare')
-            ->with($this->callback(function ($sql) {
+            ->with($this->callback(function ($sql): bool {
                 // Normaliza SQL: lowercase e remove espaços extras
-                $normalizedSql = strtolower(preg_replace('/\s+/', ' ', trim($sql)));
+                $normalizedSql = strtolower((string) preg_replace('/\s+/', ' ', trim($sql)));
                 $expectedSql = 'select * from password_resets where code = :code and used_at is null and expires_at > now()';
                 return str_contains($normalizedSql, $expectedSql);
             }))
@@ -145,8 +145,8 @@ final class PasswordResetRepositoryTest extends TestCase
 
         $pdo->expects($this->once())
             ->method('prepare')
-            ->with($this->callback(function ($sql) {
-                $normalizedSql = strtolower(preg_replace('/\s+/', ' ', trim($sql)));
+            ->with($this->callback(function ($sql): bool {
+                $normalizedSql = strtolower((string) preg_replace('/\s+/', ' ', trim($sql)));
                 return str_contains($normalizedSql, 'update password_resets set used_at = now()');
             }))
             ->willReturn($stmt);
@@ -197,8 +197,8 @@ final class PasswordResetRepositoryTest extends TestCase
 
         $pdo->expects($this->once())
             ->method('query')
-            ->with($this->callback(function ($sql) {
-                $normalizedSql = strtolower(preg_replace('/\s+/', ' ', trim($sql)));
+            ->with($this->callback(function ($sql): bool {
+                $normalizedSql = strtolower((string) preg_replace('/\s+/', ' ', trim($sql)));
                 return str_contains($normalizedSql, 'delete from password_resets');
             }))
             ->willReturn($stmt);

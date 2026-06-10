@@ -50,6 +50,7 @@ return [
             'enabled' => $_ENV['RATE_LIMIT_ENABLED'] === 'true',
             'max_requests' => (int)$_ENV['RATE_LIMIT_MAX_REQUESTS'],
             'window' => (int)$_ENV['RATE_LIMIT_WINDOW'],
+            'trusted_proxies' => !empty($_ENV['TRUSTED_PROXIES']) ? \explode(',', $_ENV['TRUSTED_PROXIES']) : [],
         ],
 
         'password_reset' => [

@@ -504,7 +504,7 @@ final class CachingUserRepositoryTest extends TestCase
         // Cache miss log + invalidate log + method-specific log
         $logger->expects($this->exactly(3))
             ->method('info')
-            ->willReturnCallback(function ($message) use ($user) {
+            ->willReturnCallback(function ($message) use ($user): void {
                 // Validate that the messages are one of the expected ones
                 $validMessages = [
                     'Cache de usuário não encontrado para o ID: ' . $user->getId(),

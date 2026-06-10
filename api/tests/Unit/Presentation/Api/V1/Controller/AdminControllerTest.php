@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Presentation\Api\V1\Controller;
 
-use App\Application\DTO\CreateUserAdminRequestDTO;
-use App\Application\DTO\UpdateUserAdminRequestDTO;
-use App\Application\DTO\UserListResponseDTO;
-use App\Application\DTO\UserResponseDTO;
+use App\Application\DTO\User\CreateUserAdminRequestDTO;
+use App\Application\DTO\User\UpdateUserAdminRequestDTO;
+use App\Application\DTO\User\UserListResponseDTO;
+use App\Application\DTO\User\UserResponseDTO;
 use App\Application\UseCase\CreateUserAdminUseCase;
 use App\Application\UseCase\DeleteUserUseCase;
 use App\Application\UseCase\GetUserUseCase;
@@ -26,23 +26,35 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Log\LoggerInterface;
 use Slim\Psr7\Factory\ResponseFactory;
 use Slim\Psr7\Response as SlimResponse;
+use App\Application\Service\ValidationService;
 
 class AdminControllerTest extends TestCase
 {
     private JsonResponseFactory&MockObject $jsonResponseFactory;
+
     private LoggerInterface&MockObject $logger;
+
+    private ValidationService&MockObject $validationService;
+
     private CreateUserAdminUseCase&MockObject $createUserAdminUseCase;
+
     private ListUsersUseCase&MockObject $listUsersUseCase;
+
     private GetUserUseCase&MockObject $getUserUseCase;
+
     private UpdateUserAdminUseCase&MockObject $updateUserAdminUseCase;
+
     private DeleteUserUseCase&MockObject $deleteUserUseCase;
+
     private AdminController $adminController;
+
     private Response $response;
 
     protected function setUp(): void
     {
         $this->jsonResponseFactory = $this->createMock(JsonResponseFactory::class);
         $this->logger = $this->createMock(LoggerInterface::class);
+        $this->validationService = $this->createMock(ValidationService::class);
         $this->createUserAdminUseCase = $this->createMock(CreateUserAdminUseCase::class);
         $this->listUsersUseCase = $this->createMock(ListUsersUseCase::class);
         $this->getUserUseCase = $this->createMock(GetUserUseCase::class);
@@ -52,6 +64,7 @@ class AdminControllerTest extends TestCase
         $this->adminController = new AdminController(
             $this->jsonResponseFactory,
             $this->logger,
+            $this->validationService,
             $this->createUserAdminUseCase,
             $this->listUsersUseCase,
             $this->getUserUseCase,
@@ -59,7 +72,7 @@ class AdminControllerTest extends TestCase
             $this->deleteUserUseCase
         );
 
-        $this->response = (new ResponseFactory())->createResponse();
+        $this->response = new ResponseFactory()->createResponse();
     }
 
     public function testCreateUserSuccess(): void
@@ -81,23 +94,21 @@ class AdminControllerTest extends TestCase
             id: 1,
             name: 'New User',
             email: 'newuser@example.com',
-            phone: null,
-            cpfcnpj: null,
-            roleId: 2,
             roleName: 'member',
+            roleId: 2,
             isActive: true,
             isVerified: false,
+            phone: null,
+            cpfcnpj: null,
             createdAt: '2024-01-01 10:00:00',
             updatedAt: '2024-01-01 10:00:00',
         );
 
         $this->createUserAdminUseCase->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($arg) use ($dto) {
-                return $arg instanceof CreateUserAdminRequestDTO
-                    && $arg->name === $dto->name
-                    && $arg->email === $dto->email;
-            }))
+            ->with($this->callback(fn($arg): bool => $arg instanceof CreateUserAdminRequestDTO
+                && $arg->name === $dto->name
+                && $arg->email === $dto->email))
             ->willReturn($userResponseDto);
 
         $responseData = [
@@ -115,7 +126,7 @@ class AdminControllerTest extends TestCase
             'updated_at' => $userResponseDto->updatedAt,
         ];
 
-        $mockedResponse = (new ResponseFactory())->createResponse(201);
+        $mockedResponse = new ResponseFactory()->createResponse(201);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'success',
             'data' => $responseData,
@@ -151,16 +162,15 @@ class AdminControllerTest extends TestCase
 
         $this->createUserAdminUseCase->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($arg) use ($dto) {
-                return $arg instanceof CreateUserAdminRequestDTO
-                    && $arg->name === $dto->name
-                    && $arg->email === $dto->email;
-            }))
+            ->with($this->callback(fn($arg): bool => $arg instanceof CreateUserAdminRequestDTO
+                && $arg->name === $dto->name
+                && $arg->email === $dto->email))
             ->willThrowException(new ValidationException('Falha na validação', $validationErrors));
 
-        $this->logger->expects($this->once())->method('warning');
+        // No logger warning for validation exceptions
+        $this->logger->expects($this->never())->method('warning');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(400);
+        $mockedResponse = new ResponseFactory()->createResponse(400);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => $validationErrors,
@@ -168,7 +178,7 @@ class AdminControllerTest extends TestCase
         ]));
         $this->jsonResponseFactory->expects($this->once())
             ->method('fail')
-            ->with($validationErrors, 'Falha na validação', 422)
+            ->with($validationErrors, 'Falha na validação', 400)
             ->willReturn($mockedResponse);
 
         $response = $this->adminController->createUser($request);
@@ -200,9 +210,10 @@ class AdminControllerTest extends TestCase
             ->method('execute')
             ->willThrowException(new ConflictException('Email already in use.'));
 
+        // Logger warning is called in the new version for ConflictException
         $this->logger->expects($this->once())->method('warning');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(409);
+        $mockedResponse = new ResponseFactory()->createResponse(409);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => null,
@@ -244,7 +255,7 @@ class AdminControllerTest extends TestCase
 
         $this->logger->expects($this->once())->method('error');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(500);
+        $mockedResponse = new ResponseFactory()->createResponse(500);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'error',
             'data' => null,
@@ -280,12 +291,12 @@ class AdminControllerTest extends TestCase
             id: 1,
             name: 'User One',
             email: 'one@example.com',
-            phone: null,
-            cpfcnpj: null,
-            roleId: 2,
             roleName: 'user',
+            roleId: 2,
             isActive: true,
             isVerified: true,
+            phone: null,
+            cpfcnpj: null,
             createdAt: '2024-01-01 10:00:00',
             updatedAt: '2024-01-01 10:00:00',
         );
@@ -293,12 +304,12 @@ class AdminControllerTest extends TestCase
             id: 2,
             name: 'User Two',
             email: 'two@example.com',
-            phone: null,
-            cpfcnpj: null,
-            roleId: 1,
             roleName: 'admin',
+            roleId: 1,
             isActive: true,
             isVerified: true,
+            phone: null,
+            cpfcnpj: null,
             createdAt: '2024-01-02 11:00:00',
             updatedAt: '2024-01-02 11:00:00',
         );
@@ -336,8 +347,8 @@ class AdminControllerTest extends TestCase
             'limit' => $userListResponseDTO->limit,
             'offset' => $userListResponseDTO->offset,
         ];
-        
-        $mockedResponse = (new ResponseFactory())->createResponse(200);
+
+        $mockedResponse = new ResponseFactory()->createResponse(200);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'success',
             'data' => $expectedResponseData,
@@ -371,7 +382,7 @@ class AdminControllerTest extends TestCase
             ->method('execute')
             ->with($limit, $offset)
             ->willReturn($userListResponseDTO);
-        
+
         $expectedResponseData = [
             'users' => [],
             'total' => $userListResponseDTO->total,
@@ -379,7 +390,7 @@ class AdminControllerTest extends TestCase
             'offset' => $userListResponseDTO->offset,
         ];
 
-        $mockedResponse = (new ResponseFactory())->createResponse(200);
+        $mockedResponse = new ResponseFactory()->createResponse(200);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'success',
             'data' => $expectedResponseData,
@@ -411,12 +422,12 @@ class AdminControllerTest extends TestCase
             id: $userId,
             name: 'Test User',
             email: 'test@example.com',
-            phone: null,
-            cpfcnpj: null,
-            roleId: 1,
             roleName: 'admin',
+            roleId: 1,
             isActive: true,
             isVerified: true,
+            phone: null,
+            cpfcnpj: null,
             createdAt: '2024-01-01 10:00:00',
             updatedAt: '2024-01-01 10:00:00',
         );
@@ -441,7 +452,7 @@ class AdminControllerTest extends TestCase
             'updated_at' => $userResponseDto->updatedAt,
         ];
 
-        $mockedResponse = (new ResponseFactory())->createResponse(200);
+        $mockedResponse = new ResponseFactory()->createResponse(200);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'success',
             'data' => $responseData,
@@ -474,7 +485,7 @@ class AdminControllerTest extends TestCase
             ->with($userId)
             ->willThrowException(new NotFoundException('User not found.'));
 
-        $mockedResponse = (new ResponseFactory())->createResponse(404);
+        $mockedResponse = new ResponseFactory()->createResponse(404);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => null,
@@ -514,23 +525,21 @@ class AdminControllerTest extends TestCase
             id: $userId,
             name: 'Updated Admin',
             email: 'admin@example.com',
-            phone: null,
-            cpfcnpj: null,
-            roleId: 1,
             roleName: 'admin',
+            roleId: 1,
             isActive: true,
             isVerified: true,
+            phone: null,
+            cpfcnpj: null,
             createdAt: '2024-01-01 10:00:00',
             updatedAt: '2024-01-01 11:00:00', // Updated time
         );
 
         $this->updateUserAdminUseCase->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($arg) use ($dto) {
-                return $arg instanceof UpdateUserAdminRequestDTO
-                    && $arg->userId === $dto->userId
-                    && $arg->name === $dto->name;
-            }))
+            ->with($this->callback(fn($arg): bool => $arg instanceof UpdateUserAdminRequestDTO
+                && $arg->userId === $dto->userId
+                && $arg->name === $dto->name))
             ->willReturn($userResponseDto);
 
         $responseData = [
@@ -548,7 +557,7 @@ class AdminControllerTest extends TestCase
             'updated_at' => $userResponseDto->updatedAt,
         ];
 
-        $mockedResponse = (new ResponseFactory())->createResponse(200);
+        $mockedResponse = new ResponseFactory()->createResponse(200);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'success',
             'data' => $responseData,
@@ -588,9 +597,10 @@ class AdminControllerTest extends TestCase
             ->method('execute')
             ->willThrowException(new ValidationException('Falha na validação', $validationErrors));
 
-        $this->logger->expects($this->once())->method('warning');
+        // No logger warning for validation exceptions
+        $this->logger->expects($this->never())->method('warning');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(400);
+        $mockedResponse = new ResponseFactory()->createResponse(400);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => $validationErrors,
@@ -598,7 +608,7 @@ class AdminControllerTest extends TestCase
         ]));
         $this->jsonResponseFactory->expects($this->once())
             ->method('fail')
-            ->with($validationErrors, 'Falha na validação', 422)
+            ->with($validationErrors, 'Falha na validação', 400)
             ->willReturn($mockedResponse);
 
         $response = $this->adminController->updateUser($request, $response, $args);
@@ -628,9 +638,10 @@ class AdminControllerTest extends TestCase
             ->method('execute')
             ->willThrowException(new ConflictException('Email already in use.'));
 
+        // Logger warning is called in the new version for ConflictException
         $this->logger->expects($this->once())->method('warning');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(409);
+        $mockedResponse = new ResponseFactory()->createResponse(409);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => null,
@@ -666,9 +677,10 @@ class AdminControllerTest extends TestCase
             ->method('execute')
             ->willThrowException(new NotFoundException('User not found.'));
 
+        // Logger warning is called in the new version for NotFoundException
         $this->logger->expects($this->once())->method('warning');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(404);
+        $mockedResponse = new ResponseFactory()->createResponse(404);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => null,
@@ -706,7 +718,7 @@ class AdminControllerTest extends TestCase
 
         $this->logger->expects($this->once())->method('error');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(500);
+        $mockedResponse = new ResponseFactory()->createResponse(500);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'error',
             'data' => null,
@@ -744,7 +756,7 @@ class AdminControllerTest extends TestCase
             ->method('execute')
             ->with($userIdToDelete);
 
-        $mockedResponse = (new ResponseFactory())->createResponse(200);
+        $mockedResponse = new ResponseFactory()->createResponse(200);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'success',
             'data' => null,
@@ -776,7 +788,7 @@ class AdminControllerTest extends TestCase
 
         $this->deleteUserUseCase->expects($this->never())->method('execute'); // Should not be called
 
-        $mockedResponse = (new ResponseFactory())->createResponse(403);
+        $mockedResponse = new ResponseFactory()->createResponse(403);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => null,
@@ -811,7 +823,7 @@ class AdminControllerTest extends TestCase
             ->with($userIdToDelete)
             ->willThrowException(new NotFoundException('User to delete not found.'));
 
-        $mockedResponse = (new ResponseFactory())->createResponse(404);
+        $mockedResponse = new ResponseFactory()->createResponse(404);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'fail',
             'data' => null,
@@ -839,6 +851,7 @@ class AdminControllerTest extends TestCase
         $request = $this->createMock(Request::class);
         $response = $this->createMock(Response::class);
         $args = ['id' => (string)$userIdToDelete];
+        $request = $this->createMock(Request::class);
         $request->method('getAttribute')->with('user_id')->willReturn($requestingUserId);
 
         $this->deleteUserUseCase->expects($this->once())
@@ -848,7 +861,7 @@ class AdminControllerTest extends TestCase
 
         $this->logger->expects($this->once())->method('error');
 
-        $mockedResponse = (new ResponseFactory())->createResponse(500);
+        $mockedResponse = new ResponseFactory()->createResponse(500);
         $mockedResponse->getBody()->write(json_encode([
             'status' => 'error',
             'data' => null,

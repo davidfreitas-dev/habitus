@@ -43,10 +43,10 @@ class DayHabitSeeder
             $count = $stmt->rowCount();
             echo "Realistic habit completions seeded for User 1 ({$count} entries)!
 ";
-        } catch (\PDOException $e) {
-            echo "Error seeding day_habits: " . $e->getMessage() . "
+        } catch (\PDOException $pdoException) {
+            echo "Error seeding day_habits: " . $pdoException->getMessage() . "
 ";
-            throw $e;
+            throw $pdoException;
         }
     }
 }

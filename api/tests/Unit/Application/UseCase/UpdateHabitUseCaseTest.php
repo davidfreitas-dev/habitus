@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Application\UseCase;
 
-use App\Application\DTO\HabitResponseDTO;
-use App\Application\DTO\UpdateHabitRequestDTO;
+use App\Application\DTO\Habit\HabitResponseDTO;
+use App\Application\DTO\Habit\UpdateHabitRequestDTO;
 use App\Application\Service\ValidationService;
 use App\Application\UseCase\UpdateHabitUseCase;
 use App\Domain\Entity\Habit;
@@ -25,8 +25,11 @@ use Tests\TestCase;
 class UpdateHabitUseCaseTest extends TestCase
 {
     private PDO&MockObject $pdo;
+
     private ValidationService&MockObject $validationService;
+
     private HabitRepositoryInterface&MockObject $habitRepository;
+
     private UpdateHabitUseCase $updateHabitUseCase;
 
     public function testShouldUpdateHabitSuccessfully(): void

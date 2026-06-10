@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Application\UseCase;
 
-use App\Application\DTO\UserListResponseDTO;
-use App\Application\DTO\UserResponseDTO;
+use App\Application\DTO\User\UserListResponseDTO;
+use App\Application\DTO\User\UserResponseDTO;
 use App\Application\UseCase\ListUsersUseCase;
 use App\Domain\Entity\Person;
 use App\Domain\Entity\Role;

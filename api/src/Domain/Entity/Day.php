@@ -10,18 +10,9 @@ use JsonSerializable;
 class Day implements JsonSerializable
 {
     private ?int $id = null;
-    private DateTimeImmutable $date;
-    private DateTimeImmutable $createdAt;
-    private DateTimeImmutable $updatedAt;
 
-    public function __construct(
-        DateTimeImmutable $date,
-        ?DateTimeImmutable $createdAt = null,
-        ?DateTimeImmutable $updatedAt = null,
-    ) {
-        $this->date = $date;
-        $this->createdAt = $createdAt ?? new DateTimeImmutable();
-        $this->updatedAt = $updatedAt ?? new DateTimeImmutable();
+    public function __construct(private DateTimeImmutable $date, private readonly ?DateTimeImmutable $createdAt = new DateTimeImmutable(), private ?DateTimeImmutable $updatedAt = new DateTimeImmutable())
+    {
     }
 
     public function getId(): ?int
@@ -34,6 +25,7 @@ class Day implements JsonSerializable
         if ($this->id !== null) {
             return;
         }
+
         $this->id = $id;
     }
 

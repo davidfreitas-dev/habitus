@@ -50,8 +50,8 @@ class UserRepositoryTest extends DatabaseTestCase
 
         $user = new User(
             person: $person,
-            password: 'password123',
-            role: $role
+            role: $role,
+            password: 'password123'
         );
         return $this->userRepository->create($user);
     }

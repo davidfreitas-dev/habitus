@@ -17,17 +17,26 @@ use App\Infrastructure\Persistence\Repository\HabitRepository;
 class HabitRepositoryTest extends DatabaseTestCase
 {
     private HabitRepository $habitRepository;
+
     private UserRepository $userRepository;
+
     private PersonRepository $personRepository;
+
     private RoleRepository $roleRepository;
+
     private ?User $testUser = null;
 
-    private const TEST_DATE_MONDAY = '2026-02-09';
-    private const SUNDAY = 0;
-    private const MONDAY = 1;
-    private const TUESDAY = 2;
-    private const WEDNESDAY = 3;
-    private const ALL_WEEK_DAYS = [0, 1, 2, 3, 4, 5, 6];
+    private const string TEST_DATE_MONDAY = '2026-02-09';
+
+    private const int SUNDAY = 0;
+
+    private const int MONDAY = 1;
+
+    private const int TUESDAY = 2;
+
+    private const int WEDNESDAY = 3;
+
+    private const array ALL_WEEK_DAYS = [0, 1, 2, 3, 4, 5, 6];
 
     protected function setUp(): void
     {
@@ -89,7 +98,7 @@ class HabitRepositoryTest extends DatabaseTestCase
         $otherUser = $this->createTestUser('Other User', 'other@example.com');
 
         $foundHabit = $this->habitRepository->findById($createdHabit->getId(), $otherUser->getId());
-        
+
         $this->assertNull($foundHabit);
     }
 
@@ -117,6 +126,7 @@ class HabitRepositoryTest extends DatabaseTestCase
         $createdHabit = $this->habitRepository->create($habit, [self::SUNDAY, self::MONDAY]);
 
         $createdHabit->setTitle('Updated Title');
+
         $updatedHabit = $this->habitRepository->update($createdHabit, [self::TUESDAY, self::WEDNESDAY, 4]);
 
         $this->assertInstanceOf(Habit::class, $updatedHabit);
@@ -124,7 +134,7 @@ class HabitRepositoryTest extends DatabaseTestCase
         $this->assertNotEquals($createdHabit->getUpdatedAt(), $updatedHabit->getUpdatedAt());
         $this->assertInstanceOf(DateTimeImmutable::class, $updatedHabit->getUpdatedAt());
         $this->assertCount(3, $updatedHabit->getHabitWeekDays());
-        
+
         $data = $this->getHabitFromDatabase($updatedHabit->getId());
         $this->assertNotFalse($data);
         $this->assertEquals('Updated Title', $data['title']);
@@ -160,7 +170,7 @@ class HabitRepositoryTest extends DatabaseTestCase
 
         $habit3 = new Habit('Tuesday Habit', $this->testUser, null, new DateTimeImmutable('2026-02-08'), new DateTimeImmutable('2026-02-08'));
         $this->habitRepository->create($habit3, [self::TUESDAY]);
-        
+
         $futureHabitDate = new DateTimeImmutable('2026-02-10');
         $habit4 = new Habit('Future Habit', $this->testUser, null, $futureHabitDate, $futureHabitDate);
         $this->habitRepository->create($habit4, [self::MONDAY]);
@@ -179,10 +189,10 @@ class HabitRepositoryTest extends DatabaseTestCase
 
         $habit1 = new Habit('Completed Habit 1', $this->testUser, null, new DateTimeImmutable('2026-02-08'), new DateTimeImmutable('2026-02-08'));
         $createdHabit1 = $this->habitRepository->create($habit1, [self::SUNDAY]);
-        
+
         $habit2 = new Habit('Completed Habit 2', $this->testUser, null, new DateTimeImmutable('2026-02-08'), new DateTimeImmutable('2026-02-08'));
         $createdHabit2 = $this->habitRepository->create($habit2, [self::SUNDAY]);
-        
+
         $habit3 = new Habit('Uncompleted Habit', $this->testUser, null, new DateTimeImmutable('2026-02-08'), new DateTimeImmutable('2026-02-08'));
         $this->habitRepository->create($habit3, [self::SUNDAY]);
 
@@ -221,15 +231,7 @@ class HabitRepositoryTest extends DatabaseTestCase
         // Assert that the summary is an array and not empty
         $this->assertIsArray($summary);
         $this->assertNotEmpty($summary);
-
-        // Find the summary entry for TEST_DATE_MONDAY
-        $mondaySummary = null;
-        foreach ($summary as $item) {
-            if ($item['date'] === self::TEST_DATE_MONDAY) {
-                $mondaySummary = $item;
-                break;
-            }
-        }
+        $mondaySummary = array_find($summary, fn($item): bool => $item['date'] === self::TEST_DATE_MONDAY);
 
         // Assert that the summary for TEST_DATE_MONDAY is found and has expected values
         $this->assertNotNull($mondaySummary, "Summary for " . self::TEST_DATE_MONDAY . " not found.");
@@ -246,15 +248,15 @@ class HabitRepositoryTest extends DatabaseTestCase
         $fetchedPerson = $this->personRepository->findByEmail($createdPerson->getEmail());
 
         $customerRole = $this->roleRepository->findByName('customer');
-        if (!$customerRole) {
+        if (!$customerRole instanceof \App\Domain\Entity\Role) {
             throw new \RuntimeException("Perfil 'customer' não encontrada no seed do banco de dados.");
         }
 
         $user = new User(person: $fetchedPerson, role: $customerRole, password: 'password');
         $this->userRepository->create($user);
-        
+
         $fetchedUser = $this->userRepository->findByEmail($email);
-        if (!$fetchedUser) {
+        if (!$fetchedUser instanceof \App\Domain\Entity\User) {
             throw new \RuntimeException("Usuário não pôde ser criado ou encontrado.");
         }
 
@@ -265,10 +267,10 @@ class HabitRepositoryTest extends DatabaseTestCase
     {
         $stmt = self::$pdo->prepare('INSERT IGNORE INTO days (date) VALUES (:date)');
         $stmt->execute(['date' => $date->format('Y-m-d')]);
-        
+
         $stmt = self::$pdo->prepare('SELECT id FROM days WHERE date = :date');
         $stmt->execute(['date' => $date->format('Y-m-d')]);
-        
+
         return (int)$stmt->fetchColumn();
     }
 
@@ -282,7 +284,7 @@ class HabitRepositoryTest extends DatabaseTestCase
     {
         $stmt = self::$pdo->prepare('SELECT * FROM habits WHERE id = :id');
         $stmt->execute(['id' => $habitId]);
-        
+
         return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 
@@ -290,7 +292,7 @@ class HabitRepositoryTest extends DatabaseTestCase
     {
         $stmt = self::$pdo->prepare('SELECT week_day FROM habit_week_days WHERE habit_id = :habit_id ORDER BY week_day ASC');
         $stmt->execute(['habit_id' => $habitId]);
-        
-        return array_map('intval', $stmt->fetchAll(\PDO::FETCH_COLUMN));
+
+        return array_map(intval(...), $stmt->fetchAll(\PDO::FETCH_COLUMN));
     }
 }

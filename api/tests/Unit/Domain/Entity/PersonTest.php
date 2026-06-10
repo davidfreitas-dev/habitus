@@ -57,6 +57,7 @@ class PersonTest extends TestCase
         $person->setName('Jane Roe');
         $person->setEmail('jane.roe@example.com');
         $person->setPhone('987654321');
+
         $cpfCnpj = CpfCnpj::fromString('12345678909');
         $person->setCpfCnpj($cpfCnpj);
         $person->setAvatarUrl('http://example.com/new-avatar.jpg');

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Presentation\Api\V1\Controller;
 
-use App\Application\DTO\ForgotPasswordRequestDTO;
-use App\Application\DTO\LoginRequestDTO;
-use App\Application\DTO\RegisterResponseDTO;
-use App\Application\DTO\RegisterUserRequestDTO;
-use App\Application\DTO\ResetPasswordRequestDTO;
-use App\Application\DTO\ValidateResetCodeRequestDTO;
+use App\Application\DTO\Auth\ForgotPasswordRequestDTO;
+use App\Application\DTO\Auth\LoginRequestDTO;
+use App\Application\DTO\Auth\RegisterResponseDTO;
+use App\Application\DTO\Auth\RegisterUserRequestDTO;
+use App\Application\DTO\Auth\ResetPasswordRequestDTO;
+use App\Application\DTO\Auth\ValidateResetCodeRequestDTO;
 use App\Application\Exception\EmailSendingFailedException;
 use App\Application\Service\ValidationService;
 use App\Application\UseCase\ForgotPasswordUseCase;
@@ -201,8 +201,8 @@ class AuthController
             $this->jwtService->blockToken($jti, $exp);
 
             return $this->jsonResponseFactory->success(null, 'Logout bem-sucedido');
-        } catch (Throwable $e) {
-            $this->logger->error('Ocorreu um erro inesperado durante o logout', ['exception' => $e]);
+        } catch (Throwable $throwable) {
+            $this->logger->error('Ocorreu um erro inesperado durante o logout', ['exception' => $throwable]);
             return $this->jsonResponseFactory->error(
                 'Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.',
                 null,

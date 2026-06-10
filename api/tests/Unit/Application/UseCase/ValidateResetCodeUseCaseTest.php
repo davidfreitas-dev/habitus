@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Application\UseCase;
 
-use App\Application\DTO\PasswordResetResponseDTO;
-use App\Application\DTO\ValidateResetCodeRequestDTO;
+use App\Application\DTO\Auth\PasswordResetResponseDTO;
+use App\Application\DTO\Auth\ValidateResetCodeRequestDTO;
 use App\Application\UseCase\ValidateResetCodeUseCase;
 use App\Domain\Entity\PasswordReset;
 use App\Domain\Entity\User;

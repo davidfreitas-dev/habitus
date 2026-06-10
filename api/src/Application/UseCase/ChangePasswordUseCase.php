@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\UseCase;
 
-use App\Application\DTO\ChangePasswordRequestDTO;
+use App\Application\DTO\User\ChangePasswordRequestDTO;
 use App\Domain\Exception\NotFoundException;
 use App\Domain\Exception\ValidationException;
 use App\Domain\Repository\UserRepositoryInterface;

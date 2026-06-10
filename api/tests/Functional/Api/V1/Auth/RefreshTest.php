@@ -19,8 +19,11 @@ use Fig\Http\Message\StatusCodeInterface;
 class RefreshTest extends FunctionalTestCase
 {
     private UserRepositoryInterface $userRepository;
+
     private PersonRepositoryInterface $personRepository;
+
     private RoleRepositoryInterface $roleRepository;
+
     private \Faker\Generator $faker;
 
     protected function setUp(): void
@@ -55,8 +58,8 @@ class RefreshTest extends FunctionalTestCase
         // Criar User
         $user = new User(
             person: $person,
-            password: $hashedPassword,
             role: $role,
+            password: $hashedPassword,
             isActive: true,
             isVerified: false
         );
@@ -106,7 +109,7 @@ class RefreshTest extends FunctionalTestCase
         // Assert
         $this->assertEquals(StatusCodeInterface::STATUS_OK, $response->getStatusCode());
         $this->assertNotNull($responseData, 'O corpo da resposta não é um JSON válido: ' . $body);
-        $this->assertArrayHasKey('data', $responseData, 'Response missing \'data\' key: ' . $body);
+        $this->assertArrayHasKey('data', $responseData, "Response missing 'data' key: " . $body);
         $this->assertArrayHasKey('access_token', $responseData['data']);
         $this->assertArrayHasKey('refresh_token', $responseData['data']);
         $this->assertArrayHasKey('token_type', $responseData['data']);

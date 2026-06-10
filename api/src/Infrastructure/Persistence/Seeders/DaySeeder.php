@@ -18,7 +18,7 @@ class DaySeeder
     {
         $today = new DateTimeImmutable();
         $currentYear = (int) $today->format('Y');
-        $startDate = new DateTimeImmutable("{$currentYear}-01-01");
+        $startDate = new DateTimeImmutable($currentYear . '-01-01');
         $endDate = $today;
 
         $interval = new \DateInterval('P1D');
@@ -30,10 +30,11 @@ class DaySeeder
             foreach ($period as $date) {
                 $stmt->execute([$date->format('Y-m-d')]);
             }
+
             $this->pdo->commit();
-        } catch (\PDOException $e) {
+        } catch (\PDOException $pdoException) {
             $this->pdo->rollBack();
-            throw $e;
+            throw $pdoException;
         }
     }
 }

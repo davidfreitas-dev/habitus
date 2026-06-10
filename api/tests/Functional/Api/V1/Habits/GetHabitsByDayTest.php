@@ -19,11 +19,17 @@ use Faker\Factory;
 class GetHabitsByDayTest extends FunctionalTestCase
 {
     protected UserRepositoryInterface $userRepository;
+
     protected PersonRepositoryInterface $personRepository;
+
     protected RoleRepositoryInterface $roleRepository;
+
     protected HabitRepositoryInterface $habitRepository;
+
     protected \Faker\Generator $faker;
+
     protected ?User $testUser = null;
+
     protected string $accessToken;
 
     protected function setUp(): void
@@ -58,8 +64,8 @@ class GetHabitsByDayTest extends FunctionalTestCase
 
         $user = new User(
             person: $person,
-            password: $hashedPassword,
             role: $role,
+            password: $hashedPassword,
             isActive: true,
             isVerified: true
         );
@@ -91,7 +97,7 @@ class GetHabitsByDayTest extends FunctionalTestCase
         $pdo = $this->app->getContainer()->get(\PDO::class);
         $stmt = $pdo->prepare('SELECT * FROM habits WHERE id = :id');
         $stmt->execute(['id' => $habitId]);
-        
+
         return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 
@@ -100,8 +106,8 @@ class GetHabitsByDayTest extends FunctionalTestCase
         $pdo = $this->app->getContainer()->get(\PDO::class);
         $stmt = $pdo->prepare('SELECT week_day FROM habit_week_days WHERE habit_id = :habit_id ORDER BY week_day ASC');
         $stmt->execute(['habit_id' => $habitId]);
-        
-        return array_map('intval', $stmt->fetchAll(\PDO::FETCH_COLUMN));
+
+        return array_map(intval(...), $stmt->fetchAll(\PDO::FETCH_COLUMN));
     }
 
     protected function createHabit(string $title, array $weekDays): int
@@ -109,7 +115,7 @@ class GetHabitsByDayTest extends FunctionalTestCase
         $payload = [
             'title' => $title,
             'week_days' => $weekDays,
-            'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+            'created_at' => new \DateTimeImmutable()->format('Y-m-d H:i:s'),
         ];
 
         $response = $this->sendRequest('POST', '/api/v1/habits', $payload, [
@@ -137,7 +143,7 @@ class GetHabitsByDayTest extends FunctionalTestCase
         $stmt->execute(['habit_id' => $habitId, 'date' => $date]);
         return (bool) $stmt->fetchColumn();
     }
-    
+
     public function testGetHabitsByDayReturnsOk(): void
     {
         // Arrange
@@ -151,7 +157,7 @@ class GetHabitsByDayTest extends FunctionalTestCase
         // Toggle the habit for today
         $toggleResponse = $this->sendRequest(
             'PATCH',
-            "/api/v1/habits/{$habitId}/toggle",
+            sprintf('/api/v1/habits/%d/toggle', $habitId),
             ['date' => $today->format('Y-m-d')],
             ['Authorization' => 'Bearer ' . $this->accessToken]
         );
@@ -186,6 +192,7 @@ class GetHabitsByDayTest extends FunctionalTestCase
                 break;
             }
         }
+
         $this->assertTrue($foundInPossible, 'Created habit not found in the possible habits list.');
 
         // Check for the created habit in completed_habits
@@ -198,6 +205,7 @@ class GetHabitsByDayTest extends FunctionalTestCase
                 break;
             }
         }
+
         $this->assertTrue($foundInCompleted, 'Created habit not found in the completed habits list.');
     }
 }

@@ -10,7 +10,7 @@ use PDO;
 
 class HabitStatsRepository implements HabitStatsRepositoryInterface
 {
-    public function __construct(private PDO $pdo)
+    public function __construct(private readonly PDO $pdo)
     {
     }
 
@@ -192,6 +192,7 @@ class HabitStatsRepository implements HabitStatsRepositoryInterface
                     $firstDay = false;
                     continue;
                 }
+
                 break;
             }
 

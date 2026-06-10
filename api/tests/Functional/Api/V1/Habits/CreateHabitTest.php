@@ -19,11 +19,17 @@ use Faker\Factory;
 class CreateHabitTest extends FunctionalTestCase
 {
     protected UserRepositoryInterface $userRepository;
+
     protected PersonRepositoryInterface $personRepository;
+
     protected RoleRepositoryInterface $roleRepository;
+
     protected HabitRepositoryInterface $habitRepository;
+
     protected \Faker\Generator $faker;
+
     protected ?User $testUser = null;
+
     protected string $accessToken;
 
     protected function setUp(): void
@@ -58,8 +64,8 @@ class CreateHabitTest extends FunctionalTestCase
 
         $user = new User(
             person: $person,
-            password: $hashedPassword,
             role: $role,
+            password: $hashedPassword,
             isActive: true,
             isVerified: true
         );
@@ -91,7 +97,7 @@ class CreateHabitTest extends FunctionalTestCase
         $pdo = $this->app->getContainer()->get(\PDO::class);
         $stmt = $pdo->prepare('SELECT * FROM habits WHERE id = :id');
         $stmt->execute(['id' => $habitId]);
-        
+
         return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 
@@ -100,8 +106,8 @@ class CreateHabitTest extends FunctionalTestCase
         $pdo = $this->app->getContainer()->get(\PDO::class);
         $stmt = $pdo->prepare('SELECT week_day FROM habit_week_days WHERE habit_id = :habit_id ORDER BY week_day ASC');
         $stmt->execute(['habit_id' => $habitId]);
-        
-        return array_map('intval', $stmt->fetchAll(\PDO::FETCH_COLUMN));
+
+        return array_map(intval(...), $stmt->fetchAll(\PDO::FETCH_COLUMN));
     }
 
     protected function createHabit(string $title, array $weekDays): int
@@ -109,7 +115,7 @@ class CreateHabitTest extends FunctionalTestCase
         $payload = [
             'title' => $title,
             'week_days' => $weekDays,
-            'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+            'created_at' => new \DateTimeImmutable()->format('Y-m-d H:i:s'),
         ];
 
         $response = $this->sendRequest('POST', '/api/v1/habits', $payload, [
@@ -144,7 +150,7 @@ class CreateHabitTest extends FunctionalTestCase
         $payload = [
             'title' => $this->faker->sentence(3),
             'week_days' => [1, 2, 3], // Monday, Tuesday, Wednesday
-            'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+            'created_at' => new \DateTimeImmutable()->format('Y-m-d H:i:s'),
         ];
 
         // Act
@@ -200,7 +206,7 @@ class CreateHabitTest extends FunctionalTestCase
 
         // Assert
         $this->assertEquals(StatusCodeInterface::STATUS_CREATED, $response->getStatusCode());
-        
+
         // Verify in database
         $habitId = $body['data']['id'];
         $dbHabit = $this->getHabitFromDatabase($habitId);
@@ -214,7 +220,7 @@ class CreateHabitTest extends FunctionalTestCase
         $payload = [
             'title' => 'Habit without auth',
             'week_days' => [1],
-            'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+            'created_at' => new \DateTimeImmutable()->format('Y-m-d H:i:s'),
         ];
 
         // Act
@@ -229,7 +235,7 @@ class CreateHabitTest extends FunctionalTestCase
         // Arrange
         $payload = [
             'week_days' => [1, 2],
-            'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+            'created_at' => new \DateTimeImmutable()->format('Y-m-d H:i:s'),
         ];
 
         // Act
@@ -251,7 +257,7 @@ class CreateHabitTest extends FunctionalTestCase
         $payload = [
             'title' => 'Habit with empty week days',
             'week_days' => [],
-            'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+            'created_at' => new \DateTimeImmutable()->format('Y-m-d H:i:s'),
         ];
 
         // Act
@@ -273,7 +279,7 @@ class CreateHabitTest extends FunctionalTestCase
         $payload = [
             'title' => 'Habit with invalid week day',
             'week_days' => [1, 8], // 8 is an invalid week day
-            'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+            'created_at' => new \DateTimeImmutable()->format('Y-m-d H:i:s'),
         ];
 
         // Act

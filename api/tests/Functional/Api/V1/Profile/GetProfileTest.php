@@ -19,10 +19,15 @@ use Fig\Http\Message\StatusCodeInterface;
 class GetProfileTest extends FunctionalTestCase
 {
     private UserRepositoryInterface $userRepository;
+
     private PersonRepositoryInterface $personRepository;
+
     private RoleRepositoryInterface $roleRepository;
+
     private User $user;
+
     private string $accessToken;
+
     private \Faker\Generator $faker;
 
     protected function setUp(): void
@@ -53,8 +58,8 @@ class GetProfileTest extends FunctionalTestCase
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         $this->user = new User(
             person: $person,
-            password: $hashedPassword,
             role: $role,
+            password: $hashedPassword,
             isActive: true,
             isVerified: true
         );
@@ -81,7 +86,7 @@ class GetProfileTest extends FunctionalTestCase
 
         $this->accessToken = $responseData['data']['access_token'];
     }
-    
+
     public function testGetProfileWithAuthenticatedUserReturnsProfileData(): void
     {
         // Act

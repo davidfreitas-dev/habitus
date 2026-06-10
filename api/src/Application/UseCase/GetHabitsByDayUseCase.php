@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Application\UseCase;
 
-use App\Application\DTO\HabitResponseDTO;
-use App\Application\DTO\HabitsByDayRequestDTO;
-use App\Application\DTO\HabitsByDayResponseDTO;
+use App\Application\DTO\Habit\HabitResponseDTO;
+use App\Application\DTO\Habit\HabitsByDayRequestDTO;
+use App\Application\DTO\Habit\HabitsByDayResponseDTO;
 use App\Application\Service\ValidationService;
-use App\Domain\Entity\Habit;
 use App\Domain\Repository\DayRepositoryInterface;
 use App\Domain\Repository\HabitRepositoryInterface;
 use DateTimeImmutable;
@@ -29,13 +28,13 @@ class GetHabitsByDayUseCase
         $date = new DateTimeImmutable($dto->date);
 
         $possibleHabits = array_map(
-            static fn (Habit $habit): HabitResponseDTO => HabitResponseDTO::fromEntity($habit),
+            HabitResponseDTO::fromEntity(...),
             $this->habitRepository->findPossibleHabits($date, $userId),
         );
 
         $completedHabitsEntities = $this->habitRepository->findCompletedHabits($date, $userId);
         $completedHabits = array_map(
-            static fn (Habit $habit): HabitResponseDTO => HabitResponseDTO::fromEntity($habit),
+            HabitResponseDTO::fromEntity(...),
             $completedHabitsEntities,
         );
 

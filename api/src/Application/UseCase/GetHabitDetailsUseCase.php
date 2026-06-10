@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\UseCase;
 
-use App\Application\DTO\HabitResponseDTO;
+use App\Application\DTO\Habit\HabitResponseDTO;
 use App\Domain\Exception\HabitNotFoundException;
 use App\Domain\Repository\HabitRepositoryInterface;
 

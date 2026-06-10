@@ -21,12 +21,19 @@ use App\Infrastructure\Persistence\Repository\HabitRepository;
 class DayHabitRepositoryTest extends DatabaseTestCase
 {
     private DayHabitRepository $dayHabitRepository;
+
     private DayRepository $dayRepository;
+
     private HabitRepository $habitRepository;
+
     private UserRepository $userRepository;
+
     private PersonRepository $personRepository;
+
     private RoleRepository $roleRepository;
+
     private ?User $testUser = null;
+
     private ?User $otherUser = null;
 
     protected function setUp(): void
@@ -130,15 +137,15 @@ class DayHabitRepositoryTest extends DatabaseTestCase
         $fetchedPerson = $this->personRepository->findByEmail($createdPerson->getEmail());
 
         $customerRole = $this->roleRepository->findByName('customer');
-        if (!$customerRole) {
+        if (!$customerRole instanceof \App\Domain\Entity\Role) {
             throw new \RuntimeException("Perfil 'customer' não encontrada no seed do banco de dados.");
         }
 
         $user = new User(person: $fetchedPerson, role: $customerRole, password: 'password');
         $this->userRepository->create($user);
-        
+
         $fetchedUser = $this->userRepository->findByEmail($email);
-        if (!$fetchedUser) {
+        if (!$fetchedUser instanceof \App\Domain\Entity\User) {
             throw new \RuntimeException("Usuário não pôde ser criado ou encontrado.");
         }
 

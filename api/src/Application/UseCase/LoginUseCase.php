@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Application\UseCase;
 
-use App\Application\DTO\LoginRequestDTO;
-use App\Application\DTO\LoginResponseDTO;
+use App\Application\DTO\Auth\LoginRequestDTO;
+use App\Application\DTO\Auth\LoginResponseDTO;
 use App\Domain\Exception\AuthenticationException;
 use App\Domain\Repository\UserRepositoryInterface;
 use App\Infrastructure\Security\JwtService;
@@ -24,7 +24,7 @@ class LoginUseCase
     {
         $user = $this->userRepository->findByEmail($dto->email);
 
-        if (!$user) {
+        if (!$user instanceof \App\Domain\Entity\User) {
             throw new AuthenticationException('Credenciais inválidas.');
         }
 

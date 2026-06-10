@@ -11,8 +11,10 @@ use Psr\Log\LoggerInterface;
 
 class CachingRoleRepository implements RoleRepositoryInterface
 {
-    private const CACHE_PREFIX_ID = 'role:id:';
-    private const CACHE_PREFIX_NAME = 'role:name:';
+    private const string CACHE_PREFIX_ID = 'role:id:';
+
+    private const string CACHE_PREFIX_NAME = 'role:name:';
+
     private const CACHE_TTL = 3600 * 24; // 24 hours - roles are fairly static
 
     public function __construct(

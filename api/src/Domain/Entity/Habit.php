@@ -12,33 +12,25 @@ use JsonSerializable;
 
 class Habit implements JsonSerializable
 {
-    private const MAX_TITLE_LENGTH = 255;
+    private const int MAX_TITLE_LENGTH = 255;
 
     private ?int $id = null;
     private string $title;
-    private ?string $reminderTime;
-    private User $user;
-    private DateTimeImmutable $createdAt;
-    private DateTimeImmutable $updatedAt;
 
     /**
      * @var Collection<int, HabitWeekDay>
      */
-    private Collection $habitWeekDays;
+    private readonly Collection $habitWeekDays;
 
     public function __construct(
         string $title,
-        User $user,
-        ?string $reminderTime = null,
-        ?DateTimeImmutable $createdAt = null,
-        ?DateTimeImmutable $updatedAt = null,
+        private readonly User $user,
+        private ?string $reminderTime = null,
+        private readonly ?DateTimeImmutable $createdAt = new DateTimeImmutable(),
+        private ?DateTimeImmutable $updatedAt = new DateTimeImmutable(),
     ) {
         $this->validateTitle($title);
         $this->title = $title;
-        $this->user = $user;
-        $this->reminderTime = $reminderTime;
-        $this->createdAt = $createdAt ?? new DateTimeImmutable();
-        $this->updatedAt = $updatedAt ?? new DateTimeImmutable();
         $this->habitWeekDays = new ArrayCollection();
     }
 
@@ -52,6 +44,7 @@ class Habit implements JsonSerializable
         if ($this->id !== null) {
             return;
         }
+
         $this->id = $id;
     }
 
@@ -143,7 +136,7 @@ class Habit implements JsonSerializable
     public static function fromArray(array $data, \App\Domain\Repository\UserRepositoryInterface $userRepository): self
     {
         $user = $userRepository->findById($data['user_id']);
-        if (!$user) {
+        if (!$user instanceof \App\Domain\Entity\User) {
             throw new \InvalidArgumentException(sprintf('User with ID %d not found.', $data['user_id']));
         }
 
@@ -171,7 +164,7 @@ class Habit implements JsonSerializable
     {
         $trimmedTitle = trim($title);
 
-        if (empty($trimmedTitle)) {
+        if ($trimmedTitle === '' || $trimmedTitle === '0') {
             throw new ValidationException('Habit title cannot be empty.');
         }
 

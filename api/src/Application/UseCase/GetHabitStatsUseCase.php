@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Application\UseCase;
 
-use App\Application\DTO\HabitStatsResponseDTO;
-use App\Application\DTO\HabitStatsWeekDayDTO;
+use App\Application\DTO\Habit\HabitStatsResponseDTO;
+use App\Application\DTO\Habit\HabitStatsWeekDayDTO;
 use App\Domain\Repository\HabitStatsRepositoryInterface;
 use DateTimeImmutable;
 use InvalidArgumentException;
 
 readonly class GetHabitStatsUseCase
 {
-    private const LABELS = [
+    private const array LABELS = [
         0 => 'D',
         1 => 'S',
         2 => 'T',
@@ -78,7 +78,7 @@ readonly class GetHabitStatsUseCase
             '3M' => $endDate->modify('-89 days'),
             '6M' => $endDate->modify('-179 days'),
             'Y' => $endDate->modify('-364 days'),
-            default => throw new InvalidArgumentException("Invalid period: {$period}")
+            default => throw new InvalidArgumentException('Invalid period: ' . $period)
         };
     }
 }

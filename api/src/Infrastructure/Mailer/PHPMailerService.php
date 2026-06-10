@@ -15,7 +15,7 @@ use function extract;
 
 class PHPMailerService implements MailerInterface
 {
-    private PHPMailer $mailer;
+    private readonly PHPMailer $mailer;
 
     public function __construct(
         private readonly LoggerInterface $logger,
@@ -28,8 +28,9 @@ class PHPMailerService implements MailerInterface
         private readonly string $fromName,
         private readonly string $siteUrl,
         private readonly string $appName,
+        ?PHPMailer $mailer = null,
     ) {
-        $this->mailer = new PHPMailer(true); // true enables exceptions
+        $this->mailer = $mailer ?? new PHPMailer(true); // true enables exceptions
         $this->configureMailer();
     }
 

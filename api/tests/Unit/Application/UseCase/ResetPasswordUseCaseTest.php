@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Application\UseCase;
 
-use App\Application\DTO\ResetPasswordRequestDTO;
-use App\Application\DTO\PasswordResetResponseDTO;
+use App\Application\DTO\Auth\ResetPasswordRequestDTO;
+use App\Application\DTO\Auth\PasswordResetResponseDTO;
 use App\Application\UseCase\ResetPasswordUseCase;
 use App\Domain\Entity\User;
 use App\Domain\Exception\NotFoundException;
@@ -19,10 +19,14 @@ use PHPUnit\Framework\MockObject\MockObject;
 
 class ResetPasswordUseCaseTest extends TestCase
 {
-    private UserRepositoryInterface|MockObject $userRepository;
-    private PasswordResetRepositoryInterface|MockObject $passwordResetRepository;
-    private PasswordHasher|MockObject $passwordHasher;
-    private JwtService|MockObject $jwtService;
+    private \PHPUnit\Framework\MockObject\MockObject $userRepository;
+
+    private \PHPUnit\Framework\MockObject\MockObject $passwordResetRepository;
+
+    private \PHPUnit\Framework\MockObject\MockObject $passwordHasher;
+
+    private \PHPUnit\Framework\MockObject\MockObject $jwtService;
+
     private ResetPasswordUseCase $resetPasswordUseCase;
 
     protected function setUp(): void
@@ -54,7 +58,7 @@ class ResetPasswordUseCaseTest extends TestCase
                                      'id' => null,
                                      'userId' => 1,
                                      'code' => '123456',
-                                     'expiresAt' => (new \DateTimeImmutable())->format(\DateTimeImmutable::ATOM),
+                                     'expiresAt' => new \DateTimeImmutable()->format(\DateTimeImmutable::ATOM),
                                      'usedAt' => null,
                                      'ipAddress' => '127.0.0.1',
                                  ])
@@ -105,7 +109,7 @@ class ResetPasswordUseCaseTest extends TestCase
                                      'id' => null,
                                      'userId' => 999,
                                      'code' => '123456',
-                                     'expiresAt' => (new \DateTimeImmutable())->format(\DateTimeImmutable::ATOM),
+                                     'expiresAt' => new \DateTimeImmutable()->format(\DateTimeImmutable::ATOM),
                                      'usedAt' => null,
                                      'ipAddress' => '127.0.0.1',
                                  ])

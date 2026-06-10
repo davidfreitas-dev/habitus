@@ -19,11 +19,17 @@ use Faker\Factory;
 class GetHabitsSummaryTest extends FunctionalTestCase
 {
     protected UserRepositoryInterface $userRepository;
+
     protected PersonRepositoryInterface $personRepository;
+
     protected RoleRepositoryInterface $roleRepository;
+
     protected HabitRepositoryInterface $habitRepository;
+
     protected \Faker\Generator $faker;
+
     protected ?User $testUser = null;
+
     protected string $accessToken;
 
     protected function setUp(): void
@@ -58,8 +64,8 @@ class GetHabitsSummaryTest extends FunctionalTestCase
 
         $user = new User(
             person: $person,
-            password: $hashedPassword,
             role: $role,
+            password: $hashedPassword,
             isActive: true,
             isVerified: true
         );
@@ -91,7 +97,7 @@ class GetHabitsSummaryTest extends FunctionalTestCase
         $pdo = $this->app->getContainer()->get(\PDO::class);
         $stmt = $pdo->prepare('SELECT * FROM habits WHERE id = :id');
         $stmt->execute(['id' => $habitId]);
-        
+
         return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 
@@ -100,8 +106,8 @@ class GetHabitsSummaryTest extends FunctionalTestCase
         $pdo = $this->app->getContainer()->get(\PDO::class);
         $stmt = $pdo->prepare('SELECT week_day FROM habit_week_days WHERE habit_id = :habit_id ORDER BY week_day ASC');
         $stmt->execute(['habit_id' => $habitId]);
-        
-        return array_map('intval', $stmt->fetchAll(\PDO::FETCH_COLUMN));
+
+        return array_map(intval(...), $stmt->fetchAll(\PDO::FETCH_COLUMN));
     }
 
     protected function createHabit(string $title, array $weekDays): int
@@ -109,7 +115,7 @@ class GetHabitsSummaryTest extends FunctionalTestCase
         $payload = [
             'title' => $title,
             'week_days' => $weekDays,
-            'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+            'created_at' => new \DateTimeImmutable()->format('Y-m-d H:i:s'),
         ];
 
         $response = $this->sendRequest('POST', '/api/v1/habits', $payload, [
@@ -137,7 +143,7 @@ class GetHabitsSummaryTest extends FunctionalTestCase
         $stmt->execute(['habit_id' => $habitId, 'date' => $date]);
         return (bool) $stmt->fetchColumn();
     }
-    
+
     public function testGetSummaryReturnsOk(): void
     {
         // Arrange
@@ -150,7 +156,7 @@ class GetHabitsSummaryTest extends FunctionalTestCase
         // Toggle habit 1 for today
         $this->sendRequest(
             'PATCH',
-            "/api/v1/habits/{$habitId1}/toggle",
+            sprintf('/api/v1/habits/%d/toggle', $habitId1),
             ['date' => $todayFormatted],
             ['Authorization' => 'Bearer ' . $this->accessToken]
         );
@@ -171,17 +177,9 @@ class GetHabitsSummaryTest extends FunctionalTestCase
         $this->assertArrayHasKey('data', $body);
         $this->assertIsArray($body['data']);
         $this->assertNotEmpty($body['data']);
+        $todaySummary = array_find($body['data'], fn($summaryItem): bool => $summaryItem['date'] === $todayFormatted);
 
-        // Find today's summary in the array
-        $todaySummary = null;
-        foreach ($body['data'] as $summaryItem) {
-            if ($summaryItem['date'] === $todayFormatted) {
-                $todaySummary = $summaryItem;
-                break;
-            }
-        }
-
-        $this->assertNotNull($todaySummary, "Summary for today ($todayFormatted) not found in the response.");
+        $this->assertNotNull($todaySummary, sprintf('Summary for today (%s) not found in the response.', $todayFormatted));
         $this->assertArrayHasKey('completed', $todaySummary);
         $this->assertArrayHasKey('total', $todaySummary);
 

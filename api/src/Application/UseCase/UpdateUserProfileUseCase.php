@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Application\UseCase;
 
-use App\Application\DTO\UpdateUserProfileRequestDTO;
-use App\Application\DTO\UserResponseDTO;
+use App\Application\DTO\User\UpdateUserProfileRequestDTO;
+use App\Application\DTO\User\UserResponseDTO;
+use App\Application\Service\FileUploaderService;
 use App\Domain\Entity\Person;
 use App\Domain\Exception\NotFoundException;
 use App\Domain\Exception\ValidationException;
@@ -14,8 +15,6 @@ use App\Domain\Repository\UserRepositoryInterface;
 use App\Domain\ValueObject\CpfCnpj;
 use Exception;
 use PDO;
-use Psr\Http\Message\UploadedFileInterface;
-use RuntimeException;
 
 class UpdateUserProfileUseCase
 {
@@ -23,6 +22,7 @@ class UpdateUserProfileUseCase
         private readonly PDO $pdo,
         private readonly UserRepositoryInterface $userRepository,
         private readonly PersonRepositoryInterface $personRepository,
+        private readonly FileUploaderService $fileUploaderService,
         private readonly string $uploadPath,
     ) {
     }
@@ -73,7 +73,13 @@ class UpdateUserProfileUseCase
 
             // Handle profile image upload
             if ($dto->profileImage instanceof \Psr\Http\Message\UploadedFileInterface && $dto->profileImage->getError() === UPLOAD_ERR_OK) {
-                $this->handleProfileImageUpload($person, $dto->profileImage);
+                $filename = $this->fileUploaderService->upload(
+                    $dto->profileImage,
+                    $this->uploadPath,
+                    (string)$person->getId(),
+                );
+
+                $person->setAvatarUrl($filename);
             }
 
             $user->touch(); // Update the 'updatedAt' timestamp on the User entity
@@ -83,8 +89,8 @@ class UpdateUserProfileUseCase
             $this->pdo->commit();
 
             // Delete the old file only after successful commit
-            if ($oldAvatarUrl && \file_exists($oldAvatarUrl) && $oldAvatarUrl !== $updatedUser->getPerson()->getAvatarUrl()) {
-                \unlink($oldAvatarUrl);
+            if ($oldAvatarUrl && $oldAvatarUrl !== $updatedUser->getPerson()->getAvatarUrl()) {
+                $this->fileUploaderService->delete($oldAvatarUrl, $this->uploadPath);
             }
 
             return new UserResponseDTO(
@@ -106,28 +112,5 @@ class UpdateUserProfileUseCase
 
             throw $exception;
         }
-    }
-
-    private function handleProfileImageUpload(Person $person, UploadedFileInterface $uploadedFile): void
-    {
-        // Generate a new unique filename
-        $extension = \pathinfo((string) $uploadedFile->getClientFilename(), PATHINFO_EXTENSION);
-        $filename = \sprintf('%d-%d.%s', $person->getId(), \time(), $extension);
-        $destinationPath = $this->uploadPath . DIRECTORY_SEPARATOR . $filename;
-
-        // Ensure the upload directory exists
-        if (!\is_dir($this->uploadPath)) {
-            \mkdir($this->uploadPath, 0o775, true);
-        }
-
-        // Move the file
-        try {
-            $uploadedFile->moveTo($destinationPath);
-        } catch (Exception $exception) {
-            throw new RuntimeException('Falha ao mover o arquivo enviado.', 0, $exception);
-        }
-
-        // Update the person's profile image path
-        $person->setAvatarUrl($destinationPath);
     }
 }

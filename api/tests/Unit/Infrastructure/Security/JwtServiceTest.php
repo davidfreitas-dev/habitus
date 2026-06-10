@@ -19,12 +19,19 @@ use ReflectionClass;
 class JwtServiceTest extends TestCase
 {
     private JwtService $jwtService;
-    private UserRepositoryInterface|MockObject $userRepository;
-    private RedisCache|MockObject $cache;
+
+    private \PHPUnit\Framework\MockObject\MockObject $userRepository;
+
+    private \PHPUnit\Framework\MockObject\MockObject $cache;
+
     private string $privateKeyPath;
+
     private string $publicKeyPath;
+
     private string $algorithm = 'RS256';
-    private int $accessTokenExpire = 900; // 15 minutos
+
+    private int $accessTokenExpire = 900;
+     // 15 minutos
     private int $refreshTokenExpire = 604800; // 7 dias
 
     protected function setUp(): void
@@ -53,11 +60,12 @@ class JwtServiceTest extends TestCase
     protected function tearDown(): void
     {
         parent::tearDown();
-        
+
         // Remover chaves temporárias
         if (file_exists($this->privateKeyPath)) {
             unlink($this->privateKeyPath);
         }
+
         if (file_exists($this->publicKeyPath)) {
             unlink($this->publicKeyPath);
         }
@@ -86,10 +94,10 @@ class JwtServiceTest extends TestCase
     private function createMockUser(int $id, string $email, string $role = 'user', bool $isVerified = true): User|MockObject
     {
         $user = $this->createMock(User::class);
-        
+
         $roleMock = $this->createMock(\App\Domain\Entity\Role::class);
         $roleMock->method('getName')->willReturn($role);
-        
+
         $user->method('getId')->willReturn($id);
         $user->method('getEmail')->willReturn($email);
         $user->method('getRole')->willReturn($roleMock);
@@ -370,16 +378,16 @@ class JwtServiceTest extends TestCase
         $this->cache
             ->expects($this->exactly(4))
             ->method('delete')
-            ->willReturnCallback(function($key) use (&$deleteCallCount, $jtis, $userId) {
+            ->willReturnCallback(function($key) use (&$deleteCallCount, $jtis, $userId): true {
                 $deleteCallCount++;
-                
+
                 if ($deleteCallCount <= 3) {
                     $expectedKey = 'refresh_token:jti-' . $deleteCallCount;
                     $this->assertEquals($expectedKey, $key);
                 } else {
                     $this->assertEquals('user_refresh_tokens:' . $userId, $key);
                 }
-                
+
                 return true;
             });
 

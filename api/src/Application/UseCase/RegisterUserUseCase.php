@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Application\UseCase;
 
-use App\Application\DTO\RegisterUserRequestDTO;
-use App\Application\DTO\UserResponseDTO;
+use App\Application\DTO\Auth\RegisterUserRequestDTO;
+use App\Application\DTO\User\UserResponseDTO;
 use App\Domain\Entity\Person;
 use App\Domain\Entity\Role;
 use App\Domain\Entity\User;
@@ -42,7 +42,7 @@ class RegisterUserUseCase
     public function execute(RegisterUserRequestDTO $dto): UserResponseDTO
     {
         // Check if email already exists
-        if ($this->personRepository->findByEmail($dto->email)) {
+        if ($this->personRepository->findByEmail($dto->email) instanceof \App\Domain\Entity\Person) {
             throw new ConflictException('Este e-mail já está cadastrado.');
         }
 
@@ -55,7 +55,7 @@ class RegisterUserUseCase
                 try {
                     $cpfCnpjVO = CpfCnpj::fromString($dto->cpfcnpj);
 
-                    if ($this->personRepository->findByCpfCnpj($cpfCnpjVO->value())) {
+                    if ($this->personRepository->findByCpfCnpj($cpfCnpjVO->value()) instanceof \App\Domain\Entity\Person) {
                         throw new ConflictException('Este CPF/CNPJ já está cadastrado.');
                     }
                 } catch (ValidationException $e) {
@@ -78,8 +78,8 @@ class RegisterUserUseCase
 
             $user = new User(
                 person: $person,
-                password: $hashedPassword,
                 role: $this->defaultUserRole,
+                password: $hashedPassword,
                 isActive: true,
                 isVerified: false, // Explicitly set as false, even though it's default
             );
@@ -98,10 +98,7 @@ class RegisterUserUseCase
             $this->userVerificationRepository->create($userVerification);
 
             $this->pdo->commit();
-        } catch (ConflictException $e) {
-            $this->pdo->rollBack();
-            throw $e;
-        } catch (ValidationException $e) {
+        } catch (ConflictException|ValidationException $e) {
             $this->pdo->rollBack();
             throw $e;
         } catch (Exception $exception) { // Catch any other generic exceptions
@@ -129,7 +126,7 @@ class RegisterUserUseCase
             isActive: $createdUser->isActive(),
             isVerified: $createdUser->isVerified(),
             phone: $createdUser->getPerson()->getPhone(),
-            cpfcnpj: $createdUser->getPerson()->getCpfCnpj() ? $createdUser->getPerson()->getCpfCnpj()->value() : null,
+            cpfcnpj: $createdUser->getPerson()->getCpfCnpj() instanceof \App\Domain\ValueObject\CpfCnpj ? $createdUser->getPerson()->getCpfCnpj()->value() : null,
         );
     }
 }
