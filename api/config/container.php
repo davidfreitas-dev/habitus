@@ -155,7 +155,7 @@ return [
     LoggerInterface::class => function (ContainerInterface $c) {
         $logger = new Logger('api');
         // Stream handler for general logging (e.g., to file or stdout)
-        $logger->pushHandler(new StreamHandler(__DIR__ . '/../logs/app.log', Level::Info)); // Set to Info to see CORS logs
+        $logger->pushHandler(new StreamHandler(__DIR__ . '/../logs/app.log', Level::Error)); // Set to Info to see CORS logs
 
         // Database handler for critical errors (ERROR and CRITICAL levels)
         $logger->pushHandler(new DatabaseErrorLogHandler(

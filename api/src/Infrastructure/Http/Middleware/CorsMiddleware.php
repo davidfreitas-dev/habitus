@@ -29,11 +29,6 @@ class CorsMiddleware implements MiddlewareInterface
         $origin = $request->getHeaderLine('Origin');
         $allowedOrigins = $this->settings['allowed_origins'];
 
-        // Log origin for debugging purposes (Item 4)
-        if ($origin !== '') {
-            $this->logger->info("CORS Attempt from Origin: " . $origin);
-        }
-
         // Check if origin is allowed. Also allow requests without an Origin header.
         if ($origin === '' || \in_array('*', $allowedOrigins, true) || \in_array($origin, $allowedOrigins, true)) {
             $allowOrigin = \in_array('*', $allowedOrigins, true) ? '*' : $origin;
