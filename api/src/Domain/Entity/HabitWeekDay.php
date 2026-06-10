@@ -21,6 +21,7 @@ class HabitWeekDay implements JsonSerializable
         if ($weekDay < 0 || $weekDay > 6) {
             throw new \InvalidArgumentException('O dia da semana deve ser entre 0 (Domingo) e 6 (Sábado).');
         }
+
         $this->weekDay = $weekDay;
     }
 

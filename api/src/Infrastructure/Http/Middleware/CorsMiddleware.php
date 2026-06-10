@@ -8,12 +8,15 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Log\LoggerInterface;
 use Slim\Psr7\Response;
 
 class CorsMiddleware implements MiddlewareInterface
 {
-    public function __construct(private array $settings)
-    {
+    public function __construct(
+        private array $settings,
+        private readonly LoggerInterface $logger,
+    ) {
     }
 
     public function process(
@@ -25,6 +28,11 @@ class CorsMiddleware implements MiddlewareInterface
 
         $origin = $request->getHeaderLine('Origin');
         $allowedOrigins = $this->settings['allowed_origins'];
+
+        // Log origin for debugging purposes (Item 4)
+        if ($origin !== '') {
+            $this->logger->info("CORS Attempt from Origin: " . $origin);
+        }
 
         // Check if origin is allowed. Also allow requests without an Origin header.
         if ($origin === '' || \in_array('*', $allowedOrigins, true) || \in_array($origin, $allowedOrigins, true)) {

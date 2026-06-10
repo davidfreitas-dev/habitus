@@ -18,15 +18,17 @@ use App\Application\{
     UseCase\GetHabitStatsUseCase,
     UseCase\GetHabitsByDayUseCase,
     UseCase\GetHabitsSummaryUseCase,
+    UseCase\GetUserUseCase,
     UseCase\ListErrorLogsUseCase,
+    UseCase\ListUsersUseCase,
     UseCase\RegisterUserUseCase,
     UseCase\ResetPasswordUseCase,
     UseCase\ResolveErrorLogUseCase,
     UseCase\ToggleHabitUseCase,
     UseCase\UpdateHabitUseCase,
-    UseCase\UpdateProfileImageUseCase,
     UseCase\UpdateUserAdminUseCase,
     UseCase\UpdateUserProfileUseCase,
+    UseCase\UploadProfileImageUseCase,
     UseCase\ValidateResetCodeUseCase,
     UseCase\VerifyEmailUseCase
 };
@@ -69,6 +71,7 @@ use App\Infrastructure\{
     Security\PasswordHasher
 };
 // Domain Layer
+use App\Presentation\Api\V1\Controller\AdminController;
 use App\Presentation\Api\V1\Controller\ErrorLogController;
 use App\Presentation\Api\V1\Controller\HabitController;
 use App\Presentation\Api\V1\Controller\UserController;
@@ -152,7 +155,7 @@ return [
     LoggerInterface::class => function (ContainerInterface $c) {
         $logger = new Logger('api');
         // Stream handler for general logging (e.g., to file or stdout)
-        $logger->pushHandler(new StreamHandler(__DIR__ . '/../logs/app.log', Level::Error)); // Use Debug to see INFO type, or Warning
+        $logger->pushHandler(new StreamHandler(__DIR__ . '/../logs/app.log', Level::Info)); // Set to Info to see CORS logs
 
         // Database handler for critical errors (ERROR and CRITICAL levels)
         $logger->pushHandler(new DatabaseErrorLogHandler(
@@ -186,7 +189,10 @@ return [
     CorsMiddleware::class => function (ContainerInterface $c) {
         $settings = $c->get('settings');
 
-        return new CorsMiddleware($settings['cors']);
+        return new CorsMiddleware(
+            $settings['cors'],
+            $c->get(LoggerInterface::class),
+        );
     },
 
     JsonResponseFactory::class => fn (ContainerInterface $c) => new JsonResponseFactory($c->get(ResponseFactoryInterface::class)),
@@ -303,10 +309,18 @@ return [
         $c->get('settings')['paths']['upload_path'],
     ),
 
-    UpdateProfileImageUseCase::class => fn (ContainerInterface $c) => new UpdateProfileImageUseCase(
+    UploadProfileImageUseCase::class => fn (ContainerInterface $c) => new UploadProfileImageUseCase(
         $c->get(UserRepositoryInterface::class),
         $c->get(PersonRepositoryInterface::class),
         $c->get('settings')['paths']['upload_path'],
+    ),
+
+    ListUsersUseCase::class => fn (ContainerInterface $c) => new ListUsersUseCase(
+        $c->get(UserRepositoryInterface::class),
+    ),
+
+    GetUserUseCase::class => fn (ContainerInterface $c) => new GetUserUseCase(
+        $c->get(UserRepositoryInterface::class),
     ),
 
     ChangePasswordUseCase::class => fn (ContainerInterface $c) => new ChangePasswordUseCase(
@@ -417,7 +431,6 @@ return [
         $c->get(HabitRepositoryInterface::class),
         $c->get(DayRepositoryInterface::class),
         $c->get(DayHabitRepositoryInterface::class),
-        $c->get(UserRepositoryInterface::class),
     ),
 
     GetAllHabitsUseCase::class => fn (ContainerInterface $c) => new GetAllHabitsUseCase(

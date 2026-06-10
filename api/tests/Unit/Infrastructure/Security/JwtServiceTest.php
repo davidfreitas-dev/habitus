@@ -31,6 +31,7 @@ class JwtServiceTest extends TestCase
     private string $algorithm = 'RS256';
 
     private int $accessTokenExpire = 900;
+
      // 15 minutos
     private int $refreshTokenExpire = 604800; // 7 dias
 

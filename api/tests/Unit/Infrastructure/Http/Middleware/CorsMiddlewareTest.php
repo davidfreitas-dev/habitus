@@ -8,6 +8,7 @@ use App\Infrastructure\Http\Middleware\CorsMiddleware;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Log\LoggerInterface;
 use Slim\Psr7\Factory\RequestFactory;
 use Slim\Psr7\Factory\ResponseFactory;
 use Slim\Psr7\Response;
@@ -17,9 +18,12 @@ use Slim\Psr7\Response;
  */
 final class CorsMiddlewareTest extends TestCase
 {
+    private LoggerInterface $logger;
+
     protected function setUp(): void
     {
         parent::setUp();
+        $this->logger = $this->createMock(LoggerInterface::class);
     }
 
     private function getDefaultSettings(): array
@@ -47,7 +51,7 @@ final class CorsMiddlewareTest extends TestCase
         $handler = $this->createMock(RequestHandlerInterface::class);
         $handler->expects($this->never())->method('handle'); // Handler should not be called for OPTIONS
 
-        $middleware = new CorsMiddleware($settings);
+        $middleware = new CorsMiddleware($settings, $this->logger);
         $resultResponse = $middleware->process($request, $handler);
 
         self::assertSame(200, $resultResponse->getStatusCode());
@@ -72,7 +76,7 @@ final class CorsMiddlewareTest extends TestCase
             ->with(self::identicalTo($request))
             ->willReturn($expectedResponse);
 
-        $middleware = new CorsMiddleware($settings);
+        $middleware = new CorsMiddleware($settings, $this->logger);
         $resultResponse = $middleware->process($request, $handler);
 
         self::assertSame(200, $resultResponse->getStatusCode());
@@ -95,7 +99,7 @@ final class CorsMiddlewareTest extends TestCase
         $handler = $this->createMock(RequestHandlerInterface::class);
         $handler->expects($this->once())->method('handle')->willReturn($expectedResponse);
 
-        $middleware = new CorsMiddleware($settings);
+        $middleware = new CorsMiddleware($settings, $this->logger);
         $resultResponse = $middleware->process($request, $handler);
 
         self::assertSame('*', $resultResponse->getHeaderLine('Access-Control-Allow-Origin'));
@@ -112,7 +116,7 @@ final class CorsMiddlewareTest extends TestCase
         $handler = $this->createMock(RequestHandlerInterface::class);
         $handler->expects($this->once())->method('handle')->willReturn($expectedResponse);
 
-        $middleware = new CorsMiddleware($settings);
+        $middleware = new CorsMiddleware($settings, $this->logger);
         $resultResponse = $middleware->process($request, $handler);
 
         self::assertEmpty($resultResponse->getHeaderLine('Access-Control-Allow-Origin'));
@@ -128,7 +132,7 @@ final class CorsMiddlewareTest extends TestCase
         $handler = $this->createMock(RequestHandlerInterface::class);
         $handler->expects($this->once())->method('handle')->willReturn($expectedResponse);
 
-        $middleware = new CorsMiddleware($settings);
+        $middleware = new CorsMiddleware($settings, $this->logger);
         $resultResponse = $middleware->process($request, $handler);
 
         self::assertEmpty($resultResponse->getHeaderLine('Access-Control-Allow-Origin'));
@@ -145,7 +149,7 @@ final class CorsMiddlewareTest extends TestCase
         $handler = $this->createMock(RequestHandlerInterface::class);
         $handler->expects($this->once())->method('handle')->willReturn($expectedResponse);
 
-        $middleware = new CorsMiddleware($settings);
+        $middleware = new CorsMiddleware($settings, $this->logger);
         $resultResponse = $middleware->process($request, $handler);
 
         self::assertEmpty($resultResponse->getHeaderLine('Access-Control-Allow-Credentials'));
