@@ -7,29 +7,93 @@ on:
     paths:
       - "api/**"
 
+# Garante que apenas um deploy rode por vez
+concurrency:
+  group: deploy-api
+  cancel-in-progress: false  # aguarda o anterior terminar
+
 jobs:
-  deploy:
-    name: Deploy Habits API
+  # Etapa 1: validação
+  validate:
     runs-on: ubuntu-latest
-    
+    defaults:
+      run:
+        working-directory: api
+
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-      
-      - name: Deploy to Server
-        uses: easingthemes/ssh-deploy@main
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
         with:
-          SSH_PRIVATE_KEY: ${{ secrets.API_SERVER_SSH_KEY }}
-          ARGS: "-rlgoDzvh --delete-after --no-perms --no-owner --no-group"
-          SOURCE: "./api/"
-          TARGET: ${{ secrets.API_REMOTE_TARGET }}
-          REMOTE_HOST: ${{ secrets.API_REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.API_REMOTE_USER }}
-          REMOTE_PORT: ${{ secrets.API_REMOTE_PORT }}
-          EXCLUDE: "/.git/,.docker/,bin/,tests/,docker-compose.yml,.dockerignore,.env.example,GEMINI.md,README.md,vendor/,.env,.idea/,.vscode/,logs/,config/keys/,tools/,docs/,storage/"
+          php-version: '8.4'
+          tools: composer:v2
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: api/vendor
+          key: composer-${{ hashFiles('api/composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install dependencies
+        run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
+      - name: Validate composer.json
+        run: composer validate --no-check-publish
+
+      - name: Check syntax (lint)
+        run: find src -name "*.php" -print0 | xargs -0 php -l
+
+      # Descomente quando tiver testes
+      # - name: Run tests
+      #   run: composer test
+
+# Etapa 2: deploy (só roda se validate passar)
+  deploy:
+    needs: validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+
+      - name: Restore Composer cache
+        uses: actions/cache@v4
+        with:
+          path: api/vendor
+          key: composer-${{ hashFiles('api/composer.lock') }}
+
+      - name: Install dependencies
+        working-directory: api
+        run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
+      - name: Deploy to Server
+        uses: easingthemes/ssh-deploy@v5.1.0  # versão fixada
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          REMOTE_PORT: ${{ secrets.REMOTE_PORT }}
+          SOURCE: "api/"
+          TARGET: "/var/www/habits/api/"
+          ARGS: "-rlgoDz --delete"
+          EXCLUDE: "README.md, .git/, .gitignore, .env.example, .dockerignore,
+                    docker-compose.yml, Dockerfile, .docker/, docs/, tools/,
+                    logs/, .env"
           SCRIPT_AFTER: |
-            cd /var/www/habits.davidfreitas.dev.br
-            composer install --no-dev --optimize-autoloader --no-interaction
-            sudo chmod -R 775 logs
-            redis-cli -a ${{ secrets.API_REDIS_PASSWORD }} SELECT 0 && redis-cli -a ${{ secrets.API_REDIS_PASSWORD }} FLUSHDB || true
+            set -e  # falha imediatamente se qualquer comando falhar
+            cd /var/www/habits/api
             sudo systemctl reload php8.4-fpm
+            echo "Deploy concluído: $(date)"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Deploy falhou! Verifique os logs acima."
+          # Aqui você pode adicionar integração com Slack, Discord, e-mail, etc.
