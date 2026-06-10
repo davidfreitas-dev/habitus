@@ -1,0 +1,29 @@
+# Environment variables
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Dependencies (redundant if handled in subfolders, but safe for root)
+node_modules/
+vendor/
+
+# Docker
+# Note: Keep docker-compose.yml and Dockerfiles, but ignore local data if any
+mysql_data/
+redis_data/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/

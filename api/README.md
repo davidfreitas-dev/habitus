@@ -88,32 +88,33 @@ cd <project-folder>
 ```
 
 #### 3. Configure o ambiente
-Copie o arquivo de exemplo `.env.example` e o personalize conforme necessário.
+Copie o arquivo de exemplo `.env.example` da pasta `api` e o personalize conforme necessário.
 ```bash
-cp .env.example .env
+cp api/.env.example api/.env
 ```
 
-O arquivo `.env` deve conter as configurações para **dois bancos de dados**:
+O arquivo `api/.env` deve conter as configurações para **dois bancos de dados**:
 - **Banco de Desenvolvimento** (`DB_*`): Para uso durante o desenvolvimento
 - **Banco de Testes** (`DB_TEST_*`): Usado exclusivamente pelos testes automatizados
 
-> **Importante:** Certifique-se de preencher todas as variáveis de ambiente no arquivo `.env`, especialmente as senhas de banco de dados e Redis.
+> **Importante:** Certifique-se de preencher todas as variáveis de ambiente no arquivo `api/.env`, especialmente as senhas de banco de dados e Redis.
 
 #### 4. Gere as Chaves de Criptografia
 Para a autenticação JWT com RS256, você precisa de um par de chaves pública/privada.
 
 ```bash
-# Crie o diretório se não existir
-mkdir -p config/keys
+# Crie o diretório se não existir (a partir da raiz do projeto)
+mkdir -p api/config/keys
 
 # Gere a chave privada
-openssl genrsa -out config/keys/private_key.pem 2048
+openssl genrsa -out api/config/keys/private_key.pem 2048
 
 # Extraia a chave pública
-openssl rsa -in config/keys/private_key.pem -pubout -out config/keys/public_key.pem
+openssl rsa -in api/config/keys/private_key.pem -pubout -out api/config/keys/public_key.pem
 ```
 
 #### 5. Inicie os containers
+Execute este comando a partir da raiz do projeto:
 ```bash
 docker compose up -d --build
 ```
@@ -131,7 +132,7 @@ docker compose exec api composer seed
 ```
 
 #### 8. Acesse a aplicação
-- **API**: `http://localhost:8000`
+- **API**: `http://api.localhost`
 - **PHPMyAdmin**: `http://localhost:8080`
 
 ### Acessando o PHPMyAdmin

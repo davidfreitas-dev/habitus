@@ -272,6 +272,7 @@ project/
 
 | Property | Value |
 |---|---|
+| Environment | Docker-based (development server) |
 | Framework | Ionic Framework 7.x with Vue 3 |
 | Language | JavaScript (Composition API with `<script setup>`) |
 | Build Tool | Vite |
@@ -348,14 +349,18 @@ project/
 
 ### 3.5 Development Workflow
 
-#### Local Development
+#### Local Development (Docker)
+The development server starts automatically with `docker compose up`.
 ```bash
-ionic serve
+docker compose logs -f mobile    # View development server logs
 ```
+The app is accessible at `http://localhost:8100`.
 
 #### Mobile Platform Sync
+Native operations must be run on the host machine.
 ```bash
-npx cap sync    # Run after making changes to web assets
+docker compose exec mobile npm run build    # Build web assets inside Docker
+npx cap sync                                # Sync to native projects (host)
 ```
 
 #### Testing Strategy
@@ -369,18 +374,22 @@ npx cap sync    # Run after making changes to web assets
 
 ### 3.6 Commands Reference
 
+#### Dependency Management (via Docker)
 ```bash
-# Dependency management
-npm install <package>
-npm install --save-dev <package>
+docker compose exec mobile npm install <package>
+docker compose exec mobile npm install --save-dev <package>
+```
 
-# Mobile
+#### Mobile (Host Machine)
+```bash
 npx cap sync              # Sync web assets to native projects
 npx cap open ios          # Open native iOS IDE
 npx cap open android      # Open native Android IDE
+```
 
-# Build
-npm run build
+#### Build (via Docker)
+```bash
+docker compose exec mobile npm run build
 ```
 
 ---
