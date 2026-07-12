@@ -60,7 +60,7 @@ These rules apply to **both projects** and must **NEVER** be violated under any 
 - Dependency injection using PHP-DI
 - Docker-first development workflow
 
-> **Additional Critical Rule — No Local Composer**: **NEVER** run Composer locally. All Composer commands must be executed through Docker: `docker compose exec api composer <command>`
+> **Additional Critical Rule — No Local Composer**: **NEVER** run Composer locally. All Composer commands must be executed through Docker: `docker compose exec server composer <command>`
 
 ---
 
@@ -167,37 +167,37 @@ All new code must have proper PHPDoc blocks with:
 
 #### Composer Commands
 ```bash
-docker compose exec api composer install
-docker compose exec api composer update
-docker compose exec api composer require <package/name>
-docker compose exec api composer require --dev <package/name>
-docker compose exec api composer remove <package/name>
+docker compose exec server composer install
+docker compose exec server composer update
+docker compose exec server composer require <package/name>
+docker compose exec server composer require --dev <package/name>
+docker compose exec server composer remove <package/name>
 ```
 > Use Composer scripts when available. Prefer `composer test` over direct PHPUnit calls.
 
 #### Code Quality Commands
 ```bash
-docker compose exec api composer cs-check      # Check code style (dry-run)
-docker compose exec api composer cs-fix        # Fix code style automatically
-docker compose exec api composer rector        # Run Rector refactoring
-docker compose exec api composer rector:dry    # Simulate Rector (dry-run)
+docker compose exec server composer cs-check      # Check code style (dry-run)
+docker compose exec server composer cs-fix        # Fix code style automatically
+docker compose exec server composer rector        # Run Rector refactoring
+docker compose exec server composer rector:dry    # Simulate Rector (dry-run)
 ```
 
 #### Testing Commands
 ```bash
-docker compose exec api composer test                  # Run all tests
-docker compose exec api composer test:testdox          # Detailed output (testdox)
-docker compose exec api composer test:unit             # Unit tests only
-docker compose exec api composer test:integration      # Integration tests only
-docker compose exec api composer test:functional       # Functional tests only
-docker compose exec api composer test:coverage         # Generate coverage report
+docker compose exec server composer test                  # Run all tests
+docker compose exec server composer test:testdox          # Detailed output (testdox)
+docker compose exec server composer test:unit             # Unit tests only
+docker compose exec server composer test:integration      # Integration tests only
+docker compose exec server composer test:functional       # Functional tests only
+docker compose exec server composer test:coverage         # Generate coverage report
 ```
 
 #### Advanced Testing Workflow
 
 **Run a specific test file with text coverage:**
 ```bash
-docker compose exec api vendor/bin/phpunit tests/Unit/Domain/Entity/<TestFileName>.php \
+docker compose exec server vendor/bin/phpunit tests/Unit/Domain/Entity/<TestFileName>.php \
   --coverage-filter src/Domain/Entity \
   --coverage-text
 ```
@@ -205,7 +205,7 @@ docker compose exec api vendor/bin/phpunit tests/Unit/Domain/Entity/<TestFileNam
 
 **Inspect HTML coverage reports:**
 ```bash
-docker compose exec api composer test:coverage         # Generate full HTML report (output: tools/coverage/)
+docker compose exec server composer test:coverage         # Generate full HTML report (output: tools/coverage/)
 cat tools/coverage/Domain/index.html                   # View summary for a specific module
 cat tools/coverage/Domain/Entity/ErrorLog.php.html     # Inspect line-by-line coverage
 ```
@@ -435,7 +435,7 @@ mobile/
 ✅ Always add sensitive files to `.gitignore`  
 
 ### REST API
-✅ Always use Docker commands: `docker compose exec api composer <command>`  
+✅ Always use Docker commands: `docker compose exec server composer <command>`  
 ✅ Never run Composer locally  
 ✅ Follow PSR-12 for code style  
 ✅ Use strict types: `declare(strict_types=1);`  

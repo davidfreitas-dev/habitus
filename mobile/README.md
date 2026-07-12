@@ -38,36 +38,32 @@ src/
 
 ---
 
-## 🚀 Configuração Inicial (Docker)
+## 🚀 Configuração do Ambiente
 
-O uso de Docker é o método recomendado para desenvolvimento, garantindo que todas as dependências (Node, Ionic CLI) estejam configuradas corretamente.
+> [!IMPORTANT]
+> **Pré-requisito:** Este projeto faz parte de um monorepo e depende da infraestrutura Docker definida no projeto `/server`. Antes de continuar, **siga completamente o passo a passo de configuração do [`/server`](../server/README.md)** (clone do repositório, criação do `.env` raiz, geração de chaves JWT, inicialização dos containers e instalação das dependências do Composer).
 
-### Pré-requisitos
-- Docker
-- Docker Compose
+Após concluir o setup do `/server` e com os containers já em execução (`docker compose up -d`), siga os passos abaixo para configurar o mobile:
 
-### Instalação e Execução
+### 1. Configure as variáveis de ambiente do Mobile
 
-1. **Clone o repositório e acesse a raiz:**
-   ```sh
-   git clone <repository-url>
-   cd habits
-   ```
+Crie o arquivo `.env` específico do mobile a partir do exemplo:
+```sh
+cp mobile/.env.example mobile/.env
+```
+Preencha as variáveis conforme necessário (ex: URL base da API).
 
-2. **Configure as variáveis de ambiente:**
-   Crie o arquivo `.env` na raiz do projeto (se ainda não existir) e o `.env` na pasta `mobile/`:
-   ```sh
-   cp mobile/.env.example mobile/.env
-   ```
+### 2. Reconstrua o container mobile
 
-3. **Inicie os containers:**
-   ```sh
-   docker compose up -d --build
-   ```
-   O container `mobile` instalará automaticamente as dependências (`npm install`) durante o build.
+Caso o container `mobile` ainda não tenha sido iniciado com o build completo:
+```sh
+docker compose up -d --build mobile
+```
+O container instalará automaticamente as dependências (`npm install`) durante o build.
 
-4. **Acesse o App:**
-   Abra `http://localhost:8100` no seu navegador.
+### 3. Acesse o App
+
+Abra `http://mobile.localhost` no seu navegador.
 
 ---
 

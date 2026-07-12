@@ -14,6 +14,14 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    host: '0.0.0.0',
+    port: 8100,
+    allowedHosts: ['mobile.localhost', 'localhost'],
+    hmr: {
+      clientPort: 80,
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom'
