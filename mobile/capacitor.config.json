@@ -1,6 +1,6 @@
 {
-  "appId": "com.habits.ionic.app",
-  "appName": "habitus",
+  "appId": "br.dev.davidfreitas.habitus",
+  "appName": "Habitus - Rastreamento de Hábitos",
   "webDir": "dist",
   "plugins": {
     "LocalNotifications": {

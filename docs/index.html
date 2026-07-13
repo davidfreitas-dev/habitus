@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Habitus — Política de Privacidade e Termos de Uso</title>
+  <meta name="description" content="Política de Privacidade e Termos de Uso do aplicativo Habitus - Rastreador de Hábitos, desenvolvido por David Freitas." />
+  <meta name="author" content="David Freitas" />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:title" content="Habitus — Política de Privacidade" />
+  <meta property="og:description" content="Política de Privacidade e Termos de Uso do aplicativo Habitus - Rastreador de Hábitos." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Base ──────────────────────────────────────────── */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      /* Primary — Lime (from Habitus) */
+      --color-primary: #a3e635;
+      --color-primary-hover: #84cc16;
+      --color-primary-dim: rgba(163, 230, 53, 0.55);
+      --color-primary-glow: rgba(163, 230, 53, 0.08);
+      --color-primary-tab: rgba(163, 230, 53, 0.12);
+
+      /* Backgrounds — Zinc neutrals (dark theme) */
+      --bg-body: #09090a;
+      --bg-card: #18181b;
+      --bg-card-border: #27272a;
+      --bg-tab: rgba(255, 255, 255, 0.04);
+
+      /* Text — Zinc scale */
+      --color-text: #ffffff;
+      --color-text-secondary: #a1a1aa;
+      --color-text-muted: #52525b;
+
+      /* Borders */
+      --color-border: #27272a;
+
+      /* Links */
+      --color-link: #a3e635;
+
+      /* Radii */
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+
+      /* Shadows & transitions */
+      --shadow-card: 0 4px 32px rgba(0, 0, 0, 0.45);
+      --transition-fast: 0.2s ease;
+      --transition-normal: 0.3s ease;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background-color: var(--bg-body);
+      color: var(--color-text);
+      line-height: 1.7;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ── Background Glow ───────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -180px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, var(--color-primary-glow) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Layout ────────────────────────────────────────────────── */
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* ── Header ────────────────────────────────────────────────── */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header__icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 64px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #a3e635 0%, #65a30d 100%);
+      margin-bottom: 20px;
+      box-shadow: 0 8px 24px rgba(163, 230, 53, 0.25);
+    }
+
+    .header__icon svg {
+      width: 32px;
+      height: 32px;
+      fill: #fff;
+    }
+
+    .header__title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--color-text);
+    }
+
+    .header__subtitle {
+      font-size: 0.95rem;
+      color: var(--color-text-muted);
+      margin-top: 6px;
+    }
+
+    /* ── Tabs ──────────────────────────────────────────────────── */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--bg-tab);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 4px;
+      margin-bottom: 36px;
+    }
+
+    .tabs__button {
+      flex: 1;
+      padding: 12px 16px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--color-text-muted);
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      position: relative;
+    }
+
+    .tabs__button:hover {
+      color: var(--color-text-secondary);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .tabs__button.active {
+      background: var(--color-primary-tab);
+      color: var(--color-primary);
+      box-shadow: 0 2px 8px rgba(163, 230, 53, 0.1);
+    }
+
+    /* ── Content Panels ────────────────────────────────────────── */
+    .panel {
+      display: none;
+      animation: fadeIn 0.35s ease forwards;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Card ──────────────────────────────────────────────────── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      box-shadow: var(--shadow-card);
+    }
+
+    /* ── Typography ────────────────────────────────────────────── */
+    .card h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.015em;
+      color: var(--color-text);
+      margin-bottom: 4px;
+    }
+
+    .card .updated {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+      margin-bottom: 32px;
+      display: block;
+    }
+
+    .card section {
+      margin-bottom: 28px;
+    }
+
+    .card section:last-child {
+      margin-bottom: 0;
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 8px;
+      position: relative;
+      padding-left: 14px;
+    }
+
+    .card h2::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 3px;
+      width: 3px;
+      height: calc(100% - 6px);
+      background: var(--color-primary);
+      border-radius: 2px;
+    }
+
+    .card p {
+      font-size: 0.935rem;
+      color: var(--color-text-secondary);
+      margin-bottom: 12px;
+      line-height: 1.75;
+    }
+
+    .card p:last-child {
+      margin-bottom: 0;
+    }
+
+    .card ul {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 12px;
+    }
+
+    .card ul li {
+      position: relative;
+      padding-left: 20px;
+      margin-bottom: 10px;
+      font-size: 0.935rem;
+      color: var(--color-text-secondary);
+      line-height: 1.75;
+    }
+
+    .card ul li::before {
+      content: '';
+      position: absolute;
+      left: 2px;
+      top: 10px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-primary-dim);
+    }
+
+    .card ul li strong {
+      color: var(--color-text);
+      font-weight: 600;
+    }
+
+    .card a {
+      color: var(--color-link);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color var(--transition-fast);
+      border-bottom: 1px solid transparent;
+    }
+
+    .card a:hover {
+      border-bottom-color: var(--color-primary);
+    }
+
+    /* ── Footer ────────────────────────────────────────────────── */
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+    }
+
+    .footer a {
+      color: var(--color-primary-dim);
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* ── Responsive ────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .wrapper {
+        padding: 28px 16px 60px;
+      }
+
+      .header {
+        margin-bottom: 28px;
+      }
+
+      .header__title {
+        font-size: 1.4rem;
+      }
+
+      .tabs__button {
+        font-size: 0.8rem;
+        padding: 10px 12px;
+      }
+
+      .card {
+        padding: 24px 20px;
+        border-radius: var(--radius-md);
+      }
+
+      .card h1 {
+        font-size: 1.25rem;
+      }
+
+      .card h2 {
+        font-size: 1rem;
+      }
+
+      .card p,
+      .card ul li {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrapper">
+    <!-- Header -->
+    <header class="header">
+      <div class="header__icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+        </svg>
+      </div>
+      <h1 class="header__title">Habitus</h1>
+      <p class="header__subtitle">Rastreador de Hábitos</p>
+    </header>
+
+    <!-- Tabs -->
+    <div class="tabs" role="tablist" aria-label="Navegação entre seções">
+      <button
+        class="tabs__button active"
+        role="tab"
+        id="tab-privacy"
+        aria-controls="panel-privacy"
+        aria-selected="true"
+        onclick="switchTab('privacy')"
+      >
+        Política de Privacidade
+      </button>
+      <button
+        class="tabs__button"
+        role="tab"
+        id="tab-terms"
+        aria-controls="panel-terms"
+        aria-selected="false"
+        onclick="switchTab('terms')"
+      >
+        Termos de Uso
+      </button>
+    </div>
+
+    <!-- Privacy Policy -->
+    <div class="panel active" id="panel-privacy" role="tabpanel" aria-labelledby="tab-privacy">
+      <article class="card">
+        <h1>Política de Privacidade</h1>
+        <em class="updated">Última atualização: 25 de fevereiro de 2026</em>
+
+        <section>
+          <h2>Informações Gerais</h2>
+          <p>A sua privacidade é importante para nós. Esta Política de Privacidade explica como o aplicativo <strong>Habitus - Rastreador de Hábitos</strong> ("nós", "nosso"), desenvolvido por David Freitas, coleta, utiliza e protege suas informações. Ao usar nosso Aplicativo, você concorda com a coleta e uso de informações de acordo com esta política.</p>
+        </section>
+
+        <section>
+          <h2>Coleta e Uso de Informações</h2>
+          <p>Para fornecer e melhorar nosso serviço, coletamos os seguintes tipos de informações:</p>
+          <ul>
+            <li><strong>Informações Pessoais:</strong> Ao criar uma conta, solicitamos seu nome, endereço de e-mail e uma senha (armazenada de forma segura). Utilizamos esses dados para identificar você, permitir o acesso à sua conta e nos comunicarmos sobre o serviço.</li>
+            <li><strong>Dados de Hábitos:</strong> Armazenamos os hábitos e o progresso que você registra no Aplicativo. Esses dados são essenciais para o funcionamento do serviço e para que você possa acompanhar sua evolução.</li>
+            <li><strong>Dados de Uso e Técnicos:</strong> Coletamos informações como seu endereço IP, tipo de dispositivo, sistema operacional e interações com o Aplicativo. Esses dados nos ajudam a entender como nosso serviço é utilizado, a diagnosticar problemas técnicos e a melhorar a experiência do usuário.</li>
+          </ul>
+          <p>O Aplicativo não coleta informações de localização precisa do dispositivo.</p>
+        </section>
+
+        <section>
+          <h2>Direitos do Usuário</h2>
+          <p>Respeitamos seus direitos sobre seus dados. A qualquer momento, você pode:</p>
+          <ul>
+            <li><strong>Acessar e Corrigir:</strong> Você pode visualizar e editar suas informações de perfil diretamente no aplicativo.</li>
+            <li><strong>Excluir:</strong> Você pode excluir sua conta e todos os dados associados através da seção de configurações do Aplicativo. A exclusão é permanente.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Retenção e Exclusão de Dados</h2>
+          <p>Manteremos suas informações apenas pelo tempo necessário para fornecer o serviço. Se você decidir excluir sua conta, todos os seus dados pessoais e de hábitos serão excluídos permanentemente de nossos servidores em um prazo de até 30 dias.</p>
+        </section>
+
+        <section>
+          <h2>Terceiros</h2>
+          <p>Os dados podem ser compartilhados com terceiros confiáveis para análise e melhorias, respeitando esta política de privacidade.</p>
+          <p>Serviços de terceiros utilizados:</p>
+          <ul>
+            <li><a href="https://www.google.com/policies/privacy/" target="_blank" rel="noopener noreferrer">Google Play Services</a></li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Privacidade Infantil</h2>
+          <p>Nossos serviços não se destinam a menores de 13 anos. Não coletamos intencionalmente informações de identificação pessoal de crianças menores de 13 anos. Se descobrirmos que uma criança menor de 13 anos nos forneceu informações pessoais, as excluiremos imediatamente de nossos servidores.</p>
+        </section>
+
+        <section>
+          <h2>Segurança</h2>
+          <p>O Provedor de Serviço implementa medidas físicas, eletrônicas e procedimentais para proteger as informações coletadas. No entanto, lembre-se de que nenhum método de transmissão pela internet ou de armazenamento eletrônico é 100% seguro.</p>
+        </section>
+
+        <section>
+          <h2>Alterações</h2>
+          <p>Esta política pode ser atualizada periodicamente. Notificaremos você sobre quaisquer alterações, publicando a nova política de privacidade nesta página. É aconselhável revisar esta página periodicamente para verificar quaisquer alterações.</p>
+        </section>
+
+        <section>
+          <h2>Contato</h2>
+          <p>Para dúvidas ou sugestões sobre privacidade, envie um e-mail para <a href="mailto:davidfreitas.dev@outlook.com">davidfreitas.dev@outlook.com</a>.</p>
+        </section>
+      </article>
+    </div>
+
+    <!-- Terms of Use -->
+    <div class="panel" id="panel-terms" role="tabpanel" aria-labelledby="tab-terms">
+      <article class="card">
+        <h1>Termos de Uso</h1>
+        <em class="updated">Última atualização: 25 de fevereiro de 2026</em>
+
+        <section>
+          <h2>1. Acordo com os Termos</h2>
+          <p>Ao baixar e utilizar o aplicativo <strong>Habitus - Rastreador de Hábitos</strong>, você concorda em cumprir estes Termos de Uso. Se você não concorda com estes termos, não utilize o Aplicativo.</p>
+        </section>
+
+        <section>
+          <h2>2. Propriedade Intelectual</h2>
+          <p>O Aplicativo e seu conteúdo original, funcionalidades e design são de propriedade de David Freitas e protegidos por leis de direitos autorais. Você não tem permissão para copiar, modificar, distribuir ou criar trabalhos derivados baseados no Aplicativo.</p>
+        </section>
+
+        <section>
+          <h2>3. Contas de Usuário</h2>
+          <p>Você é responsável por manter a confidencialidade de sua conta e senha. Você concorda em aceitar a responsabilidade por todas as atividades que ocorram em sua conta.</p>
+        </section>
+
+        <section>
+          <h2>4. Isenção de Garantia</h2>
+          <p>O Aplicativo é fornecido "COMO ESTÁ" e "COMO DISPONÍVEL", sem garantias de qualquer tipo, expressas ou implícitas. Não garantimos que o serviço será ininterrupto, seguro ou livre de erros.</p>
+        </section>
+
+        <section>
+          <h2>5. Limitação de Responsabilidade</h2>
+          <p>Em nenhuma circunstância o provedor do serviço será responsável por quaisquer danos diretos, indiretos, incidentais ou consequentes resultantes do uso ou da incapacidade de usar o Aplicativo.</p>
+        </section>
+
+        <section>
+          <h2>6. Alterações nos Termos</h2>
+          <p>Reservamo-nos o direito de modificar estes termos a qualquer momento. Notificaremos sobre as alterações publicando os novos termos nesta página. É sua responsabilidade revisar estes Termos de Uso periodicamente.</p>
+        </section>
+
+        <section>
+          <h2>7. Contato</h2>
+          <p>Para dúvidas ou sugestões sobre os Termos de Uso, envie um e-mail para <a href="mailto:davidfreitas.dev@outlook.com">davidfreitas.dev@outlook.com</a>.</p>
+        </section>
+      </article>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>&copy; 2026 Habitus — David Freitas. Todos os direitos reservados.</p>
+    </footer>
+  </div>
+
+  <script>
+    function switchTab(tab) {
+      // Update buttons
+      document.querySelectorAll('.tabs__button').forEach(function(btn) {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-selected', 'false');
+      });
+      document.getElementById('tab-' + tab).classList.add('active');
+      document.getElementById('tab-' + tab).setAttribute('aria-selected', 'true');
+
+      // Update panels
+      document.querySelectorAll('.panel').forEach(function(panel) {
+        panel.classList.remove('active');
+      });
+      document.getElementById('panel-' + tab).classList.add('active');
+    }
+  </script>
+
+</body>
+</html>
