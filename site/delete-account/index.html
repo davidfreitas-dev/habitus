@@ -102,6 +102,10 @@
       margin-bottom: 40px;
     }
 
+    .header__brand-link:hover {
+      opacity: 0.85;
+    }
+
     .header__icon {
       display: inline-flex;
       align-items: center;
@@ -432,12 +436,14 @@
   <div class="wrapper">
     <!-- Header -->
     <header class="header">
-      <div class="header__icon">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
-        </svg>
-      </div>
-      <h1 class="header__title">Habitus</h1>
+      <a href="../" class="header__brand-link" style="display: inline-block; text-decoration: none; color: inherit; transition: opacity var(--transition-fast);">
+        <div class="header__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+          </svg>
+        </div>
+        <h1 class="header__title">Habitus</h1>
+      </a>
       <p class="header__subtitle">Rastreador de Hábitos</p>
     </header>
 
