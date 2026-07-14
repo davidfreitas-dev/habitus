@@ -1,6 +1,6 @@
 {
   "appId": "br.dev.davidfreitas.habitus",
-  "appName": "Habitus - Rastreamento de Hábitos",
+  "appName": "habitus",
   "webDir": "dist",
   "plugins": {
     "LocalNotifications": {
