@@ -295,46 +295,131 @@
       transform: translateY(-2px);
     }
 
-    /* ── Screenshots Carousel ──────────────────────────────────── */
-    .screenshots {
-      padding: 60px 0 100px;
-      overflow: hidden;
+    /* ── Why Habits ────────────────────────────────────────────── */
+    .why {
+      padding: 80px 0;
     }
 
-    .screenshots__track {
+    .why__grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 64px;
+      align-items: center;
+    }
+
+    .why__content .section-label { margin-bottom: 12px; }
+
+    .why__title {
+      font-size: clamp(1.6rem, 4vw, 2.1rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.25;
+      margin-bottom: 18px;
+    }
+
+    .why__desc {
+      font-size: 1rem;
+      color: var(--color-text-secondary);
+      line-height: 1.8;
+      margin-bottom: 28px;
+    }
+
+    .why__list {
+      list-style: none;
       display: flex;
-      gap: 20px;
-      animation: scroll 30s linear infinite;
-      width: max-content;
+      flex-direction: column;
+      gap: 16px;
     }
 
-    .screenshots__track:hover {
-      animation-play-state: paused;
+    .why__list-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 0.95rem;
+      color: var(--color-text);
     }
 
-    @keyframes scroll {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
-
-    .screenshots__item {
+    .why__list-icon {
       flex-shrink: 0;
-      width: 220px;
-      border-radius: var(--radius-lg);
-      overflow: hidden;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--color-primary-glow);
+      border: 1px solid rgba(163, 230, 53, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+
+    .why__list-icon svg {
+      width: 13px;
+      height: 13px;
+      fill: var(--color-primary);
+    }
+
+    .why__list-item strong { font-weight: 700; }
+    .why__list-item span { color: var(--color-text-secondary); }
+
+    .why__panel {
+      background: var(--bg-card);
       border: 1px solid var(--bg-card-border);
-      box-shadow: var(--shadow-card);
-      transition: transform var(--transition-normal);
+      border-radius: var(--radius-lg);
+      padding: 40px 32px;
+      position: relative;
+      overflow: hidden;
     }
 
-    .screenshots__item:hover {
-      transform: scale(1.04);
+    .why__panel::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(163, 230, 53, 0.08) 0%, transparent 70%);
+      pointer-events: none;
     }
 
-    .screenshots__item img {
-      width: 100%;
-      height: auto;
-      display: block;
+    .why__panel-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      background: var(--color-primary-glow);
+      border: 1px solid rgba(163, 230, 53, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .why__panel-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: var(--color-primary);
+    }
+
+    .why__panel-quote {
+      font-size: 1.15rem;
+      font-weight: 700;
+      line-height: 1.5;
+      letter-spacing: -0.01em;
+      margin-bottom: 14px;
+      position: relative;
+    }
+
+    .why__panel-caption {
+      font-size: 0.9rem;
+      color: var(--color-text-secondary);
+      line-height: 1.7;
+      position: relative;
+    }
+
+    @media (max-width: 768px) {
+      .why__grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
     }
 
     /* ── Features ──────────────────────────────────────────────── */
@@ -460,50 +545,224 @@
       line-height: 1.65;
     }
 
-    /* ── How It Works ──────────────────────────────────────────── */
-    .how-it-works {
-      padding: 80px 0;
-    }
-
-    .steps {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      counter-reset: step;
-    }
-
-    .step {
-      text-align: center;
-      padding: 28px 20px;
-      counter-increment: step;
+    /* ── Walkthrough Timeline ──────────────────────────────────── */
+    .walkthrough {
+      padding: 60px 0 100px;
       position: relative;
     }
 
-    .step__number {
-      display: inline-flex;
+    .walkthrough__header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+
+    .walkthrough__list {
+      position: relative;
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .walkthrough__list::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 100%;
+      background: linear-gradient(180deg, transparent, var(--bg-card-border) 6%, var(--bg-card-border) 94%, transparent);
+    }
+
+    .walkthrough__step {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 56px;
+      padding: 36px 0;
+    }
+
+    .walkthrough__step:nth-child(even) .walkthrough__media { order: 2; }
+    .walkthrough__step:nth-child(even) .walkthrough__content { order: 1; text-align: right; }
+    .walkthrough__step:nth-child(even) .walkthrough__content-inner { margin-left: auto; }
+
+    .walkthrough__badge {
+      position: absolute;
+      top: 36px;
+      left: 50%;
+      transform: translate(-50%, 0);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--bg-body);
+      border: 1px solid var(--color-primary);
+      color: var(--color-primary);
+      font-size: 0.95rem;
+      font-weight: 800;
+      display: flex;
       align-items: center;
       justify-content: center;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: var(--color-primary-glow);
-      border: 1px solid rgba(163, 230, 53, 0.2);
-      font-size: 0.9rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin-bottom: 16px;
+      box-shadow: 0 0 0 6px var(--bg-body), 0 0 24px var(--color-primary-glow);
+      z-index: 2;
     }
 
-    .step__title {
-      font-size: 0.95rem;
+    .walkthrough__content-inner {
+      max-width: 340px;
+    }
+
+    .walkthrough__step:nth-child(odd) .walkthrough__content-inner { margin-right: auto; }
+
+    .walkthrough__label {
+      display: inline-block;
+      font-size: 0.75rem;
       font-weight: 700;
-      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-primary);
+      margin-bottom: 10px;
     }
 
-    .step__desc {
-      font-size: 0.85rem;
+    .walkthrough__title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+
+    .walkthrough__desc {
+      font-size: 0.95rem;
       color: var(--color-text-secondary);
-      line-height: 1.6;
+      line-height: 1.7;
+    }
+
+    .walkthrough__media {
+      display: flex;
+      justify-content: center;
+    }
+
+    .walkthrough__phone {
+      width: 220px;
+      border-radius: 22px;
+      overflow: hidden;
+      border: 1px solid var(--bg-card-border);
+      box-shadow: var(--shadow-card);
+      transition: transform var(--transition-normal);
+    }
+
+    .walkthrough__phone:hover {
+      transform: translateY(-6px) scale(1.03);
+    }
+
+    .walkthrough__phone img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .walkthrough__list::before { left: 27px; }
+
+      .walkthrough__step,
+      .walkthrough__step:nth-child(even) {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding-left: 64px;
+        text-align: left;
+      }
+
+      .walkthrough__step:nth-child(even) .walkthrough__media { order: 0; }
+      .walkthrough__step:nth-child(even) .walkthrough__content { order: 0; text-align: left; }
+      .walkthrough__step:nth-child(even) .walkthrough__content-inner,
+      .walkthrough__content-inner { margin-left: 0; margin-right: 0; max-width: 100%; }
+
+      .walkthrough__badge {
+        top: 0;
+        left: 27px;
+        width: 36px;
+        height: 36px;
+        font-size: 0.85rem;
+      }
+
+      .walkthrough__media { justify-content: flex-start; }
+      .walkthrough__phone { width: 170px; }
+    }
+
+    /* ── FAQ ───────────────────────────────────────────────────── */
+    .faq {
+      padding: 80px 0;
+    }
+
+    .faq__list {
+      max-width: 760px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .faq__item {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      transition: border-color var(--transition-fast);
+    }
+
+    .faq__item[open] {
+      border-color: rgba(163, 230, 53, 0.2);
+    }
+
+    .faq__question {
+      list-style: none;
+      cursor: pointer;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      font-size: 0.98rem;
+      font-weight: 700;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .faq__question::-webkit-details-marker { display: none; }
+
+    .faq__icon {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--bg-elevated);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform var(--transition-normal), background var(--transition-normal);
+    }
+
+    .faq__icon svg {
+      width: 14px;
+      height: 14px;
+      fill: var(--color-text-secondary);
+      transition: fill var(--transition-fast);
+    }
+
+    .faq__item[open] .faq__icon {
+      transform: rotate(45deg);
+      background: var(--color-primary-glow);
+    }
+
+    .faq__item[open] .faq__icon svg { fill: var(--color-primary); }
+
+    .faq__answer {
+      padding: 0 24px 22px;
+      font-size: 0.92rem;
+      color: var(--color-text-secondary);
+      line-height: 1.75;
+    }
+
+    @media (max-width: 480px) {
+      .faq__question { padding: 16px 18px; font-size: 0.92rem; }
+      .faq__answer { padding: 0 18px 18px; }
     }
 
     /* ── CTA ───────────────────────────────────────────────────── */
@@ -734,22 +993,48 @@
     </div>
   </section>
 
-  <!-- ═══ Screenshots ═══ -->
-  <section class="screenshots" aria-label="Screenshots do aplicativo">
-    <div class="screenshots__track">
-      <div class="screenshots__item"><img src="screenshots/Home.jpeg" alt="Tela inicial do Habitus" loading="lazy" /></div>
-      <div class="screenshots__item"><img src="screenshots/Habit.jpeg" alt="Detalhes de um hábito" loading="lazy" /></div>
-      <div class="screenshots__item"><img src="screenshots/Stats.jpeg" alt="Estatísticas de progresso" loading="lazy" /></div>
-      <div class="screenshots__item"><img src="screenshots/Form.jpeg" alt="Criação de hábito" loading="lazy" /></div>
-      <div class="screenshots__item"><img src="screenshots/Register.jpeg" alt="Tela de cadastro" loading="lazy" /></div>
-      <div class="screenshots__item"><img src="screenshots/Options.jpeg" alt="Configurações" loading="lazy" /></div>
-      <!-- Duplicated for seamless loop -->
-      <div class="screenshots__item"><img src="screenshots/Home.jpeg" alt="Tela inicial do Habitus" loading="lazy" /></div>
-      <div class="screenshots__item"><img src="screenshots/Habit.jpeg" alt="Detalhes de um hábito" loading="lazy" /></div>
-      <div class="screenshots__item"><img src="screenshots/Stats.jpeg" alt="Estatísticas de progresso" loading="lazy" /></div>
-      <div class="screenshots__item"><img src="screenshots/Form.jpeg" alt="Criação de hábito" loading="lazy" /></div>
-      <div class="screenshots__item"><img src="screenshots/Register.jpeg" alt="Tela de cadastro" loading="lazy" /></div>
-      <div class="screenshots__item"><img src="screenshots/Options.jpeg" alt="Configurações" loading="lazy" /></div>
+  <!-- ═══ Why Habits ═══ -->
+  <section class="why" id="why">
+    <div class="container">
+      <div class="why__grid">
+        <div class="why__content fade-in">
+          <span class="section-label">Por Que Hábitos</span>
+          <h2 class="why__title">Consistência importa mais<br>do que motivação</h2>
+          <p class="why__desc">
+            A maioria das pessoas não falha por falta de vontade, mas por falta de acompanhamento.
+            Sem um sistema simples para visualizar seu progresso, é fácil perder o ritmo depois de
+            alguns dias. O Habitus existe para preencher essa lacuna.
+          </p>
+          <ul class="why__list">
+            <li class="why__list-item">
+              <span class="why__list-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+              </span>
+              <span><strong>Torne visível o invisível.</strong> Ver sua sequência crescer dia após dia cria um incentivo real para não quebrá-la.</span>
+            </li>
+            <li class="why__list-item">
+              <span class="why__list-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+              </span>
+              <span><strong>Reduza o esforço mental.</strong> Lembretes automáticos tiram da sua cabeça a responsabilidade de lembrar.</span>
+            </li>
+            <li class="why__list-item">
+              <span class="why__list-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+              </span>
+              <span><strong>Celebre o progresso, não a perfeição.</strong> Estatísticas claras mostram sua evolução real, mesmo em dias imperfeitos.</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="why__panel fade-in">
+          <div class="why__panel-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 2L3 14h7v8l10-12h-7z"/></svg>
+          </div>
+          <p class="why__panel-quote">Pequenas ações repetidas todos os dias criam grandes mudanças com o tempo.</p>
+          <p class="why__panel-caption">O Habitus foi criado para tornar essas pequenas ações fáceis de manter — um dia de cada vez.</p>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -798,36 +1083,188 @@
     </div>
   </section>
 
-  <!-- ═══ How It Works ═══ -->
-  <section class="how-it-works" id="how-it-works">
+  <!-- ═══ Walkthrough ═══ -->
+  <section class="walkthrough" id="walkthrough" aria-label="Como usar o aplicativo">
     <div class="container">
-      <div class="section-header fade-in">
-        <span class="section-label">Como Funciona</span>
-        <h2 class="section-title">Comece em minutos</h2>
-        <p class="section-subtitle">Simples, rápido e sem complicação.</p>
+      <div class="walkthrough__header fade-in">
+        <span class="section-label">Passo a Passo</span>
+        <h2 class="section-title">Veja como é fácil começar</h2>
+        <p class="section-subtitle">Da criação da conta ao acompanhamento das suas estatísticas, tudo em poucos toques.</p>
       </div>
 
-      <div class="steps fade-in">
-        <div class="step">
-          <div class="step__number">1</div>
-          <h3 class="step__title">Baixe o App</h3>
-          <p class="step__desc">Instale o Habitus no seu smartphone Android.</p>
+      <div class="walkthrough__list">
+
+        <div class="walkthrough__step fade-in">
+          <div class="walkthrough__badge">1</div>
+          <div class="walkthrough__media">
+            <div class="walkthrough__phone">
+              <img src="screenshots/Register.jpeg" alt="Tela de cadastro do Habitus" loading="lazy" />
+            </div>
+          </div>
+          <div class="walkthrough__content">
+            <div class="walkthrough__content-inner">
+              <span class="walkthrough__label">Passo 1</span>
+              <h3 class="walkthrough__title">Crie sua conta</h3>
+              <p class="walkthrough__desc">Informe seu nome, e-mail e senha para criar sua conta em segundos e começar a construir seus hábitos.</p>
+            </div>
+          </div>
         </div>
-        <div class="step">
-          <div class="step__number">2</div>
-          <h3 class="step__title">Crie sua Conta</h3>
-          <p class="step__desc">Cadastre-se em segundos com seu e-mail.</p>
+
+        <div class="walkthrough__step fade-in">
+          <div class="walkthrough__badge">2</div>
+          <div class="walkthrough__media">
+            <div class="walkthrough__phone">
+              <img src="screenshots/Form.jpeg" alt="Tela de criação de hábito" loading="lazy" />
+            </div>
+          </div>
+          <div class="walkthrough__content">
+            <div class="walkthrough__content-inner">
+              <span class="walkthrough__label">Passo 2</span>
+              <h3 class="walkthrough__title">Crie seu hábito</h3>
+              <p class="walkthrough__desc">Defina o compromisso, escolha os dias da semana em que ele se repete e ative lembretes no horário que preferir.</p>
+            </div>
+          </div>
         </div>
-        <div class="step">
-          <div class="step__number">3</div>
-          <h3 class="step__title">Adicione Hábitos</h3>
-          <p class="step__desc">Toque em "+" e configure seus hábitos.</p>
+
+        <div class="walkthrough__step fade-in">
+          <div class="walkthrough__badge">3</div>
+          <div class="walkthrough__media">
+            <div class="walkthrough__phone">
+              <img src="screenshots/Home.jpeg" alt="Tela inicial do Habitus com calendário de progresso" loading="lazy" />
+            </div>
+          </div>
+          <div class="walkthrough__content">
+            <div class="walkthrough__content-inner">
+              <span class="walkthrough__label">Passo 3</span>
+              <h3 class="walkthrough__title">Acompanhe no calendário</h3>
+              <p class="walkthrough__desc">Na tela inicial, visualize seu histórico de dias concluídos e mantenha sua sequência sempre em dia.</p>
+            </div>
+          </div>
         </div>
-        <div class="step">
-          <div class="step__number">4</div>
-          <h3 class="step__title">Acompanhe</h3>
-          <p class="step__desc">Monitore sequências e evolua diariamente.</p>
+
+        <div class="walkthrough__step fade-in">
+          <div class="walkthrough__badge">4</div>
+          <div class="walkthrough__media">
+            <div class="walkthrough__phone">
+              <img src="screenshots/Habit.jpeg" alt="Tela de hábitos do dia com checklist" loading="lazy" />
+            </div>
+          </div>
+          <div class="walkthrough__content">
+            <div class="walkthrough__content-inner">
+              <span class="walkthrough__label">Passo 4</span>
+              <h3 class="walkthrough__title">Marque como concluído</h3>
+              <p class="walkthrough__desc">Toque em cada hábito do dia para marcá-lo como feito e acompanhe a barra de progresso diária em tempo real.</p>
+            </div>
+          </div>
         </div>
+
+        <div class="walkthrough__step fade-in">
+          <div class="walkthrough__badge">5</div>
+          <div class="walkthrough__media">
+            <div class="walkthrough__phone">
+              <img src="screenshots/Stats.jpeg" alt="Tela de estatísticas de progresso" loading="lazy" />
+            </div>
+          </div>
+          <div class="walkthrough__content">
+            <div class="walkthrough__content-inner">
+              <span class="walkthrough__label">Passo 5</span>
+              <h3 class="walkthrough__title">Analise suas estatísticas</h3>
+              <p class="walkthrough__desc">Veja sua taxa de conclusão por dia da semana, sua sequência atual e seu recorde para se manter motivado.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="walkthrough__step fade-in">
+          <div class="walkthrough__badge">6</div>
+          <div class="walkthrough__media">
+            <div class="walkthrough__phone">
+              <img src="screenshots/Options.jpeg" alt="Tela de opções e configurações da conta" loading="lazy" />
+            </div>
+          </div>
+          <div class="walkthrough__content">
+            <div class="walkthrough__content-inner">
+              <span class="walkthrough__label">Passo 6</span>
+              <h3 class="walkthrough__title">Personalize sua experiência</h3>
+              <p class="walkthrough__desc">Edite seu perfil, altere a senha, ative o modo escuro e gerencie sua conta a qualquer momento.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FAQ ═══ -->
+  <section class="faq" id="faq">
+    <div class="container">
+      <div class="section-header fade-in">
+        <span class="section-label">Dúvidas</span>
+        <h2 class="section-title">Perguntas frequentes</h2>
+        <p class="section-subtitle">Tudo o que você precisa saber antes de começar.</p>
+      </div>
+
+      <div class="faq__list fade-in">
+
+        <details class="faq__item">
+          <summary class="faq__question">
+            O Habitus é gratuito?
+            <span class="faq__icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            </span>
+          </summary>
+          <p class="faq__answer">Sim, o Habitus é gratuito para baixar e usar, incluindo criação de hábitos, lembretes e acompanhamento de estatísticas.</p>
+        </details>
+
+        <details class="faq__item">
+          <summary class="faq__question">
+            Meus hábitos ficam salvos se eu trocar de celular?
+            <span class="faq__icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            </span>
+          </summary>
+          <p class="faq__answer">Sim. Seus dados são sincronizados automaticamente na nuvem e ficam vinculados à sua conta, então basta fazer login em qualquer dispositivo para acessá-los novamente.</p>
+        </details>
+
+        <details class="faq__item">
+          <summary class="faq__question">
+            Posso editar ou excluir um hábito depois de criado?
+            <span class="faq__icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            </span>
+          </summary>
+          <p class="faq__answer">Sim. A qualquer momento você pode editar o compromisso, a recorrência ou o horário do lembrete, além de excluir o hábito caso ele não faça mais sentido para sua rotina.</p>
+        </details>
+
+        <details class="faq__item">
+          <summary class="faq__question">
+            Como funcionam os lembretes?
+            <span class="faq__icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            </span>
+          </summary>
+          <p class="faq__answer">Você escolhe os dias da semana e o horário para cada hábito, e o app envia uma notificação no momento definido para te lembrar de cumpri-lo.</p>
+        </details>
+
+        <details class="faq__item">
+          <summary class="faq__question">
+            O Habitus está disponível para iOS?
+            <span class="faq__icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            </span>
+          </summary>
+          <p class="faq__answer">No momento o Habitus está disponível para Android 10 ou superior. Uma versão para iOS está nos planos futuros.</p>
+        </details>
+
+        <details class="faq__item">
+          <summary class="faq__question">
+            Preciso de internet para usar o app?
+            <span class="faq__icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            </span>
+          </summary>
+          <p class="faq__answer">Sim, o Habitus requer conexão com a internet para sincronizar seus hábitos e manter seus dados atualizados e seguros na nuvem.</p>
+        </details>
+
       </div>
     </div>
   </section>
