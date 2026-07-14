@@ -2,6 +2,8 @@
 import { onMounted, watch } from 'vue';
 import { IonApp, IonRouterOutlet } from '@ionic/vue';
 import { Capacitor } from '@capacitor/core';
+import { App as CapApp } from '@capacitor/app';
+import { useRouter } from 'vue-router';
 import { ScreenOrientation } from '@capacitor/screen-orientation';
 import { useNetwork } from '@/composables/useNetwork';
 import { useStatusBar } from '@/composables/useStatusBar';
@@ -13,6 +15,7 @@ import { NotificationService } from '@/services/NotificationService';
 const { isConnected } = useNetwork();
 const { setStatusBar, Style } = useStatusBar();
 const { requestPermission } = useNotifications();
+const router = useRouter();
 const themeStore = useThemeStore();
 const habitStore = useHabitStore();
 
@@ -35,6 +38,22 @@ onMounted(async () => {
 
   if (Capacitor.isNativePlatform()) {
     await ScreenOrientation.lock({ orientation: 'portrait' });
+
+    // Listener para capturar Universal/App Links e Deep Links
+    CapApp.addListener('appUrlOpen', (event) => {
+      try {
+        const url = new URL(event.url);
+        const path = url.pathname; // ex: "/verify-email"
+        const search = url.search; // ex: "?token=xxx"
+        
+        if (path === '/verify-email') {
+          router.push(`${path}${search}`);
+        }
+      } catch (e) {
+        console.error('Falha ao processar URL de deep link:', e);
+      }
+    });
+
     const granted = await requestPermission();
     if (granted) {
       try {

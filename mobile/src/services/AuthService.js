@@ -33,5 +33,9 @@ export const AuthService = {
       password, 
       password_confirm: passwordConfirm 
     });
+  },
+  
+  verifyEmail(token) {
+    return api.get(`${AUTH_ENDPOINTS.VERIFY_EMAIL}?token=${token}`);
   }
 };

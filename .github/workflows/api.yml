@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-      - "server/**"
+      - "api/**"
   workflow_dispatch:
 
 # Garante que apenas um deploy rode por vez
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: server
+        working-directory: api
 
     steps:
       - uses: actions/checkout@v4
@@ -33,8 +33,8 @@ jobs:
       - name: Cache Composer dependencies
         uses: actions/cache@v4
         with:
-          path: server/vendor
-          key: composer-${{ hashFiles('server/composer.lock') }}
+          path: api/vendor
+          key: composer-${{ hashFiles('api/composer.lock') }}
           restore-keys: composer-
 
       - name: Install dependencies
@@ -69,11 +69,11 @@ jobs:
       - name: Restore Composer cache
         uses: actions/cache@v4
         with:
-          path: server/vendor
-          key: composer-${{ hashFiles('server/composer.lock') }}
+          path: api/vendor
+          key: composer-${{ hashFiles('api/composer.lock') }}
 
       - name: Install dependencies
-        working-directory: server
+        working-directory: api
         run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
 
       - name: Deploy to Server
@@ -83,13 +83,13 @@ jobs:
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_PORT: ${{ secrets.REMOTE_PORT }}
-          SOURCE: "server/"
-          TARGET: "/var/www/habits/server/"
+          SOURCE: "api/"
+          TARGET: "/var/www/habits/api/"
           ARGS: "-rlgoDz --delete"
           EXCLUDE: "README.md,.git/,.gitignore,.env.example,.dockerignore,docker-compose.yml,Dockerfile,.docker/,docs/,tools/,logs/,.env,config/keys/,storage/"
           SCRIPT_AFTER: |
             set -e  # falha imediatamente se qualquer comando falhar
-            cd /var/www/habits/server
+            cd /var/www/habits/api
             sudo systemctl reload php8.4-fpm
             echo "Deploy concluído: $(date)"
 

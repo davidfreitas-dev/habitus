@@ -6,6 +6,7 @@ export const AUTH_ENDPOINTS = {
   VALIDATE_RESET_CODE: '/auth/validate-reset-code',
   RESET_PASSWORD: '/auth/reset-password',
   REFRESH: '/auth/refresh',
+  VERIFY_EMAIL: '/auth/verify-email',
 };
 
 export const HABIT_ENDPOINTS = {

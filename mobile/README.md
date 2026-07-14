@@ -30,9 +30,9 @@ Aplicativo para rastrear e gerenciar seus hábitos diários, construído com Ion
 
 ## 🚀 Configuração do Ambiente de Desenvolvimento
 
-> **Pré-requisito:** Este projeto faz parte de um monorepo e depende da infraestrutura Docker definida no projeto `/server`. Antes de continuar, **siga completamente o passo a passo de configuração do [`/server`](../server/README.md)** (clone do repositório, criação do `.env` raiz, inicialização dos containers e importação do banco de dados).
+> **Pré-requisito:** Este projeto faz parte de um monorepo e depende da infraestrutura Docker definida no projeto `/api`. Antes de continuar, **siga completamente o passo a passo de configuração do [`/api`](../api/README.md)** (clone do repositório, criação do `.env` raiz, inicialização dos containers e importação do banco de dados).
 
-Após concluir o setup do `/server` e com os containers já em execução (`docker compose up -d`), configure o ambiente mobile:
+Após concluir o setup do `/api` e com os containers já em execução (`docker compose up -d`), configure o ambiente mobile:
 
 ### 1. Configurar variáveis de ambiente do Mobile
 Crie o arquivo `.env` específico do mobile a partir do exemplo:
@@ -153,14 +153,22 @@ O projeto requer **Node.js v22+**. A forma recomendada de instalar e gerenciar v
 ```sh
    npx cap add android
 ```
-5. **Sincronize e Compile**:
+
+5. **Configurar Deep Links e Assets (Essencial caso a pasta Android seja recriada)**:
+Para garantir que as configurações de Deep Link (Intent Filters no `AndroidManifest.xml`) e os ícones nativos sejam injetados corretamente toda vez que a plataforma for adicionada ou recriada do zero, execute:
+```sh
+   npm run android:setup
+```
+*(Este script programático faz o patch dos Intent Filters do Deep Link no manifest e gera as resoluções de ícones e splash screens automáticos).*
+
+6. **Sincronize e Compile**:
 ```sh
    npm install
    npm run build
    npx cap sync android
    cd android && ./gradlew assembleDebug
 ```
-6. **Instale e execute em um emulador ou dispositivo** (opcional, para testar o build gerado):
+7. **Instale e execute em um emulador ou dispositivo** (opcional, para testar o build gerado):
    - Crie um emulador pelo *Device Manager* do Android Studio (ou use um dispositivo físico com depuração USB habilitada), então:
 ```sh
      npx cap run android

@@ -2,7 +2,7 @@
 import { useRouter } from 'vue-router';
 import { ref, reactive, computed } from 'vue';
 import { useVuelidate } from '@vuelidate/core';
-import { required, email } from '@vuelidate/validators';
+import { required, email, minLength } from '@vuelidate/validators';
 import { IonPage, IonContent, onIonViewDidLeave } from '@ionic/vue';
 import { useAuthStore } from '@/stores/auth';
 import { useToast } from '@/composables/useToast';
@@ -21,10 +21,33 @@ const formData = reactive({
 const { showToast } = useToast();
 const router = useRouter();
 
+const containsNameAndSurname = (value) => {
+  if (!value) return true;
+  const parts = value.trim().split(/\s+/).filter(Boolean);
+  return parts.length >= 2;
+};
+
+const capitalizeName = (name) => {
+  if (!name) return '';
+  const prepositions = ['de', 'da', 'do', 'dos', 'das', 'e'];
+  return name
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .map((word, index) => {
+      if (prepositions.includes(word) && index > 0) {
+        return word;
+      }
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(' ');
+};
+
 const signUp = async () => {
   isLoading.value = true;
 
   try {
+    formData.name = capitalizeName(formData.name);
     await authStore.register(formData);
     router.push('/');
   } catch (err) {
@@ -37,9 +60,15 @@ const signUp = async () => {
 
 const rules = computed(() => {
   return {
-    name: { required },
+    name: { 
+      required,
+      fullName: containsNameAndSurname
+    },
     email: { required, email },
-    password: { required }
+    password: { 
+      required,
+      minLength: minLength(6)
+    }
   };
 });
 

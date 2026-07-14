@@ -67,7 +67,8 @@ onIonViewDidLeave(() => {
         <form>
           <div class="logo-wrapper">
             <img
-                             src="../../../assets/logo.png"              alt="Habitus"
+              src="../../../assets/logo.png"
+              alt="Habitus"
               class="logo"
             >
           </div>

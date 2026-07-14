@@ -30,6 +30,12 @@ const routes = [
     props: route => ({ data: route.query.data })
   },
   {
+    path: '/verify-email',
+    name: 'VerifyEmail',
+    component: () => import('@/views/auth/VerifyEmail.vue'),
+    props: route => ({ token: route.query.token })
+  },
+  {
     path: '/',
     redirect: '/tabs/home'
   },

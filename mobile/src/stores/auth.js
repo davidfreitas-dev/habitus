@@ -134,6 +134,10 @@ export const useAuthStore = defineStore('auth', () => {
     return response;
   };
 
+  const verifyEmail = async (token) => {
+    return await AuthService.verifyEmail(token);
+  };
+
   return {
     accessToken,
     refreshToken,
@@ -149,6 +153,7 @@ export const useAuthStore = defineStore('auth', () => {
     validateResetCode,
     resetPassword,
     refreshAccessToken,
+    verifyEmail,
   };
 });
 
