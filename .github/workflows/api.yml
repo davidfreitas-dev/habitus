@@ -6,6 +6,7 @@ on:
       - master
     paths:
       - "server/**"
+  workflow_dispatch:
 
 # Garante que apenas um deploy rode por vez
 concurrency:
@@ -18,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: api
+        working-directory: server
 
     steps:
       - uses: actions/checkout@v4
@@ -37,7 +38,7 @@ jobs:
           restore-keys: composer-
 
       - name: Install dependencies
-        run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+        run: composer install --optimize-autoloader --no-interaction --prefer-dist
 
       - name: Validate composer.json
         run: composer validate --no-check-publish
@@ -45,9 +46,11 @@ jobs:
       - name: Check syntax (lint)
         run: find src -name "*.php" -print0 | xargs -0 php -l
 
-      # Descomente quando tiver testes
-      # - name: Run tests
-      #   run: composer test
+      - name: Check code style
+        run: composer cs-check
+
+      - name: Run unit tests
+        run: composer test:unit
 
 # Etapa 2: deploy (só roda se validate passar)
   deploy:
@@ -70,7 +73,7 @@ jobs:
           key: composer-${{ hashFiles('server/composer.lock') }}
 
       - name: Install dependencies
-        working-directory: api
+        working-directory: server
         run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
 
       - name: Deploy to Server
@@ -83,10 +86,10 @@ jobs:
           SOURCE: "server/"
           TARGET: "/var/www/habits/server/"
           ARGS: "-rlgoDz --delete"
-          EXCLUDE: ".git/,.gitignore,.env.example,.dockerignore,docker-compose.yml,Dockerfile,.docker/,docs/,tools/,logs/,.env,config/keys/,storage/"
+          EXCLUDE: "README.md,.git/,.gitignore,.env.example,.dockerignore,docker-compose.yml,Dockerfile,.docker/,docs/,tools/,logs/,.env,config/keys/,storage/"
           SCRIPT_AFTER: |
             set -e  # falha imediatamente se qualquer comando falhar
-            cd /var/www/habits/api
+            cd /var/www/habits/server
             sudo systemctl reload php8.4-fpm
             echo "Deploy concluído: $(date)"
 

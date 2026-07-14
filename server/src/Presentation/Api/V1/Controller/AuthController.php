@@ -350,4 +350,74 @@ class AuthController
             );
         }
     }
+
+    /**
+     * Rota publica de fallback para o navegador. Processa o token e renderiza um HTML amigavel.
+     *
+     * @param Request $request
+     * @param Response $response
+     * @return Response
+     */
+    public function verifyEmailHtml(Request $request, Response $response): Response
+    {
+        $token = $request->getQueryParams()['token'] ?? '';
+        $success = false;
+        $message = '';
+
+        if (empty($token)) {
+            $message = 'Token de verificação está faltando ou é inválido.';
+        } else {
+            try {
+                $result = $this->verifyEmailUseCase->execute($token);
+                $success = true;
+                $message = $result->wasAlreadyVerified()
+                    ? 'Seu e-mail já foi verificado anteriormente!'
+                    : 'E-mail verificado com sucesso!';
+            } catch (\Throwable $e) {
+                $message = $e->getMessage();
+            }
+        }
+
+        $html = $this->renderHtmlTemplate($success, $message, $token);
+        
+        $response->getBody()->write($html);
+        return $response->withHeader('Content-Type', 'text/html; charset=utf-8');
+    }
+
+    /**
+     * Renderiza o template HTML premium para exibicao no navegador.
+     */
+    private function renderHtmlTemplate(bool $success, string $message, string $token): string
+    {
+        $templatePath = __DIR__ . '/../../../../Presentation/templates/verify_email.php';
+
+        $title = $success ? 'E-mail verificado!' : 'Falha na verificação';
+        $statusClass = $success ? 'success' : 'error';
+        $deeplinkUrl = 'habits://verify-email?token=' . \urlencode($token);
+
+        $iconSvg = $success 
+            ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="width: 40px; height: 40px;"><polyline points="20 6 9 17 4 12"></polyline></svg>'
+            : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="width: 40px; height: 40px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+
+        // Prepara as variaveis a serem extraidas no escopo do template
+        $data = [
+            'success' => $success,
+            'message' => $message,
+            'title' => $title,
+            'statusClass' => $statusClass,
+            'deeplinkUrl' => $deeplinkUrl,
+            'iconSvg' => $iconSvg,
+        ];
+
+        if (!\file_exists($templatePath)) {
+            $this->logger->error('Template de verificacao de e-mail nao encontrado: ' . $templatePath);
+            return 'Ocorreu um erro interno. Template nao encontrado.';
+        }
+
+        \extract($data);
+        \ob_start();
+        include $templatePath;
+        return \ob_get_clean() ?: '';
+    }
 }
+

@@ -12,11 +12,20 @@ use App\Presentation\Api\V1\Controller\ErrorLogController;
 use App\Presentation\Api\V1\Controller\HabitController;
 use App\Presentation\Api\V1\Controller\HealthController;
 use App\Presentation\Api\V1\Controller\UserController;
+use App\Presentation\Api\V1\Controller\WellKnownController;
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
 
 return function (App $app): void {
     $container = $app->getContainer();
+
+    // Rotas de Associação de Aplicativos (Universal Links)
+    $app->get('/.well-known/apple-app-site-association', [WellKnownController::class, 'appleAppSiteAssociation']);
+    $app->get('/apple-app-site-association', [WellKnownController::class, 'appleAppSiteAssociation']);
+    $app->get('/.well-known/assetlinks.json', [WellKnownController::class, 'assetLinks']);
+
+    // Rota pública de verificação de e-mail (HTML fallback)
+    $app->get('/verify-email', [AuthController::class, 'verifyEmailHtml']);
 
     $app->group('/api/v1', function (RouteCollectorProxy $group) use ($container): void {
         $group->get('', [HealthController::class, 'check']);
