@@ -27,10 +27,10 @@ class WellKnownController
                 'details' => [
                     [
                         'appID' => 'YOUR_APPLE_TEAM_ID.br.dev.davidfreitas.habitus',
-                        'paths' => ['/verify-email']
-                    ]
-                ]
-            ]
+                        'paths' => ['/verify-email'],
+                    ],
+                ],
+            ],
         ];
 
         $response->getBody()->write((string)\json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
@@ -53,10 +53,10 @@ class WellKnownController
                     'namespace' => 'android_app',
                     'package_name' => 'br.dev.davidfreitas.habitus',
                     'sha256_cert_fingerprints' => [
-                        'YOUR_ANDROID_SHA256_FINGERPRINT'
-                    ]
-                ]
-            ]
+                        'YOUR_ANDROID_SHA256_FINGERPRINT',
+                    ],
+                ],
+            ],
         ];
 
         $response->getBody()->write((string)\json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
