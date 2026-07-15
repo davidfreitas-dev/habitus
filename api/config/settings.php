@@ -64,6 +64,7 @@ return [
         ],
 
         'site_url' => $_ENV['SITE_URL'],
+        'app_url' => $_ENV['APP_URL'],
         'app_name' => $_ENV['APP_NAME'],
 
         'mail' => [

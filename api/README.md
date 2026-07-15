@@ -132,7 +132,7 @@ docker compose exec server composer seed
 ```
 
 #### 8. Acesse a aplicação
-- **API**: `http://server.localhost`
+- **API**: `http://api.localhost`
 - **Mobile**: `http://mobile.localhost`
 - **PHPMyAdmin**: `http://localhost:8080`
 

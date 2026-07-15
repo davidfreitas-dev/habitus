@@ -43,6 +43,7 @@ class PHPMailerServiceTest extends TestCase
             'from@example.com',
             'Test Sender',
             'http://localhost',
+            'http://api.localhost',
             'Test App',
             $this->mailerMock
         );

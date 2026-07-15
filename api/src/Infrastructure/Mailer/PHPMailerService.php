@@ -25,6 +25,7 @@ class PHPMailerService implements MailerInterface
         private readonly string $fromEmail,
         private readonly string $fromName,
         private readonly string $siteUrl,
+        private readonly string $appUrl,
         private readonly string $appName,
         private readonly ?PHPMailer $mailer = new PHPMailer(true),
     ) {
@@ -120,6 +121,7 @@ class PHPMailerService implements MailerInterface
         $data = $abstractEmailTemplate->getTemplateData();
         // Add framework-level variables to the data array
         $data['siteUrl'] = $this->siteUrl;
+        $data['appUrl'] = $this->appUrl;
         $data['appName'] = $this->appName;
         $data['year'] = \date('Y');
         $data['subject'] = $abstractEmailTemplate->getSubject();

@@ -1120,7 +1120,7 @@
     "variable": [
         {
             "key": "baseUrl",
-            "value": "http://server.localhost"
+            "value": "http://api.localhost"
         },
         {
             "key": "accessToken",

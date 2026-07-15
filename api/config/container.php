@@ -282,6 +282,7 @@ return [
             $settings['mail']['from_email'],
             $settings['mail']['from_name'],
             $settings['site_url'],
+            $settings['app_url'],
             $settings['app_name'],
         );
     },

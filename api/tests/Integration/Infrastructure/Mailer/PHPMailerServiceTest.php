@@ -44,6 +44,7 @@ class PHPMailerServiceTest extends DatabaseTestCase
             $_ENV['MAIL_FROM_EMAIL'],
             $_ENV['MAIL_FROM_NAME'],
             'http://example.com',
+            'http://api.example.com',
             'Aplicativo de Teste'
         );
 
