@@ -2,7 +2,7 @@
 import { useRouter } from 'vue-router';
 import { ref, reactive, computed } from 'vue';
 import { useVuelidate } from '@vuelidate/core';
-import { required, email, minLength } from '@vuelidate/validators';
+import { required, email, minLength, helpers } from '@vuelidate/validators';
 import { IonPage, IonContent, onIonViewDidLeave } from '@ionic/vue';
 import { useAuthStore } from '@/stores/auth';
 import { useToast } from '@/composables/useToast';
@@ -61,13 +61,16 @@ const signUp = async () => {
 const rules = computed(() => {
   return {
     name: { 
-      required,
-      fullName: containsNameAndSurname
+      required: helpers.withMessage('Informe seu nome', required),
+      fullName: helpers.withMessage('Informe nome e sobrenome', containsNameAndSurname)
     },
-    email: { required, email },
+    email: { 
+      required: helpers.withMessage('Informe seu e-mail', required),
+      email: helpers.withMessage('Informe um e-mail válido', email)
+    },
     password: { 
-      required,
-      minLength: minLength(6)
+      required: helpers.withMessage('Informe uma senha', required),
+      minLength: helpers.withMessage('A senha deve ter no mínimo 6 caracteres', minLength(6))
     }
   };
 });
@@ -89,6 +92,7 @@ onIonViewDidLeave(() => {
   formData.name = '';
   formData.email = '';
   formData.password = '';
+  v$.value.$reset();
 });
 </script>
 
@@ -110,6 +114,8 @@ onIonViewDidLeave(() => {
             type="text"
             label="Seu nome e sobrenome"
             placeholder="Fulano de Tal"
+            :error-text="v$.name.$errors[0]?.$message"
+            @blur="v$.name.$touch()"
           /> 
 
           <Input
@@ -117,6 +123,8 @@ onIonViewDidLeave(() => {
             type="text"
             label="Seu melhor e-mail"
             placeholder="exemplo@email.com"
+            :error-text="v$.email.$errors[0]?.$message"
+            @blur="v$.email.$touch()"
           /> 
           
           <Input
@@ -124,6 +132,8 @@ onIonViewDidLeave(() => {
             type="password"
             label="Sua senha"
             placeholder="Digite sua senha"
+            :error-text="v$.password.$errors[0]?.$message"
+            @blur="v$.password.$touch()"
           /> 
 
           <div class="ion-margin-top ion-padding-top">

@@ -2,7 +2,7 @@
 import { ref, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useVuelidate } from '@vuelidate/core';
-import { required, email } from '@vuelidate/validators';
+import { required, email, helpers } from '@vuelidate/validators';
 import { IonPage, IonContent, onIonViewDidLeave } from '@ionic/vue';
 import { useAuthStore } from '@/stores/auth';
 import { useToast } from '@/composables/useToast';
@@ -37,7 +37,10 @@ const handleContinue = async () => {
 
 const rules = computed(() => {
   return {
-    email: { required, email }
+    email: {
+      required: helpers.withMessage('Informe seu e-mail', required),
+      email: helpers.withMessage('Informe um e-mail válido', email)
+    }
   };
 });
 
@@ -56,6 +59,7 @@ const submitForm = async () => {
 
 onIonViewDidLeave(() => {
   formData.email = '';
+  v$.value.$reset();
 });
 </script>
 
@@ -77,6 +81,8 @@ onIonViewDidLeave(() => {
             type="text"
             label="Endereço de e-mail"
             placeholder="exemplo@email.com"
+            :error-text="v$.email.$errors[0]?.$message"
+            @blur="v$.email.$touch()"
           /> 
           
           <div class="ion-margin-top ion-padding-top">

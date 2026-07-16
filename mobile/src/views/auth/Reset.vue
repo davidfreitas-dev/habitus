@@ -2,7 +2,7 @@
 import { useRouter } from 'vue-router';
 import { ref, reactive, computed } from 'vue';
 import { useVuelidate } from '@vuelidate/core';
-import { required, sameAs } from '@vuelidate/validators';
+import { required, sameAs, helpers } from '@vuelidate/validators';
 import { IonPage, IonContent, onIonViewDidLeave } from '@ionic/vue';
 import { useAuthStore } from '@/stores/auth';
 import { useToast } from '@/composables/useToast';
@@ -38,10 +38,12 @@ const handleConfirm = async () => {
 
 const rules = computed(() => {
   return {
-    password: { required },
+    password: {
+      required: helpers.withMessage('Informe uma senha', required)
+    },
     confPassword: {
-      required,
-      sameAsPassword: sameAs(computed(() => formData.password))
+      required: helpers.withMessage('Confirme a senha', required),
+      sameAsPassword: helpers.withMessage('As senhas não coincidem', sameAs(computed(() => formData.password)))
     }
   };
 });
@@ -62,6 +64,7 @@ const submitForm = async () => {
 onIonViewDidLeave(() => {
   formData.password = '';
   formData.confPassword = '';
+  v$.value.$reset();
 });
 </script>
 
@@ -83,6 +86,8 @@ onIonViewDidLeave(() => {
             type="password"
             label="Digite a nova senha"
             placeholder="Sua nova senha"
+            :error-text="v$.password.$errors[0]?.$message"
+            @blur="v$.password.$touch()"
           /> 
 
           <Input
@@ -90,6 +95,8 @@ onIonViewDidLeave(() => {
             type="password"
             label="Confirme a nova senha"
             placeholder="Repita a senha"
+            :error-text="v$.confPassword.$errors[0]?.$message"
+            @blur="v$.confPassword.$touch()"
           /> 
 
           <div class="ion-margin-top ion-padding-top">

@@ -2,7 +2,7 @@
 import { ref, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useVuelidate } from '@vuelidate/core';
-import { required, email } from '@vuelidate/validators';
+import { required, email, helpers } from '@vuelidate/validators';
 import { IonPage, IonContent, onIonViewDidLeave } from '@ionic/vue';
 import { useAuthStore } from '@/stores/auth';
 import { useToast } from '@/composables/useToast';
@@ -36,8 +36,13 @@ const signIn = async () => {
 
 const rules = computed(() => {
   return {
-    email: { required, email },
-    password: { required }
+    email: {
+      required: helpers.withMessage('Informe seu e-mail', required),
+      email: helpers.withMessage('Informe um e-mail válido', email)
+    },
+    password: {
+      required: helpers.withMessage('Informe sua senha', required)
+    }
   };
 });
 
@@ -57,6 +62,7 @@ const submitForm = async () => {
 onIonViewDidLeave(() => {
   formData.email = '';
   formData.password = '';
+  v$.value.$reset();
 });
 </script>
 
@@ -78,6 +84,8 @@ onIonViewDidLeave(() => {
             type="text"
             label="Seu e-mail"
             placeholder="exemplo@email.com"
+            :error-text="v$.email.$errors[0]?.$message"
+            @blur="v$.email.$touch()"
           /> 
 
           <Input
@@ -85,6 +93,8 @@ onIonViewDidLeave(() => {
             type="password"
             label="Sua senha"
             placeholder="Digite sua senha"
+            :error-text="v$.password.$errors[0]?.$message"
+            @blur="v$.password.$touch()"
           /> 
 
           <router-link to="/forgot">

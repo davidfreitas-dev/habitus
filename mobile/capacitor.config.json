@@ -11,7 +11,7 @@
       "launchShowDuration": 2000,
       "launchAutoHide": true,
       "launchFadeOutDuration": 1000,
-      "backgroundColor": "#09090A",
+      "backgroundColor": "#a3e635",
       "androidSplashResourceName": "splash",
       "androidScaleType": "CENTER_CROP",
       "splashFullScreen": true,
