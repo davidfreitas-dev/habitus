@@ -115,6 +115,7 @@ const router = useRouter();
           </ion-text>
           <Button
             color="primary"
+            size="small"
             class="ion-margin-top"
             @click="router.push('/habit')"
           >

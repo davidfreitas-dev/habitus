@@ -161,7 +161,11 @@ router.beforeEach(async (to) => {
     // Erro ao renovar token, prossegue para o redirecionamento
   }
 
-  showSessionExpiredAlertAndRedirect();
+  if (authStore.sessionExpired) {
+    authStore.sessionExpired = false;
+    showSessionExpiredAlertAndRedirect();
+    return false;
+  }
   
   return { name: 'Signin' };
 });

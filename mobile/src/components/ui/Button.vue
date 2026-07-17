@@ -9,13 +9,18 @@ const props = defineProps({
     default: 'default',
     validator: (value) => ['default', 'primary', 'danger', 'outline'].includes(value),
   },
+  size: {
+    type: String,
+    default: 'default',
+    validator: (value) => ['default', 'auto', 'small'].includes(value),
+  },
 });
 </script>
 
 <template>
   <ion-button
     mode="md"
-    :class="color"
+    :class="[color, size]"
     :disabled="isLoading || isDisabled"
   >
     <ion-spinner v-if="isLoading" name="dots" />
@@ -32,12 +37,40 @@ ion-button {
   text-transform: unset;
   letter-spacing: .0225rem;
 
+  --padding-start: 1.5rem;
+  --padding-end: 1.5rem;
+
   --color: var(--color-background-primary);
   --background: var(--color-text-primary);
   --background-hover: var(--color-text-primary);
   --background-activated: var(--color-text-primary);
   --background-focused: var(--color-text-primary);
   --border-radius: var(--border-radius-default);
+}
+
+/* Padrão */
+ion-button.default {
+  width: 100%;
+  height: 3.5rem;
+}
+
+/* Mesma altura, largura automática */
+ion-button.auto {
+  width: auto;
+  min-width: fit-content;
+  height: 3.5rem;
+}
+
+/* Botão compacto */
+ion-button.small {
+  width: auto;
+  min-width: fit-content;
+  height: 2.5rem;
+
+  font-size: 0.875rem;
+
+  --padding-start: 1rem;
+  --padding-end: 1rem;
 }
 
 ion-button.primary {
