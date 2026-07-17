@@ -14,6 +14,8 @@ import BackButton from '@/components/layout/BackButton.vue';
 import Breadcrumb from '@/components/layout/Breadcrumb.vue';
 import ProgressBar from '@/components/ui/Progressbar.vue';
 import Checkbox from '@/components/ui/Checkbox.vue';
+import Button from '@/components/ui/Button.vue';
+
 
 const profileStore = useProfileStore();
 const habitStore = useHabitStore();
@@ -107,9 +109,18 @@ const router = useRouter();
           @handle-checkbox-change="handleToggleHabit(habit.id)"
         />
 
-        <ion-text v-if="!isLoading && !dayInfo.possible_habits.length && !isDateInPast" class="ion-text-center ion-padding">
-          <p>Você ainda não criou nenhum hábito.</p>
-        </ion-text>
+        <div v-if="!isLoading && !dayInfo.possible_habits.length && !isDateInPast" class="ion-text-center ion-padding empty-habits-container">
+          <ion-text>
+            <p>Você ainda não criou nenhum hábito.</p>
+          </ion-text>
+          <Button
+            color="primary"
+            class="ion-margin-top"
+            @click="router.push('/habit')"
+          >
+            Criar Hábito
+          </Button>
+        </div>
 
         <ion-text v-if="!isLoading && isDateInPast" class="ion-text-center ion-padding">
           Você não pode alterar o status de hábitos de datas passadas.
@@ -123,5 +134,12 @@ const router = useRouter();
 ion-text {
   font-size: .85rem;
   line-height: 1.5;
+}
+
+.empty-habits-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
 </style>

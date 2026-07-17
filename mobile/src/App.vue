@@ -11,6 +11,9 @@ import { useNotifications } from '@/composables/useNotifications';
 import { useThemeStore } from '@/stores/theme';
 import { useHabitStore } from '@/stores/habits';
 import { NotificationService } from '@/services/NotificationService';
+import { LocalNotifications } from '@capacitor/local-notifications';
+import dayjs from '@/lib/dayjs';
+
 
 const { isConnected } = useNetwork();
 const { setStatusBar, Style } = useStatusBar();
@@ -51,6 +54,16 @@ onMounted(async () => {
         }
       } catch (e) {
         console.error('Falha ao processar URL de deep link:', e);
+      }
+    });
+
+    // Listener para redirecionar ao clicar em uma notificação
+    LocalNotifications.addListener('localNotificationActionPerformed', (notificationAction) => {
+      try {
+        const today = dayjs().format('YYYY-MM-DD');
+        router.push(`/day/${today}`);
+      } catch (e) {
+        console.error('Erro ao processar ação de notificação local:', e);
       }
     });
 

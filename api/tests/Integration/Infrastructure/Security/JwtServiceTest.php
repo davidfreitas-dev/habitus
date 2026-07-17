@@ -134,7 +134,7 @@ class JwtServiceTest extends DatabaseTestCase
 
     public function testGenerateAndValidateAccessTokenWithRealDatabase(): void
     {
-        $_ENV['APP_URL'] = 'http://server.localhost';
+        $_ENV['APP_URL'] = 'http://api.localhost';
 
         $user = $this->createTestUser();
 
@@ -158,7 +158,7 @@ class JwtServiceTest extends DatabaseTestCase
 
     public function testGenerateRefreshTokenAndStoreInRedis(): void
     {
-        $_ENV['APP_URL'] = 'http://server.localhost';
+        $_ENV['APP_URL'] = 'http://api.localhost';
 
         $user = $this->createTestUser();
 
@@ -185,7 +185,7 @@ class JwtServiceTest extends DatabaseTestCase
 
     public function testBlockToken(): void
     {
-        $_ENV['APP_URL'] = 'http://server.localhost';
+        $_ENV['APP_URL'] = 'http://api.localhost';
 
         $user = $this->createTestUser();
 
@@ -215,7 +215,7 @@ class JwtServiceTest extends DatabaseTestCase
 
     public function testValidateBlockedTokenThrowsException(): void
     {
-        $_ENV['APP_URL'] = 'http://server.localhost';
+        $_ENV['APP_URL'] = 'http://api.localhost';
 
         $user = $this->createTestUser();
 
@@ -246,7 +246,7 @@ class JwtServiceTest extends DatabaseTestCase
 
     public function testRevokeRefreshTokenFromRedis(): void
     {
-        $_ENV['APP_URL'] = 'http://server.localhost';
+        $_ENV['APP_URL'] = 'http://api.localhost';
 
         $user = $this->createTestUser();
 
@@ -273,7 +273,7 @@ class JwtServiceTest extends DatabaseTestCase
 
     public function testInvalidateAllUserRefreshTokensFromRedis(): void
     {
-        $_ENV['APP_URL'] = 'http://server.localhost';
+        $_ENV['APP_URL'] = 'http://api.localhost';
 
         $user = $this->createTestUser();
 
@@ -313,7 +313,7 @@ class JwtServiceTest extends DatabaseTestCase
 
     public function testRefreshTokenWorkflowCompleto(): void
     {
-        $_ENV['APP_URL'] = 'http://server.localhost';
+        $_ENV['APP_URL'] = 'http://api.localhost';
 
         $user = $this->createTestUser();
 
@@ -347,7 +347,7 @@ class JwtServiceTest extends DatabaseTestCase
 
     public function testExpiredTokenValidation(): void
     {
-        $_ENV['APP_URL'] = 'http://server.localhost';
+        $_ENV['APP_URL'] = 'http://api.localhost';
 
         $user = $this->createTestUser();
 
@@ -379,7 +379,7 @@ class JwtServiceTest extends DatabaseTestCase
 
     public function testMultipleUsersRefreshTokensAreIsolated(): void
     {
-        $_ENV['APP_URL'] = 'http://server.localhost';
+        $_ENV['APP_URL'] = 'http://api.localhost';
 
         $user1 = $this->createTestUser();
         $user2 = $this->createTestUser();

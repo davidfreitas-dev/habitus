@@ -1,6 +1,8 @@
 <script setup>
-import { reactive, computed, watch } from 'vue';
+import { reactive, watch } from 'vue';
 import { IonPage, IonContent, onIonViewWillEnter } from '@ionic/vue';
+import { useVuelidate } from '@vuelidate/core';
+import { required, email, helpers } from '@vuelidate/validators';
 import { useProfileStore } from '@/stores/profile';
 import { useToast } from '@/composables/useToast';
 import { useLoading } from '@/composables/useLoading'; 
@@ -18,15 +20,26 @@ const formData = reactive({
   email: '',
 });
 
-const isDisabled = computed(() => !formData.name);
-
 const { showToast } = useToast();
 const { isLoading, withLoading } = useLoading();
+
+const rules = {
+  name: {
+    required: helpers.withMessage('Informe seu nome', required)
+  },
+  email: {
+    required: helpers.withMessage('Informe seu e-mail', required),
+    email: helpers.withMessage('Informe um e-mail válido', email)
+  }
+};
+
+const v$ = useVuelidate(rules, formData);
 
 const loadProfileData = () => {
   if (profileStore.user) {
     formData.name = profileStore.user.name || '';
     formData.email = profileStore.user.email || '';
+    v$.value.$reset();
   }
 };
 
@@ -53,6 +66,17 @@ const updateProfile = async () => {
     showToast('success', 'Perfil atualizado com sucesso!');
   }, 'Erro ao atualizar dados do perfil.');
 };
+
+const submitForm = async () => {
+  const isFormCorrect = await v$.value.$validate();
+
+  if (!isFormCorrect) {
+    showToast('info', 'Preencha todos os campos corretamente');
+    return;
+  }
+
+  updateProfile();
+};
 </script>
 
 <template>
@@ -72,6 +96,8 @@ const updateProfile = async () => {
               type="text"
               label="Nome"
               placeholder="Digite seu nome"
+              :error-text="v$.name.$errors[0]?.$message"
+              @blur="v$.name.$touch()"
             />
 
             <Input
@@ -79,14 +105,16 @@ const updateProfile = async () => {
               type="email"
               label="E-mail"
               placeholder="Digite seu e-mail"
+              :error-text="v$.email.$errors[0]?.$message"
+              @blur="v$.email.$touch()"
             />
           </div>
 
           <Button
             color="primary"
-            :is-disabled="isDisabled"
+            :is-disabled="v$.$invalid"
             :is-loading="isLoading"
-            @click="updateProfile"
+            @click="submitForm"
           >
             Confirmar
           </Button>
