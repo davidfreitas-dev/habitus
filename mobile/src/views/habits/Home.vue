@@ -128,13 +128,13 @@ onIonViewWillEnter(() => {
       @finish="onHomeOnboardingFinish"
       @exit="onHomeOnboardingFinish"
     >
-      <template #default="{ step, index, isLast, steps, exit, nextStep }">
+      <template #default="{ step, isLast, next, exit }">
         <OnboardingStep
           :step="step"
-          :index="index"
+          :index="activeHomeSteps.indexOf(step)"
           :is-last="isLast"
-          :total="steps.length"
-          @next="isLast ? exit() : nextStep()"
+          :total="activeHomeSteps.length"
+          @next="isLast ? exit() : next()"
           @skip="exit()"
         />
       </template>

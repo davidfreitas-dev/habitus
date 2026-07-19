@@ -156,13 +156,13 @@ const deleteHabit = async () => {
       @finish="onFormOnboardingFinish"
       @exit="onFormOnboardingFinish"
     >
-      <template #default="{ step, index, isLast, steps, exit, nextStep }">
+      <template #default="{ step, isLast, next, exit }">
         <OnboardingStep
           :step="step"
-          :index="index"
+          :index="formSteps.indexOf(step)"
           :is-last="isLast"
-          :total="steps.length"
-          @next="isLast ? exit() : nextStep()"
+          :total="formSteps.length"
+          @next="isLast ? exit() : next()"
           @skip="exit()"
         />
       </template>

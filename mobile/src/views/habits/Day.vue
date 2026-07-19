@@ -163,13 +163,13 @@ const router = useRouter();
       @finish="onDayOnboardingFinish"
       @exit="onDayOnboardingFinish"
     >
-      <template #default="{ step, index, isLast, steps, exit, nextStep }">
+      <template #default="{ step, isLast, next, exit }">
         <OnboardingStep
           :step="step"
-          :index="index"
+          :index="daySteps.indexOf(step)"
           :is-last="isLast"
-          :total="steps.length"
-          @next="isLast ? exit() : nextStep()"
+          :total="daySteps.length"
+          @next="isLast ? exit() : next()"
           @skip="exit()"
         />
       </template>

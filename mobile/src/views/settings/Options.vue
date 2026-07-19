@@ -150,13 +150,13 @@ onIonViewWillEnter(async () => {
       @finish="onOptionsOnboardingFinish"
       @exit="onOptionsOnboardingFinish"
     >
-      <template #default="{ step, index, isLast, steps, exit, nextStep }">
+      <template #default="{ step, isLast, next, exit }">
         <OnboardingStep
           :step="step"
-          :index="index"
+          :index="optionsSteps.indexOf(step)"
           :is-last="isLast"
-          :total="steps.length"
-          @next="isLast ? exit() : nextStep()"
+          :total="optionsSteps.length"
+          @next="isLast ? exit() : next()"
           @skip="exit()"
         />
       </template>
