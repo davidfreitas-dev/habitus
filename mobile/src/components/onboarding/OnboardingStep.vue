@@ -48,6 +48,12 @@ const emit = defineEmits(['next', 'skip']);
 <style scoped>
 .onboarding-step {
   min-width: 240px;
+  background: var(--color-background-secondary);
+  border-radius: var(--radius-xl);
+  padding: 20px 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  max-width: 320px;
+  border: 2px solid color-mix(in srgb, var(--color-primary) 40%, transparent);
 }
 
 .onboarding-step__title {

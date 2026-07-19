@@ -45,10 +45,14 @@ const scrollToBottom = async () => {
 // --- Onboarding: tour da tela Início ---
 const { isStepSeen, markStepSeen } = useOnboarding();
 const onboardingWrapper = ref(null);
-const { start: startHomeOnboarding } = useVOnboarding(onboardingWrapper);
+const { start: startHomeOnboarding, finish: finishHomeOnboarding } = useVOnboarding(onboardingWrapper);
 
-const onHomeOnboardingFinish = () => {
+const onHomeOnboardingComplete = () => {
   markStepSeen('home');
+};
+
+const onHomeOnboardingExit = () => {
+  finishHomeOnboarding();
 };
 
 // homeSteps[0] aponta para #onboarding-summary-grid, que só existe no DOM
@@ -125,8 +129,8 @@ onIonViewWillEnter(() => {
     <VOnboardingWrapper
       ref="onboardingWrapper"
       :steps="activeHomeSteps"
-      @finish="onHomeOnboardingFinish"
-      @exit="onHomeOnboardingFinish"
+      @finish="onHomeOnboardingComplete"
+      @exit="onHomeOnboardingExit"
     >
       <template #default="{ step, isLast, next, exit }">
         <VOnboardingStep>

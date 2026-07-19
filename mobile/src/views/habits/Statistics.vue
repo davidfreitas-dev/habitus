@@ -1,5 +1,5 @@
 <script setup>
-import { IonPage, IonContent, onIonViewWillEnter, onIonViewDidLeave } from '@ionic/vue';
+import { IonPage, IonContent, onIonViewWillEnter, onIonViewDidEnter, onIonViewDidLeave } from '@ionic/vue';
 import { ref, computed, watch, nextTick } from 'vue';
 import { useVOnboarding, VOnboardingStep, VOnboardingWrapper } from 'v-onboarding';
 import { useHabitStore } from '@/stores/habits';
@@ -84,14 +84,16 @@ const { isStepSeen, markStepSeen } = useOnboarding();
 const onboardingWrapper = ref(null);
 const { start: startStatsOnboarding, finish: finishStatsOnboarding } = useVOnboarding(onboardingWrapper);
 
-const onStatsOnboardingFinish = () => {
+const onStatsOnboardingComplete = () => {
   markStepSeen('stats');
 };
 
-onIonViewWillEnter(async () => {
+const onStatsOnboardingExit = () => {
+  finishStatsOnboarding();
+};
+
+onIonViewDidEnter(async () => {
   if (await isStepSeen('stats')) return;
-  // espera o card de streaks renderizar antes de iniciar o tour
-  await nextTick();
   startStatsOnboarding();
 });
 </script>
@@ -157,8 +159,8 @@ onIonViewWillEnter(async () => {
     <VOnboardingWrapper
       ref="onboardingWrapper"
       :steps="statsSteps"
-      @finish="onStatsOnboardingFinish"
-      @exit="onStatsOnboardingFinish"
+      @finish="onStatsOnboardingComplete"
+      @exit="onStatsOnboardingExit"
     >
       <template #default="{ step, isLast, next, exit }">
         <VOnboardingStep>

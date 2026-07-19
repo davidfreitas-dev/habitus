@@ -70,10 +70,14 @@ onIonViewWillEnter(() => {
 // somente leitura), e só quando já existe pelo menos 1 hábito pra marcar.
 const { isStepSeen, markStepSeen } = useOnboarding();
 const onboardingWrapper = ref(null);
-const { start: startDayOnboarding } = useVOnboarding(onboardingWrapper);
+const { start: startDayOnboarding, finish: finishDayOnboarding } = useVOnboarding(onboardingWrapper);
 
-const onDayOnboardingFinish = () => {
+const onDayOnboardingComplete = () => {
   markStepSeen('day');
+};
+
+const onDayOnboardingExit = () => {
+  finishDayOnboarding();
 };
 
 const maybeStartDayOnboarding = async () => {
@@ -160,8 +164,8 @@ const router = useRouter();
     <VOnboardingWrapper
       ref="onboardingWrapper"
       :steps="daySteps"
-      @finish="onDayOnboardingFinish"
-      @exit="onDayOnboardingFinish"
+      @finish="onDayOnboardingComplete"
+      @exit="onDayOnboardingExit"
     >
       <template #default="{ step, isLast, next, exit }">
         <VOnboardingStep>

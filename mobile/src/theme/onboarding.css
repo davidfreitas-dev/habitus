@@ -1,6 +1,10 @@
 /* v-onboarding default styles */
 @import 'v-onboarding/dist/style.css';
 
+:root {
+  --v-onboarding-step-arrow-background: var(--color-primary);
+}
+
 /* Onboarding theme overrides for Habitus */
 .v-onboarding-overlay {
   fill: rgba(0, 0, 0, 0.75);

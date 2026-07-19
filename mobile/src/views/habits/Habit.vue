@@ -56,10 +56,14 @@ onIonViewWillEnter(async () => {
 // Só mostra o tour ao CRIAR um hábito (não ao editar), e apenas na primeira vez.
 const { isStepSeen, markStepSeen } = useOnboarding();
 const onboardingWrapper = ref(null);
-const { start: startFormOnboarding } = useVOnboarding(onboardingWrapper);
+const { start: startFormOnboarding, finish: finishFormOnboarding } = useVOnboarding(onboardingWrapper);
 
-const onFormOnboardingFinish = () => {
+const onFormOnboardingComplete = () => {
   markStepSeen('form');
+};
+
+const onFormOnboardingExit = () => {
+  finishFormOnboarding();
 };
 
 const maybeStartFormOnboarding = async () => {
@@ -153,8 +157,8 @@ const deleteHabit = async () => {
     <VOnboardingWrapper
       ref="onboardingWrapper"
       :steps="formSteps"
-      @finish="onFormOnboardingFinish"
-      @exit="onFormOnboardingFinish"
+      @finish="onFormOnboardingComplete"
+      @exit="onFormOnboardingExit"
     >
       <template #default="{ step, isLast, next, exit }">
         <VOnboardingStep>

@@ -55,10 +55,14 @@ const logOut = async () => {
 // --- Onboarding: tour da tela de Opções ---
 const { isStepSeen, markStepSeen } = useOnboarding();
 const onboardingWrapper = ref(null);
-const { start: startOptionsOnboarding } = useVOnboarding(onboardingWrapper);
+const { start: startOptionsOnboarding, finish: finishOptionsOnboarding } = useVOnboarding(onboardingWrapper);
 
-const onOptionsOnboardingFinish = () => {
+const onOptionsOnboardingComplete = () => {
   markStepSeen('options');
+};
+
+const onOptionsOnboardingExit = () => {
+  finishOptionsOnboarding();
 };
 
 onIonViewWillEnter(async () => {
@@ -147,8 +151,8 @@ onIonViewWillEnter(async () => {
     <VOnboardingWrapper
       ref="onboardingWrapper"
       :steps="optionsSteps"
-      @finish="onOptionsOnboardingFinish"
-      @exit="onOptionsOnboardingFinish"
+      @finish="onOptionsOnboardingComplete"
+      @exit="onOptionsOnboardingExit"
     >
       <template #default="{ step, isLast, next, exit }">
         <VOnboardingStep>
