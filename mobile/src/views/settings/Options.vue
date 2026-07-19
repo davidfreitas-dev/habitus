@@ -12,7 +12,7 @@ import {
   onIonViewWillEnter
 } from '@ionic/vue';
 import { personOutline, gridOutline, exitOutline } from 'ionicons/icons';
-import { useVOnboarding, VOnboardingWrapper } from 'v-onboarding';
+import { useVOnboarding, VOnboardingStep, VOnboardingWrapper } from 'v-onboarding';
 import { useAuthStore } from '@/stores/auth';
 import { useThemeStore } from '@/stores/theme';
 import { useLoading } from '@/composables/useLoading';
@@ -151,14 +151,16 @@ onIonViewWillEnter(async () => {
       @exit="onOptionsOnboardingFinish"
     >
       <template #default="{ step, isLast, next, exit }">
-        <OnboardingStep
-          :step="step"
-          :index="optionsSteps.indexOf(step)"
-          :is-last="isLast"
-          :total="optionsSteps.length"
-          @next="isLast ? exit() : next()"
-          @skip="exit()"
-        />
+        <VOnboardingStep>
+          <OnboardingStep
+            :step="step"
+            :index="optionsSteps.indexOf(step)"
+            :is-last="isLast"
+            :total="optionsSteps.length"
+            @next="isLast ? exit() : next()"
+            @skip="exit()"
+          />
+        </VOnboardingStep>
       </template>
     </VOnboardingWrapper>
   </ion-page>

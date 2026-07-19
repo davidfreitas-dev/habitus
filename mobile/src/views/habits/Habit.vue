@@ -2,7 +2,7 @@
 import { ref, computed, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { IonPage, IonContent, onIonViewWillEnter } from '@ionic/vue';
-import { useVOnboarding, VOnboardingWrapper } from 'v-onboarding';
+import { useVOnboarding, VOnboardingStep, VOnboardingWrapper } from 'v-onboarding';
 import { useProfileStore } from '@/stores/profile';
 import { useHabitStore } from '@/stores/habits';
 import { useLoading } from '@/composables/useLoading';
@@ -157,14 +157,16 @@ const deleteHabit = async () => {
       @exit="onFormOnboardingFinish"
     >
       <template #default="{ step, isLast, next, exit }">
-        <OnboardingStep
-          :step="step"
-          :index="formSteps.indexOf(step)"
-          :is-last="isLast"
-          :total="formSteps.length"
-          @next="isLast ? exit() : next()"
-          @skip="exit()"
-        />
+        <VOnboardingStep>
+          <OnboardingStep
+            :step="step"
+            :index="formSteps.indexOf(step)"
+            :is-last="isLast"
+            :total="formSteps.length"
+            @next="isLast ? exit() : next()"
+            @skip="exit()"
+          />
+        </VOnboardingStep>
       </template>
     </VOnboardingWrapper>
   </ion-page>

@@ -1,7 +1,7 @@
 <script setup>
 import { IonPage, IonContent, onIonViewWillEnter, onIonViewDidLeave } from '@ionic/vue';
 import { ref, computed, watch, nextTick } from 'vue';
-import { useVOnboarding, VOnboardingWrapper } from 'v-onboarding';
+import { useVOnboarding, VOnboardingStep, VOnboardingWrapper } from 'v-onboarding';
 import { useHabitStore } from '@/stores/habits';
 import { useLoading } from '@/composables/useLoading';
 import { useOnboarding } from '@/composables/useOnboarding';
@@ -161,14 +161,16 @@ onIonViewWillEnter(async () => {
       @exit="onStatsOnboardingFinish"
     >
       <template #default="{ step, isLast, next, exit }">
-        <OnboardingStep
-          :step="step"
-          :index="statsSteps.indexOf(step)"
-          :is-last="isLast"
-          :total="statsSteps.length"
-          @next="isLast ? exit() : next()"
-          @skip="exit()"
-        />
+        <VOnboardingStep>
+          <OnboardingStep
+            :step="step"
+            :index="statsSteps.indexOf(step)"
+            :is-last="isLast"
+            :total="statsSteps.length"
+            @next="isLast ? exit() : next()"
+            @skip="exit()"
+          />
+        </VOnboardingStep>
       </template>
     </VOnboardingWrapper>
   </ion-page>

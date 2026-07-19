@@ -2,7 +2,7 @@
 import { ref, computed, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { IonPage, IonContent, IonText, onIonViewWillEnter } from '@ionic/vue';
-import { useVOnboarding, VOnboardingWrapper } from 'v-onboarding';
+import { useVOnboarding, VOnboardingStep, VOnboardingWrapper } from 'v-onboarding';
 import { useProfileStore } from '@/stores/profile';
 import { useHabitStore } from '@/stores/habits';
 import { useParsedDate } from '@/composables/useParsedDate';
@@ -164,14 +164,16 @@ const router = useRouter();
       @exit="onDayOnboardingFinish"
     >
       <template #default="{ step, isLast, next, exit }">
-        <OnboardingStep
-          :step="step"
-          :index="daySteps.indexOf(step)"
-          :is-last="isLast"
-          :total="daySteps.length"
-          @next="isLast ? exit() : next()"
-          @skip="exit()"
-        />
+        <VOnboardingStep>
+          <OnboardingStep
+            :step="step"
+            :index="daySteps.indexOf(step)"
+            :is-last="isLast"
+            :total="daySteps.length"
+            @next="isLast ? exit() : next()"
+            @skip="exit()"
+          />
+        </VOnboardingStep>
       </template>
     </VOnboardingWrapper>
   </ion-page>

@@ -23,8 +23,12 @@ const emit = defineEmits(['next', 'skip']);
 
 <template>
   <div class="onboarding-step">
-    <h4 class="onboarding-step__title">{{ step.content?.title }}</h4>
-    <p class="onboarding-step__description">{{ step.content?.description }}</p>
+    <h4 class="onboarding-step__title">
+      {{ step.content?.title }}
+    </h4>
+    <p class="onboarding-step__description">
+      {{ step.content?.description }}
+    </p>
     <div class="onboarding-step__footer">
       <button class="onboarding-step__skip" @click="emit('skip')">
         Pular

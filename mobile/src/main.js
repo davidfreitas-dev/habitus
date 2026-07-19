@@ -24,7 +24,6 @@ import '@ionic/vue/css/display.css';
 
 /* Onboarding coachmarks theme */
 import 'v-onboarding/dist/style.css';
-import './theme/onboarding.css';
 
 /* Theme variables */
 import './theme/global.css';
