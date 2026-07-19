@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { 
   IonContent, 
@@ -8,18 +8,26 @@ import {
   IonLabel, 
   IonList, 
   IonListHeader, 
-  IonIcon
+  IonIcon,
+  onIonViewWillEnter
 } from '@ionic/vue';
 import { personOutline, gridOutline, exitOutline } from 'ionicons/icons';
+import { useVOnboarding, VOnboardingWrapper } from 'v-onboarding';
 import { useAuthStore } from '@/stores/auth';
 import { useThemeStore } from '@/stores/theme';
 import { useLoading } from '@/composables/useLoading';
+import { useOnboarding } from '@/composables/useOnboarding';
+import { optionsSteps } from '@/onboarding/optionsSteps';
 import Header from '@/components/layout/Header.vue';
 import Heading from '@/components/layout/Heading.vue';
 import Container from '@/components/layout/Container.vue';
 import Button from '@/components/ui/Button.vue';
 import ModalDialog from '@/components/layout/ModalDialog.vue';
 import Toggle from '@/components/ui/Toggle.vue';
+import OnboardingStep from '@/components/onboarding/OnboardingStep.vue';
+
+// Ajuste os caminhos de `onboarding/optionsSteps` e
+// `components/onboarding/OnboardingStep.vue` conforme o local real.
 
 const router = useRouter();
 const { withLoading } = useLoading();
@@ -43,6 +51,21 @@ const logOut = async () => {
     router.push('/signin');
   }, 'Erro ao finalizar sessão.');
 };
+
+// --- Onboarding: tour da tela de Opções ---
+const { isStepSeen, markStepSeen } = useOnboarding();
+const onboardingWrapper = ref(null);
+const { start: startOptionsOnboarding } = useVOnboarding(onboardingWrapper);
+
+const onOptionsOnboardingFinish = () => {
+  markStepSeen('options');
+};
+
+onIonViewWillEnter(async () => {
+  if (await isStepSeen('options')) return;
+  await nextTick();
+  startOptionsOnboarding();
+});
 </script>
 
 <template>
@@ -59,7 +82,11 @@ const logOut = async () => {
               Minha conta
             </ion-label>
           </ion-list-header>
-          <ion-item class="ion-no-padding" router-link="/profile">
+          <ion-item
+            id="onboarding-profile-link"
+            class="ion-no-padding"
+            router-link="/profile"
+          >
             <ion-label class="ion-no-margin ion-padding-top ion-padding-bottom">
               Editar perfil
             </ion-label>
@@ -116,6 +143,24 @@ const logOut = async () => {
         />
       </Container>
     </ion-content>
+
+    <VOnboardingWrapper
+      ref="onboardingWrapper"
+      :steps="optionsSteps"
+      @finish="onOptionsOnboardingFinish"
+      @exit="onOptionsOnboardingFinish"
+    >
+      <template #default="{ step, index, isLast, steps, exit, nextStep }">
+        <OnboardingStep
+          :step="step"
+          :index="index"
+          :is-last="isLast"
+          :total="steps.length"
+          @next="isLast ? exit() : nextStep()"
+          @skip="exit()"
+        />
+      </template>
+    </VOnboardingWrapper>
   </ion-page>
 </template>
 

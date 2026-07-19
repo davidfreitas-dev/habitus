@@ -1,12 +1,15 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { IonPage, IonContent, IonText, onIonViewWillEnter } from '@ionic/vue';
+import { useVOnboarding, VOnboardingWrapper } from 'v-onboarding';
 import { useProfileStore } from '@/stores/profile';
 import { useHabitStore } from '@/stores/habits';
 import { useParsedDate } from '@/composables/useParsedDate';
 import { useLoading } from '@/composables/useLoading';
 import { useToast } from '@/composables/useToast';
+import { useOnboarding } from '@/composables/useOnboarding';
+import { daySteps } from '@/onboarding/daySteps';
 
 import Header from '@/components/layout/Header.vue';
 import Container from '@/components/layout/Container.vue';
@@ -15,6 +18,10 @@ import Breadcrumb from '@/components/layout/Breadcrumb.vue';
 import ProgressBar from '@/components/ui/Progressbar.vue';
 import Checkbox from '@/components/ui/Checkbox.vue';
 import Button from '@/components/ui/Button.vue';
+import OnboardingStep from '@/components/onboarding/OnboardingStep.vue';
+
+// Ajuste os caminhos de `onboarding/daySteps` e
+// `components/onboarding/OnboardingStep.vue` conforme o local real.
 
 
 const profileStore = useProfileStore();
@@ -54,8 +61,28 @@ onIonViewWillEnter(() => {
   withLoading(async () => {
     await profileStore.fetchProfile();
     await getDayInfo();
+    await maybeStartDayOnboarding();
   }, 'Erro ao carregar os dados do dia.');
 });
+
+// --- Onboarding: tour da tela do dia (barra de progresso + checklist) ---
+// Só mostra o tour para o dia atual (não em datas passadas, que são
+// somente leitura), e só quando já existe pelo menos 1 hábito pra marcar.
+const { isStepSeen, markStepSeen } = useOnboarding();
+const onboardingWrapper = ref(null);
+const { start: startDayOnboarding } = useVOnboarding(onboardingWrapper);
+
+const onDayOnboardingFinish = () => {
+  markStepSeen('day');
+};
+
+const maybeStartDayOnboarding = async () => {
+  if (isDateInPast.value) return;
+  if (!dayInfo.value.possible_habits?.length) return;
+  if (await isStepSeen('day')) return;
+  await nextTick();
+  startDayOnboarding();
+};
 
 const handleToggleHabit = async (habitId) => {
   await withLoading(async () => {
@@ -97,11 +124,12 @@ const router = useRouter();
           :date="dayAndMonth"
         />
 
-        <ProgressBar :progress="progressPercentage" />
+        <ProgressBar id="onboarding-progress-bar" :progress="progressPercentage" />
 
         <Checkbox
-          v-for="habit in dayInfo.possible_habits"
+          v-for="(habit, index) in dayInfo.possible_habits"
           :key="habit.id"
+          :id="index === 0 ? 'onboarding-habit-checkbox' : undefined"
           :label="habit.title"
           :is-checked="isHabitChecked(habit.id)"
           :is-disabled="isDateInPast"
@@ -128,6 +156,24 @@ const router = useRouter();
         </ion-text>
       </Container>
     </ion-content>
+
+    <VOnboardingWrapper
+      ref="onboardingWrapper"
+      :steps="daySteps"
+      @finish="onDayOnboardingFinish"
+      @exit="onDayOnboardingFinish"
+    >
+      <template #default="{ step, index, isLast, steps, exit, nextStep }">
+        <OnboardingStep
+          :step="step"
+          :index="index"
+          :is-last="isLast"
+          :total="steps.length"
+          @next="isLast ? exit() : nextStep()"
+          @skip="exit()"
+        />
+      </template>
+    </VOnboardingWrapper>
   </ion-page>
 </template>
 

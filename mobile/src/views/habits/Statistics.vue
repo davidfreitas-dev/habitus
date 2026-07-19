@@ -1,14 +1,22 @@
 <script setup>
 import { IonPage, IonContent, onIonViewWillEnter, onIonViewDidLeave } from '@ionic/vue';
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
+import { useVOnboarding, VOnboardingWrapper } from 'v-onboarding';
 import { useHabitStore } from '@/stores/habits';
 import { useLoading } from '@/composables/useLoading';
+import { useOnboarding } from '@/composables/useOnboarding';
+import { statsSteps } from '@/onboarding/statsSteps';
 import Header from '@/components/layout/Header.vue';
 import Heading from '@/components/layout/Heading.vue';
 import Container from '@/components/layout/Container.vue';
 import BarChart from '@/components/habits/BarChart.vue';
 import PeriodSelector from '@/components/habits/PeriodSelector.vue';
+import OnboardingStep from '@/components/onboarding/OnboardingStep.vue';
 import dayjs from '@/lib/dayjs';
+
+// Ajuste os caminhos de import de `onboarding/statsSteps` e
+// `components/onboarding/OnboardingStep.vue` para o local real
+// onde esses arquivos ficaram no seu projeto.
 
 const ERROR_MSG = 'Erro ao carregar estatísticas';
 const today = () => dayjs().format('YYYY-MM-DD');
@@ -70,6 +78,22 @@ onIonViewWillEnter(() =>
 onIonViewDidLeave(() => {
   statsData.value = [];
 });
+
+// --- Onboarding: tour da tela de Estatísticas ---
+const { isStepSeen, markStepSeen } = useOnboarding();
+const onboardingWrapper = ref(null);
+const { start: startStatsOnboarding, finish: finishStatsOnboarding } = useVOnboarding(onboardingWrapper);
+
+const onStatsOnboardingFinish = () => {
+  markStepSeen('stats');
+};
+
+onIonViewWillEnter(async () => {
+  if (await isStepSeen('stats')) return;
+  // espera o card de streaks renderizar antes de iniciar o tour
+  await nextTick();
+  startStatsOnboarding();
+});
 </script>
 
 <template>
@@ -100,7 +124,7 @@ onIonViewDidLeave(() => {
             />
           </div>
 
-          <div class="streaks-grid">
+          <div id="onboarding-streaks-grid" class="streaks-grid">
             <div class="streak-card">
               <div class="streak-header">
                 <span class="streak-label">Sequência Atual</span>
@@ -129,6 +153,24 @@ onIonViewDidLeave(() => {
         </div>
       </Container>
     </ion-content>
+
+    <VOnboardingWrapper
+      ref="onboardingWrapper"
+      :steps="statsSteps"
+      @finish="onStatsOnboardingFinish"
+      @exit="onStatsOnboardingFinish"
+    >
+      <template #default="{ step, index, isLast, steps, exit, nextStep }">
+        <OnboardingStep
+          :step="step"
+          :index="index"
+          :is-last="isLast"
+          :total="steps.length"
+          @next="isLast ? exit() : nextStep()"
+          @skip="exit()"
+        />
+      </template>
+    </VOnboardingWrapper>
   </ion-page>
 </template>
 

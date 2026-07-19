@@ -1,0 +1,36 @@
+/* v-onboarding default styles */
+@import 'v-onboarding/dist/style.css';
+
+/* Onboarding theme overrides for Habitus */
+.v-onboarding-overlay {
+  fill: rgba(0, 0, 0, 0.75);
+}
+
+.v-onboarding-item {
+  background: var(--color-background-secondary) !important;
+  border-radius: var(--radius-xl) !important;
+  padding: 20px 24px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+  max-width: 320px !important;
+  border: 1px solid var(--color-border-default) !important;
+}
+
+.v-onboarding-item__header-title {
+  color: var(--color-primary) !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  margin-bottom: 6px !important;
+}
+
+.v-onboarding-item__description {
+  color: var(--color-text-accent) !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+/* Hide default v-onboarding buttons - we use custom slot */
+.v-onboarding-item__actions {
+  display: none !important;
+}

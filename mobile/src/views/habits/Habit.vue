@@ -1,11 +1,14 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { IonPage, IonContent, onIonViewWillEnter } from '@ionic/vue';
+import { useVOnboarding, VOnboardingWrapper } from 'v-onboarding';
 import { useProfileStore } from '@/stores/profile';
 import { useHabitStore } from '@/stores/habits';
 import { useLoading } from '@/composables/useLoading';
 import { useToast } from '@/composables/useToast';
+import { useOnboarding } from '@/composables/useOnboarding';
+import { formSteps } from '@/onboarding/formSteps';
 import Header from '@/components/layout/Header.vue';
 import Heading from '@/components/layout/Heading.vue';
 import Container from '@/components/layout/Container.vue';
@@ -13,6 +16,10 @@ import Button from '@/components/ui/Button.vue';
 import BackButton from '@/components/layout/BackButton.vue';
 import HabitForm from '@/components/habits/HabitForm.vue';
 import ModalDialog from '@/components/layout/ModalDialog.vue';
+import OnboardingStep from '@/components/onboarding/OnboardingStep.vue';
+
+// Ajuste os caminhos de `onboarding/formSteps` e
+// `components/onboarding/OnboardingStep.vue` conforme o local real.
 
 const profileStore = useProfileStore();
 const habitStore = useHabitStore();
@@ -41,7 +48,26 @@ onIonViewWillEnter(async () => {
     const fetchedHabit = await habitStore.getHabitDetails(habit.value.id);
     habit.value = fetchedHabit;
   }, 'Erro ao carregar detalhes do hábito.');
+
+  await maybeStartFormOnboarding();
 });
+
+// --- Onboarding: tour do formulário de criação de hábito ---
+// Só mostra o tour ao CRIAR um hábito (não ao editar), e apenas na primeira vez.
+const { isStepSeen, markStepSeen } = useOnboarding();
+const onboardingWrapper = ref(null);
+const { start: startFormOnboarding } = useVOnboarding(onboardingWrapper);
+
+const onFormOnboardingFinish = () => {
+  markStepSeen('form');
+};
+
+const maybeStartFormOnboarding = async () => {
+  if (route.params.id) return; // está editando, não criando
+  if (await isStepSeen('form')) return;
+  await nextTick();
+  startFormOnboarding();
+};
 
 const habitFormRef = ref(null);
 const dialogRef = ref(null);
@@ -123,5 +149,23 @@ const deleteHabit = async () => {
 
       <!-- Removed Alert component as showAlert is removed -->
     </ion-content>
+
+    <VOnboardingWrapper
+      ref="onboardingWrapper"
+      :steps="formSteps"
+      @finish="onFormOnboardingFinish"
+      @exit="onFormOnboardingFinish"
+    >
+      <template #default="{ step, index, isLast, steps, exit, nextStep }">
+        <OnboardingStep
+          :step="step"
+          :index="index"
+          :is-last="isLast"
+          :total="steps.length"
+          @next="isLast ? exit() : nextStep()"
+          @skip="exit()"
+        />
+      </template>
+    </VOnboardingWrapper>
   </ion-page>
 </template>

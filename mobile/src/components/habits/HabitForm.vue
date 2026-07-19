@@ -124,39 +124,43 @@ const availableWeekDays = [
       placeholder="Exercícios, dormir bem, etc..."
     /> 
 
-    <p>Qual a recorrência?</p>
-    <Checkbox
-      v-for="(weekDay, index) in availableWeekDays"
-      :key="index"
-      :label="weekDay"
-      :is-checked="isDayChecked(index)"
-      @handle-checkbox-change="toggleWeekDay(index)"
-    />
+    <div id="onboarding-recurrence">
+      <p>Qual a recorrência?</p>
+      <Checkbox
+        v-for="(weekDay, index) in availableWeekDays"
+        :key="index"
+        :label="weekDay"
+        :is-checked="isDayChecked(index)"
+        @handle-checkbox-change="toggleWeekDay(index)"
+      />
+    </div>
 
-    <ion-item lines="none" class="ion-no-padding">
-      <ion-label class="ion-no-margin">
-        <b>Ativar lembrete</b>
-      </ion-label>
-      <Toggle v-model:checked="formData.reminderEnabled" />
-    </ion-item>
-    <ion-item
-      v-if="formData.reminderEnabled"
-      lines="none"
-      class="ion-no-padding"
-    >
-      <ion-label class="ion-no-margin">
-        Horário
-      </ion-label>
-      <ion-datetime-button datetime="reminder-datetime" />
-      <ion-modal :keep-contents-mounted="true">
-        <ion-datetime
-          id="reminder-datetime"
-          v-model="formData.reminderTime"
-          presentation="time"
-          locale="pt-BR"
-        />
-      </ion-modal>
-    </ion-item>
+    <div id="onboarding-reminder">
+      <ion-item lines="none" class="ion-no-padding">
+        <ion-label class="ion-no-margin">
+          <b>Ativar lembrete</b>
+        </ion-label>
+        <Toggle v-model:checked="formData.reminderEnabled" />
+      </ion-item>
+      <ion-item
+        v-if="formData.reminderEnabled"
+        lines="none"
+        class="ion-no-padding"
+      >
+        <ion-label class="ion-no-margin">
+          Horário
+        </ion-label>
+        <ion-datetime-button datetime="reminder-datetime" />
+        <ion-modal :keep-contents-mounted="true">
+          <ion-datetime
+            id="reminder-datetime"
+            v-model="formData.reminderTime"
+            presentation="time"
+            locale="pt-BR"
+          />
+        </ion-modal>
+      </ion-item>
+    </div>
 
     <Button
       color="primary"
