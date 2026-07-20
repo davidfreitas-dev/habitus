@@ -72,8 +72,11 @@ const loadStats = async (period) => {
 watch(activePeriod, (period) =>
   withLoading(() => loadStats(period), ERROR_MSG));
 
-onIonViewWillEnter(() =>
-  withLoading(() => loadStats(activePeriod.value), ERROR_MSG));
+let statsLoaded = null;
+
+onIonViewWillEnter(() => {
+  statsLoaded = withLoading(() => loadStats(activePeriod.value), ERROR_MSG);
+});
 
 onIonViewDidLeave(() => {
   statsData.value = [];
@@ -93,6 +96,13 @@ const onStatsOnboardingExit = () => {
 };
 
 onIonViewDidEnter(async () => {
+  if (statsLoaded) {
+    try {
+      await statsLoaded;
+    } catch (err) {
+      // Ignora o erro
+    }
+  }
   if (await isStepSeen('stats')) return;
   startStatsOnboarding();
 });

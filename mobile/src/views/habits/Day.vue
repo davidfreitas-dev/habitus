@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { IonPage, IonContent, IonText, onIonViewWillEnter } from '@ionic/vue';
+import { IonPage, IonContent, IonText, onIonViewWillEnter, onIonViewDidEnter } from '@ionic/vue';
 import { useVOnboarding, VOnboardingStep, VOnboardingWrapper } from 'v-onboarding';
 import { useProfileStore } from '@/stores/profile';
 import { useHabitStore } from '@/stores/habits';
@@ -57,12 +57,24 @@ const getDayInfo = async () => {
 
 const { withLoading, isLoading } = useLoading();
 
+let dayDataLoaded = null;
+
 onIonViewWillEnter(() => {
-  withLoading(async () => {
+  dayDataLoaded = withLoading(async () => {
     await profileStore.fetchProfile();
     await getDayInfo();
-    await maybeStartDayOnboarding();
   }, 'Erro ao carregar os dados do dia.');
+});
+
+onIonViewDidEnter(async () => {
+  if (dayDataLoaded) {
+    try {
+      await dayDataLoaded;
+    } catch (err) {
+      // Ignora o erro
+    }
+  }
+  await maybeStartDayOnboarding();
 });
 
 // --- Onboarding: tour da tela do dia (barra de progresso + checklist) ---

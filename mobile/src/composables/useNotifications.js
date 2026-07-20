@@ -4,6 +4,14 @@ import { Capacitor } from '@capacitor/core';
 export function useNotifications() {
   const isNative = Capacitor.isNativePlatform();
 
+  const checkPermission = async () => {
+    if (!isNative) return true;
+
+    const permissions = await LocalNotifications.checkPermissions();
+
+    return permissions.display === 'granted';
+  };
+
   const requestPermission = async () => {
     if (!isNative) return true;
 
@@ -19,6 +27,8 @@ export function useNotifications() {
   };
 
   return {
+    checkPermission,
     requestPermission,
   };
 }
+

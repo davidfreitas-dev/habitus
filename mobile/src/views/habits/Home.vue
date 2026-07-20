@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, nextTick } from 'vue';
-import { IonPage, IonContent, IonRow, onIonViewWillEnter, IonText } from '@ionic/vue';
+import { IonPage, IonContent, IonRow, onIonViewWillEnter, onIonViewDidEnter, IonText } from '@ionic/vue';
 import { useVOnboarding, VOnboardingStep, VOnboardingWrapper } from 'v-onboarding';
 import { useGenerateRange } from '@/composables/useGenerateRange';
 import { useProfileStore } from '@/stores/profile';
@@ -74,13 +74,14 @@ const maybeStartHomeOnboarding = async () => {
   startHomeOnboarding();
 };
 
+let summaryLoaded = null;
+
 const getSummary = async () => {
   try {
     const today = dayjs().format('YYYY-MM-DD');
     const response = await habitStore.getHabitsSummary(today);
     summary.value = Array.isArray(response) ? response : [];
     scrollToBottom();
-    await maybeStartHomeOnboarding();
   } catch (err) {
     console.error('Error fetching habits summary:', err);
     showToast('error', err.response?.data?.message || 'Erro ao carregar resumo de hábitos.');
@@ -95,7 +96,18 @@ const minimumSummaryDatesSize = ref(18 * 5);
 onIonViewWillEnter(() => {
   datesFromYearStart.value = generateDatesFromYearBeginning();
   amountOfDaysToFill.value = minimumSummaryDatesSize.value - datesFromYearStart.value.length;
-  withLoading(getSummary, 'Erro ao carregar o resumo de hábitos.');
+  summaryLoaded = withLoading(getSummary, 'Erro ao carregar o resumo de hábitos.');
+});
+
+onIonViewDidEnter(async () => {
+  if (summaryLoaded) {
+    try {
+      await summaryLoaded;
+    } catch (err) {
+      // Ignora o erro
+    }
+  }
+  await maybeStartHomeOnboarding();
 });
 </script>
 

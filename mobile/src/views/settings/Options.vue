@@ -9,7 +9,7 @@ import {
   IonList, 
   IonListHeader, 
   IonIcon,
-  onIonViewWillEnter
+  onIonViewDidEnter
 } from '@ionic/vue';
 import { personOutline, gridOutline, exitOutline } from 'ionicons/icons';
 import { useVOnboarding, VOnboardingStep, VOnboardingWrapper } from 'v-onboarding';
@@ -65,7 +65,7 @@ const onOptionsOnboardingExit = () => {
   finishOptionsOnboarding();
 };
 
-onIonViewWillEnter(async () => {
+onIonViewDidEnter(async () => {
   if (await isStepSeen('options')) return;
   await nextTick();
   startOptionsOnboarding();

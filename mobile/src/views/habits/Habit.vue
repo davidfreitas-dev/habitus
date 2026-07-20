@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { IonPage, IonContent, onIonViewWillEnter } from '@ionic/vue';
+import { IonPage, IonContent, onIonViewWillEnter, onIonViewDidEnter } from '@ionic/vue';
 import { useVOnboarding, VOnboardingStep, VOnboardingWrapper } from 'v-onboarding';
 import { useProfileStore } from '@/stores/profile';
 import { useHabitStore } from '@/stores/habits';
@@ -41,14 +41,25 @@ const habit = ref({
 const { showToast } = useToast();
 const { isLoading, withLoading } = useLoading();
 
-onIonViewWillEnter(async () => {
-  await withLoading(async () => {
+let detailsLoaded = null;
+
+onIonViewWillEnter(() => {
+  detailsLoaded = withLoading(async () => {
     await profileStore.fetchProfile();
     if (!habit.value.id) return;
     const fetchedHabit = await habitStore.getHabitDetails(habit.value.id);
     habit.value = fetchedHabit;
   }, 'Erro ao carregar detalhes do hábito.');
+});
 
+onIonViewDidEnter(async () => {
+  if (detailsLoaded) {
+    try {
+      await detailsLoaded;
+    } catch (err) {
+      // Ignora o erro
+    }
+  }
   await maybeStartFormOnboarding();
 });
 

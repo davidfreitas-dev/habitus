@@ -5,6 +5,8 @@ import { IonPage, IonContent } from '@ionic/vue';
 import { useOnboarding } from '@/composables/useOnboarding';
 import { useNotifications } from '@/composables/useNotifications';
 import { useToast } from '@/composables/useToast';
+import { useHabitStore } from '@/stores/habits';
+import { NotificationService } from '@/services/NotificationService';
 import Container from '@/components/layout/Container.vue';
 import Button from '@/components/ui/Button.vue';
 
@@ -26,9 +28,15 @@ const requestNotificationPermission = async () => {
     const granted = await requestPermission();
 
     if (granted) {
-      showToast('success', 'Lembretes ativados com sucesso!');
+      try {
+        const habitStore = useHabitStore();
+        const habits = await habitStore.fetchAllHabits();
+        await NotificationService.rescheduleAllNotifications(habits);
+      } catch (error) {
+        console.error('Error rescheduling notifications on onboarding welcome:', error);
+      }
     } else {
-      showToast('info', 'Você pode ativar os lembretes depois nas configurações do dispositivo.');
+      showToast('info', 'Você pode ativar as notificações depois nas configurações do dispositivo.');
     }
   } catch (err) {
     console.error('Error requesting notification permission:', err);
@@ -49,32 +57,22 @@ const skipNotifications = () => {
     <ion-content :fullscreen="true">
       <Container>
         <div class="welcome-container">
-          <div class="welcome-illustration">
-            <span class="welcome-emoji">🎯</span>
-          </div>
-
-          <h1 class="welcome-title">
-            Bem-vindo ao Habitus!
-          </h1>
-
-          <p class="welcome-description">
-            Acompanhe seus hábitos diários, visualize seu progresso
-            e construa rotinas saudáveis de forma simples e eficiente.
-          </p>
-
-          <div class="welcome-features">
-            <div class="feature-item">
-              <span class="feature-icon">✅</span>
-              <span class="feature-text">Registre seus hábitos diários</span>
+          <div class="welcome-content">
+            <div class="welcome-illustration">
+              <img
+                src="../../../assets/notifications.png"
+                alt="Notificações"
+                class="welcome-image"
+              >
             </div>
-            <div class="feature-item">
-              <span class="feature-icon">📊</span>
-              <span class="feature-text">Acompanhe suas sequências</span>
-            </div>
-            <div class="feature-item">
-              <span class="feature-icon">🔔</span>
-              <span class="feature-text">Receba lembretes personalizados</span>
-            </div>
+
+            <h1 class="welcome-title">
+              Não Perca o Ritmo!
+            </h1>
+
+            <p class="welcome-description">
+              Ative as notificações para receber lembretes nos horários certos e manter seus hábitos em dia.
+            </p>
           </div>
 
           <div class="welcome-actions">
@@ -83,7 +81,7 @@ const skipNotifications = () => {
               :is-loading="isRequesting"
               @click="requestNotificationPermission"
             >
-              Ativar lembretes
+              Ativar notificações
             </Button>
 
             <button
@@ -105,15 +103,22 @@ const skipNotifications = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 80vh;
+  justify-content: space-between;
+  min-height: calc(100vh - 32px);
   padding: 2rem 1rem;
   text-align: center;
 }
 
+.welcome-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 2rem;
+}
+
 .welcome-illustration {
-  width: 100px;
-  height: 100px;
+  width: 250px;
+  height: 250px;
   border-radius: 50%;
   background: var(--color-background-secondary);
   display: flex;
@@ -122,8 +127,11 @@ const skipNotifications = () => {
   margin-bottom: 2rem;
 }
 
-.welcome-emoji {
-  font-size: 48px;
+.welcome-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: scale(1.3);
 }
 
 .welcome-title {
@@ -142,42 +150,14 @@ const skipNotifications = () => {
   max-width: 320px;
 }
 
-.welcome-features {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 2.5rem;
-  width: 100%;
-  max-width: 300px;
-}
-
-.feature-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background: var(--color-background-secondary);
-  border-radius: var(--radius-xl);
-}
-
-.feature-icon {
-  font-size: 20px;
-  flex-shrink: 0;
-}
-
-.feature-text {
-  color: var(--color-text-accent);
-  font-size: 14px;
-  font-weight: 600;
-  text-align: left;
-}
-
 .welcome-actions {
   display: flex;
   flex-direction: column;
   gap: 12px;
   width: 100%;
-  max-width: 300px;
+  max-width: 320px;
+  margin: 0 auto;
+  padding-bottom: env(safe-area-inset-bottom, 16px);
 }
 
 .skip-button {

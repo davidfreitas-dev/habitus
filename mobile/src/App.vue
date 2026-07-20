@@ -8,6 +8,7 @@ import { ScreenOrientation } from '@capacitor/screen-orientation';
 import { useNetwork } from '@/composables/useNetwork';
 import { useStatusBar } from '@/composables/useStatusBar';
 import { useNotifications } from '@/composables/useNotifications';
+import { useAuthStore } from '@/stores/auth';
 import { useThemeStore } from '@/stores/theme';
 import { useHabitStore } from '@/stores/habits';
 import { NotificationService } from '@/services/NotificationService';
@@ -17,8 +18,9 @@ import dayjs from '@/lib/dayjs';
 
 const { isConnected } = useNetwork();
 const { setStatusBar, Style } = useStatusBar();
-const { requestPermission } = useNotifications();
+const { checkPermission } = useNotifications();
 const router = useRouter();
+const authStore = useAuthStore();
 const themeStore = useThemeStore();
 const habitStore = useHabitStore();
 
@@ -67,8 +69,8 @@ onMounted(async () => {
       }
     });
 
-    const granted = await requestPermission();
-    if (granted) {
+    const granted = await checkPermission();
+    if (granted && authStore.isAuthenticated) {
       try {
         const habits = await habitStore.fetchAllHabits();
         await NotificationService.rescheduleAllNotifications(habits);
@@ -78,6 +80,7 @@ onMounted(async () => {
     }
   }
 });
+
 </script>
 
 <template>
