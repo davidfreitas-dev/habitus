@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { alertController } from '@ionic/vue';
+import { useOnboarding } from '@/composables/useOnboarding';
 
 const routes = [
   {
@@ -101,6 +102,12 @@ const routes = [
     path: '/about',
     name: 'About',
     component: () => import('@/views/settings/About.vue')
+  },
+  {
+    path: '/onboarding/welcome',
+    name: 'OnboardingWelcome',
+    component: () => import('@/views/onboarding/OnboardingWelcome.vue'),
+    meta: { requiresAuth: true }
   }
 ];
 
@@ -148,17 +155,35 @@ router.beforeEach(async (to) => {
     return true;
   }
 
-  if (authStore.isAuthenticated) {
-    return true;
+  let isAuthenticated = authStore.isAuthenticated;
+
+  if (!isAuthenticated) {
+    try {
+      const refreshed = await authStore.refreshAccessToken();
+      if (refreshed) {
+        isAuthenticated = true;
+      }
+    } catch (error) {
+      // Erro ao renovar token, prossegue para o redirecionamento
+    }
   }
 
-  try {
-    const refreshed = await authStore.refreshAccessToken();
-    if (refreshed) {
+  if (isAuthenticated) {
+    const { isStepSeen } = useOnboarding();
+    const seen = await isStepSeen('welcome');
+
+    if (to.name === 'OnboardingWelcome') {
+      if (seen) {
+        return '/tabs/home';
+      }
       return true;
     }
-  } catch (error) {
-    // Erro ao renovar token, prossegue para o redirecionamento
+
+    if (!seen) {
+      return { name: 'OnboardingWelcome' };
+    }
+
+    return true;
   }
 
   if (authStore.sessionExpired) {

@@ -53,7 +53,7 @@ const emit = defineEmits(['next', 'skip']);
   padding: 20px 24px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   max-width: 320px;
-  border: 2px solid color-mix(in srgb, var(--color-primary) 40%, transparent);
+  border: 1px solid var(--color-primary);
 }
 
 .onboarding-step__title {

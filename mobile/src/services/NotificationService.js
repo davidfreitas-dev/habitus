@@ -23,15 +23,37 @@ const messages = [
   'Um passo de cada vez! Hora de "{title}".'
 ];
 
+const CHANNEL_ID = 'habits_reminders_high';
+
 const getRandomItem = (array) => array[Math.floor(Math.random() * array.length)];
 
 export const NotificationService = {
+  async ensureNotificationChannel() {
+    try {
+      await LocalNotifications.createChannel({
+        id: CHANNEL_ID,
+        name: 'Lembretes de Hábitos',
+        description: 'Notificações importantes para lembrar de realizar seus hábitos.',
+        importance: 5, // IMPORTANCE_MAX (Android 8.0+): Toca som e aparece na tela
+        visibility: 1, // VISIBILITY_PUBLIC (Mostra conteúdo na lock screen)
+        vibration: true,
+        sound: 'default',
+        lights: true,
+        lightColor: '#a3e635'
+      });
+    } catch (error) {
+      console.error('Erro ao criar canal de notificações:', error);
+    }
+  },
+
   async scheduleHabitNotifications(habit) {
     await this.cancelHabitNotifications(habit.id);
 
     if (!habit.reminder_time || !habit.week_days || habit.week_days.length === 0) {
       return;
     }
+
+    await this.ensureNotificationChannel();
 
     const [hour, minute] = habit.reminder_time.split(':').map(Number);
     const notifications = [];
@@ -49,6 +71,7 @@ export const NotificationService = {
         id: notificationId,
         title,
         body,
+        channelId: CHANNEL_ID,
         schedule: {
           on: {
             weekday: capacitorWeekday,

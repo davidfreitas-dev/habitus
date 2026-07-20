@@ -2,14 +2,15 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent } from '@ionic/vue';
-import { LocalNotifications } from '@capacitor/local-notifications';
 import { useOnboarding } from '@/composables/useOnboarding';
+import { useNotifications } from '@/composables/useNotifications';
 import { useToast } from '@/composables/useToast';
 import Container from '@/components/layout/Container.vue';
 import Button from '@/components/ui/Button.vue';
 
 const router = useRouter();
 const { markStepSeen } = useOnboarding();
+const { requestPermission } = useNotifications();
 const { showToast } = useToast();
 const isRequesting = ref(false);
 
@@ -22,9 +23,9 @@ const requestNotificationPermission = async () => {
   isRequesting.value = true;
 
   try {
-    const permission = await LocalNotifications.requestPermissions();
+    const granted = await requestPermission();
 
-    if (permission.display === 'granted') {
+    if (granted) {
       showToast('success', 'Lembretes ativados com sucesso!');
     } else {
       showToast('info', 'Você pode ativar os lembretes depois nas configurações do dispositivo.');

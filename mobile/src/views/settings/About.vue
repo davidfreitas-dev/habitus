@@ -10,7 +10,7 @@
 
         <div v-if="selectedSegment === 'first'" class="ion-padding">
           <h1>Política de Privacidade</h1>
-          <p><em>Última atualização: 13 de julhode 2026</em></p>
+          <p><em>Última atualização: 13 de julho de 2026</em></p>
           <section>
             <h2>Informações Gerais</h2>
             <p>A sua privacidade é importante para nós. Esta Política de Privacidade explica como o aplicativo *Habitus - Rastreador de Hábitos* ("nós", "nosso"), desenvolvido por David Freitas, coleta, utiliza e protege suas informações. Ao usar nosso Aplicativo, você concorda com a coleta e uso de informações de acordo com esta política.</p>
@@ -65,7 +65,7 @@
 
         <div v-if="selectedSegment === 'second'" class="ion-padding">
           <h1>Termos de Uso</h1>
-          <p><em>Última atualização: 13 de julhode 2026</em></p>
+          <p><em>Última atualização: 13 de julho de 2026</em></p>
           <section>
             <h2>1. Acordo com os Termos</h2>
             <p>Ao baixar e utilizar o aplicativo *Habitus - Rastreador de Hábitos*, você concorda em cumprir estes Termos de Uso. Se você não concorda com estes termos, não utilize o Aplicativo.</p>
