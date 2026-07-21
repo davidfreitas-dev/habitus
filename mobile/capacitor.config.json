@@ -5,18 +5,13 @@
   "plugins": {
     "LocalNotifications": {
       "smallIcon": "ic_stat_habitus",
-      "iconColor": "#a3e635"      
+      "iconColor": "#acde2d"      
     },
     "SplashScreen": {
-      "launchShowDuration": 2000,
-      "launchAutoHide": true,
-      "launchFadeOutDuration": 1000,
-      "backgroundColor": "#a3e635",
-      "androidSplashResourceName": "splash",
-      "androidScaleType": "CENTER_CROP",
-      "splashFullScreen": true,
-      "splashImmersive": true,
-      "showSpinner": false
+        "launchShowDuration": 2000,
+        "launchAutoHide": true,
+        "launchFadeOutDuration": 1000,
+        "backgroundColor": "#acde2d"
     }
   }
 }

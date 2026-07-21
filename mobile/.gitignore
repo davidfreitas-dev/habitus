@@ -37,6 +37,3 @@ npm-debug.log*
 /www
 /ios
 /android
-
-resources/ios/**/*
-resources/android/**/*
