@@ -18,14 +18,14 @@ Habitus is a powerful habit management application designed to help you track an
 
 <table>
   <tr>
-    <td><img src="mobile/assets/screenshots/Register.jpeg" alt="Register Screen" width="200"></td>
-    <td><img src="mobile/assets/screenshots/Home.jpeg" alt="Home Screen" width="200"></td>
-    <td><img src="mobile/assets/screenshots/Habit.jpeg" alt="Habit Screen" width="200"></td>
+    <td><img src="docs/assets/screenshots/Register.jpeg" alt="Register Screen" width="200"></td>
+    <td><img src="docs/assets/screenshots/Home.jpeg" alt="Home Screen" width="200"></td>
+    <td><img src="docs/assets/screenshots/Habit.jpeg" alt="Habit Screen" width="200"></td>
   </tr>
   <tr>
-    <td><img src="mobile/assets/screenshots/Form.jpeg" alt="Options Screen" width="200"></td>
-    <td><img src="mobile/assets/screenshots/Stats.jpeg" alt="Stats Screen" width="200"></td>
-    <td><img src="mobile/assets/screenshots/Options.jpeg" alt="Options Screen" width="200"></td>
+    <td><img src="docs/assets/screenshots/Form.jpeg" alt="Options Screen" width="200"></td>
+    <td><img src="docs/assets/screenshots/Stats.jpeg" alt="Stats Screen" width="200"></td>
+    <td><img src="docs/assets/screenshots/Options.jpeg" alt="Options Screen" width="200"></td>
   </tr>
 </table>
 
