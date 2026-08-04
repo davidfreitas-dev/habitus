@@ -72,7 +72,7 @@ services:
       PMA_ARBITRARY: 1
       UPLOAD_LIMIT: 64M
 
-  server:
+  api:
     build:
       context: ./api
       dockerfile: .docker/php/Dockerfile
@@ -101,7 +101,7 @@ services:
     ports:
       - "8100:8100"
     environment:
-      - VITE_API_URL=http://server.localhost
+      - VITE_API_URL=http://api.localhost
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8100/"]
       interval: 10s
@@ -109,7 +109,7 @@ services:
       retries: 5
       start_period: 30s
     depends_on:
-      - server
+      - api
 
   gateway:
     image: nginx:stable
@@ -122,7 +122,7 @@ services:
       - ./nginx/snippets:/etc/nginx/snippets:ro
       - ./api:/var/www/html:ro
     depends_on:
-      server:
+      api:
         condition: service_started
       mobile:
         condition: service_started

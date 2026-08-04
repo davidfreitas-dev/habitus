@@ -27,7 +27,7 @@ const CHANNEL_ID = 'habits_reminders_high';
 
 const getRandomItem = (array) => array[Math.floor(Math.random() * array.length)];
 
-export const NotificationService = {
+export const notificationService = {
   async ensureNotificationChannel() {
     try {
       await LocalNotifications.createChannel({

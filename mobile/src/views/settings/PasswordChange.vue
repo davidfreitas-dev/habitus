@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 import { useVuelidate } from '@vuelidate/core';
 import { required, minLength, sameAs, helpers } from '@vuelidate/validators';
 import { IonContent, IonPage, onIonViewDidLeave } from '@ionic/vue';
-import { useProfileStore } from '@/stores/profile';
+import { useProfileStore } from '@/stores/profileStore';
 import { useToast } from '@/composables/useToast';
 import { useLoading } from '@/composables/useLoading';
 import Header from '@/components/layout/Header.vue';

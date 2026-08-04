@@ -2,7 +2,7 @@ import api from '@/api';
 import { HABIT_ENDPOINTS } from '@/constants/endpoints';
 import dayjs from '@/lib/dayjs';
 
-export const HabitService = {
+export const habitService = {
   create(title, weekDays, reminder_time) {
     return api.post(HABIT_ENDPOINTS.BASE, {
       title,

@@ -1,7 +1,7 @@
 import api from '@/api';
 import { PROFILE_ENDPOINTS } from '@/constants/endpoints';
 
-export const ProfileService = {
+export const profileService = {
   getProfile() {
     return api.get(PROFILE_ENDPOINTS.BASE);
   },

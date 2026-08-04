@@ -13,8 +13,8 @@ import {
 } from '@ionic/vue';
 import { personOutline, gridOutline, exitOutline } from 'ionicons/icons';
 import { useVOnboarding, VOnboardingStep, VOnboardingWrapper } from 'v-onboarding';
-import { useAuthStore } from '@/stores/auth';
-import { useThemeStore } from '@/stores/theme';
+import { useAuthStore } from '@/stores/authStore';
+import { useThemeStore } from '@/stores/themeStore';
 import { useLoading } from '@/composables/useLoading';
 import { useOnboarding } from '@/composables/useOnboarding';
 import { optionsSteps } from '@/onboarding/optionsSteps';

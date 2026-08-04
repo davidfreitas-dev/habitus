@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent } from '@ionic/vue';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/composables/useToast';
 import Container from '@/components/layout/Container.vue';
 import Button from '@/components/ui/Button.vue';

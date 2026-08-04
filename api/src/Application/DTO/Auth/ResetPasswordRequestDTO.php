@@ -26,7 +26,7 @@ readonly class ResetPasswordRequestDTO
         )]
         public string $code,
         #[Assert\NotBlank(message: 'A senha é obrigatória.')]
-        #[Assert\Length(min: 6, minMessage: 'A senha deve ter no mínimo {{ limit }} caracteres.')]
+        #[Assert\Length(min: 8, minMessage: 'A senha deve ter no mínimo {{ limit }} caracteres.')]
         public string $password,
         #[Assert\NotBlank(message: 'A confirmação da senha é obrigatória.')]
         public string $passwordConfirm,

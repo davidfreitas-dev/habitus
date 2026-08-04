@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore } from '@/stores/authStore';
 import { alertController } from '@ionic/vue';
 import { useOnboarding } from '@/composables/useOnboarding';
 
@@ -162,9 +162,12 @@ router.beforeEach(async (to) => {
       const refreshed = await authStore.refreshAccessToken();
       if (refreshed) {
         isAuthenticated = true;
+      } else {
+        authStore.sessionExpired = false;
       }
     } catch (error) {
       // Erro ao renovar token, prossegue para o redirecionamento
+      authStore.sessionExpired = false;
     }
   }
 

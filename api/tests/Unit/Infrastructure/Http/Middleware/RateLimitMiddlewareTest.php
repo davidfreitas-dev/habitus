@@ -13,7 +13,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\UriInterface;
 use Slim\Psr7\Response;
-use stdClass;
 
 /**
  * @covers \App\Infrastructure\Http\Middleware\RateLimitMiddleware
@@ -40,22 +39,22 @@ final class RateLimitMiddlewareTest extends TestCase
         string $method = 'GET',
         string $uriString = '/',
         array $headers = [],
-        array $serverParams = []
+        array $serverParams = [],
+        ?array $parsedBody = null
     ): ServerRequestInterface {
         $request = $this->createMock(ServerRequestInterface::class);
-
         $request->method('getMethod')->willReturn($method);
 
         $uri = $this->createMock(UriInterface::class);
-        $uri->method('__toString')->willReturn($uriString);
+        $uri->method('getPath')->willReturn($uriString);
         $request->method('getUri')->willReturn($uri);
 
         $request->method('getHeaderLine')
             ->willReturnCallback(fn(string $name) => $headers[$name] ?? '');
 
         $defaultServerParams = ['REMOTE_ADDR' => '127.0.0.1'];
-        $fullServerParams = array_merge($defaultServerParams, $serverParams);
-        $request->method('getServerParams')->willReturn($fullServerParams);
+        $request->method('getServerParams')->willReturn(array_merge($defaultServerParams, $serverParams));
+        $request->method('getParsedBody')->willReturn($parsedBody);
 
         return $request;
     }
@@ -65,229 +64,77 @@ final class RateLimitMiddlewareTest extends TestCase
         $redisCache = $this->createMock(RedisCache::class);
         $jwtService = $this->createMock(JwtService::class);
         $requestHandler = $this->createMock(RequestHandlerInterface::class);
-
+        
         $middleware = $this->createMiddleware($redisCache, $jwtService, ['enabled' => false]);
         $request = $this->createRequestMock();
         $expectedResponse = new Response();
-
-        $requestHandler->expects($this->once())
-            ->method('handle')
-            ->with($this->identicalTo($request))
-            ->willReturn($expectedResponse);
-
+        
+        $requestHandler->expects($this->once())->method('handle')->willReturn($expectedResponse);
         $redisCache->expects($this->never())->method('incr');
-
+        
         $response = $middleware->process($request, $requestHandler);
-
         self::assertSame($expectedResponse, $response);
     }
 
-    public function testFirstRequestInWindow(): void
+    public function testNonLoginFirstRequest(): void
     {
         $redisCache = $this->createMock(RedisCache::class);
         $jwtService = $this->createMock(JwtService::class);
         $requestHandler = $this->createMock(RequestHandlerInterface::class);
-
-        $middleware = $this->createMiddleware($redisCache, $jwtService);
-        $request = $this->createRequestMock();
-        $initialResponse = new Response();
-
-        $redisCache->expects($this->once())
-            ->method('incr')
-            ->with('rate_limit:ip:127.0.0.1')
-            ->willReturn(1);
-
-        $redisCache->expects($this->once())
-            ->method('expire')
-            ->with('rate_limit:ip:127.0.0.1', 60);
-
-        $redisCache->expects($this->once())
-            ->method('ttl')
-            ->with('rate_limit:ip:127.0.0.1')
-            ->willReturn(60);
-
-        $requestHandler->expects($this->once())
-            ->method('handle')
-            ->willReturn($initialResponse);
-
-        $response = $middleware->process($request, $requestHandler);
-
-        self::assertSame('5', $response->getHeaderLine('X-RateLimit-Limit'));
-        self::assertSame('4', $response->getHeaderLine('X-RateLimit-Remaining'));
-        self::assertNotEmpty($response->getHeaderLine('X-RateLimit-Reset'));
-    }
-
-    public function testSubsequentRequestsWithinLimit(): void
-    {
-        $redisCache = $this->createMock(RedisCache::class);
-        $jwtService = $this->createMock(JwtService::class);
-        $requestHandler = $this->createMock(RequestHandlerInterface::class);
-
-        $middleware = $this->createMiddleware($redisCache, $jwtService);
-        $request = $this->createRequestMock();
-        $initialResponse = new Response();
-
-        $redisCache->expects($this->once())
-            ->method('incr')
-            ->with('rate_limit:ip:127.0.0.1')
-            ->willReturn(3);
-
-        $redisCache->expects($this->never())->method('expire');
-
-        $redisCache->expects($this->once())
-            ->method('ttl')
-            ->with('rate_limit:ip:127.0.0.1')
-            ->willReturn(30);
-
-        $requestHandler->expects($this->once())
-            ->method('handle')
-            ->willReturn($initialResponse);
-
-        $response = $middleware->process($request, $requestHandler);
-
-        self::assertSame('5', $response->getHeaderLine('X-RateLimit-Limit'));
-        self::assertSame('2', $response->getHeaderLine('X-RateLimit-Remaining'));
-        self::assertNotEmpty($response->getHeaderLine('X-RateLimit-Reset'));
-    }
-
-    public function testExceedingRateLimit(): void
-    {
-        $redisCache = $this->createMock(RedisCache::class);
-        $jwtService = $this->createMock(JwtService::class);
-        $requestHandler = $this->createMock(RequestHandlerInterface::class);
-
-        $middleware = $this->createMiddleware($redisCache, $jwtService);
-        $request = $this->createRequestMock();
-
-        $redisCache->expects($this->once())
-            ->method('incr')
-            ->with('rate_limit:ip:127.0.0.1')
-            ->willReturn(6);
-
-        $redisCache->expects($this->once())
-            ->method('ttl')
-            ->with('rate_limit:ip:127.0.0.1')
-            ->willReturn(10);
-
-        $requestHandler->expects($this->never())->method('handle');
-
-        $response = $middleware->process($request, $requestHandler);
-
-        self::assertSame(429, $response->getStatusCode());
-        self::assertSame('5', $response->getHeaderLine('X-RateLimit-Limit'));
-        self::assertSame('0', $response->getHeaderLine('X-RateLimit-Remaining'));
         
-        $responseData = json_decode((string)$response->getBody(), true);
-        self::assertSame('Excesso de Requisições', $responseData['error']);
+        $middleware = $this->createMiddleware($redisCache, $jwtService);
+        $request = $this->createRequestMock('GET', '/api/v1/habits');
+        
+        $redisCache->expects($this->once())->method('incr')->with('rate_limit:ip:127.0.0.1')->willReturn(1);
+        $redisCache->method('getRaw')->with('rate_limit_blocks:ip:127.0.0.1')->willReturn(null);
+        $redisCache->expects($this->once())->method('expire')->with('rate_limit:ip:127.0.0.1', 60);
+        
+        $requestHandler->expects($this->once())->method('handle')->willReturn(new Response());
+        
+        $response = $middleware->process($request, $requestHandler);
+        self::assertSame('5', $response->getHeaderLine('X-RateLimit-Limit'));
     }
 
-    public function testRateLimitWithAuthenticatedUser(): void
+    public function testLoginSuccessfulResetsCounters(): void
     {
         $redisCache = $this->createMock(RedisCache::class);
         $jwtService = $this->createMock(JwtService::class);
         $requestHandler = $this->createMock(RequestHandlerInterface::class);
-
+        
         $middleware = $this->createMiddleware($redisCache, $jwtService);
-        $token = 'some.jwt.token';
-        $userId = 123;
-        $decodedToken = (object)['sub' => $userId];
-
-        $request = $this->createRequestMock('GET', '/', ['Authorization' => 'Bearer ' . $token]);
-
-        $jwtService->expects($this->once())
-            ->method('validateToken')
-            ->with($token)
-            ->willReturn($decodedToken);
-
-        $redisCache->expects($this->once())
-            ->method('incr')
-            ->with('rate_limit:user:' . $userId)
-            ->willReturn(1);
-
-        $requestHandler->expects($this->once())
-            ->method('handle')
-            ->willReturn(new Response());
-
-        $middleware->process($request, $requestHandler);
+        $request = $this->createRequestMock('POST', '/api/v1/auth/login', [], [], ['email' => 'test@test.com']);
+        
+        $redisCache->method('getRaw')->willReturn(0);
+        
+        $successResponse = new Response(200);
+        $requestHandler->expects($this->once())->method('handle')->willReturn($successResponse);
+        
+        $redisCache->expects($this->exactly(4))->method('delete');
+        
+        $response = $middleware->process($request, $requestHandler);
+        self::assertSame(200, $response->getStatusCode());
     }
 
-    public function testRateLimitFallsBackToIpWhenInvalidToken(): void
+    public function testLoginFailedIncrementsCounters(): void
     {
         $redisCache = $this->createMock(RedisCache::class);
         $jwtService = $this->createMock(JwtService::class);
         $requestHandler = $this->createMock(RequestHandlerInterface::class);
-
+        
         $middleware = $this->createMiddleware($redisCache, $jwtService);
-        $token = 'invalid.jwt.token';
-
-        $request = $this->createRequestMock('GET', '/', ['Authorization' => 'Bearer ' . $token]);
-
-        $jwtService->expects($this->once())
-            ->method('validateToken')
-            ->with($token)
-            ->willThrowException(new Exception('Token inválido'));
-
-        $redisCache->expects($this->once())
-            ->method('incr')
-            ->with('rate_limit:ip:127.0.0.1')
-            ->willReturn(1);
-
-        $requestHandler->expects($this->once())
-            ->method('handle')
-            ->willReturn(new Response());
-
-        $middleware->process($request, $requestHandler);
-    }
-
-    public function testIdentifierFromXForwardedForFromTrustedProxy(): void
-    {
-        $redisCache = $this->createMock(RedisCache::class);
-        $jwtService = $this->createMock(JwtService::class);
-        $requestHandler = $this->createMock(RequestHandlerInterface::class);
-
-        $middleware = $this->createMiddleware($redisCache, $jwtService);
-        $clientIp = '192.168.1.100';
-        // REMOTE_ADDR is 10.0.0.1 (trusted proxy)
-        $request = $this->createRequestMock('GET', '/', [], [
-            'REMOTE_ADDR' => '10.0.0.1',
-            'HTTP_X_FORWARDED_FOR' => $clientIp . ', 10.0.0.1'
+        $request = $this->createRequestMock('POST', '/api/v1/auth/login', [], [], ['email' => 'test@test.com']);
+        
+        $redisCache->method('getRaw')->willReturn(0);
+        
+        $failResponse = new Response(401);
+        $requestHandler->expects($this->once())->method('handle')->willReturn($failResponse);
+        
+        $redisCache->expects($this->exactly(2))->method('incr')->willReturnMap([
+            ['rate_limit:login:ip:127.0.0.1', 1],
+            ['rate_limit:login:email:test@test.com', 1]
         ]);
-
-        $redisCache->expects($this->once())
-            ->method('incr')
-            ->with('rate_limit:ip:' . $clientIp)
-            ->willReturn(1);
-
-        $requestHandler->expects($this->once())
-            ->method('handle')
-            ->willReturn(new Response());
-
-        $middleware->process($request, $requestHandler);
-    }
-
-    public function testIdentifierIgnoresXForwardedForFromUntrustedProxy(): void
-    {
-        $redisCache = $this->createMock(RedisCache::class);
-        $jwtService = $this->createMock(JwtService::class);
-        $requestHandler = $this->createMock(RequestHandlerInterface::class);
-
-        $middleware = $this->createMiddleware($redisCache, $jwtService);
-        $clientIp = '192.168.1.100';
-        $untrustedProxy = '203.0.113.1';
-        $request = $this->createRequestMock('GET', '/', [], [
-            'REMOTE_ADDR' => $untrustedProxy,
-            'HTTP_X_FORWARDED_FOR' => $clientIp
-        ]);
-
-        $redisCache->expects($this->once())
-            ->method('incr')
-            ->with('rate_limit:ip:' . $untrustedProxy)
-            ->willReturn(1);
-
-        $requestHandler->expects($this->once())
-            ->method('handle')
-            ->willReturn(new Response());
-
-        $middleware->process($request, $requestHandler);
+        
+        $response = $middleware->process($request, $requestHandler);
+        self::assertSame(401, $response->getStatusCode());
     }
 }

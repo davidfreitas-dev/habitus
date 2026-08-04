@@ -1,15 +1,15 @@
 import { defineStore } from 'pinia';
-import { HabitService } from '@/services/HabitService';
-import { NotificationService } from '@/services/NotificationService';
+import { habitService } from '@/services/habitService';
+import { notificationService } from '@/services/notificationService';
 
 export const useHabitStore = defineStore('habit', () => {
   const createHabit = async (title, weekDays, reminderTime) => {
-    const response = await HabitService.create(title, weekDays, reminderTime);
+    const response = await habitService.create(title, weekDays, reminderTime);
     
     const data = response.data;
     
     if (data.id && reminderTime) {
-      await NotificationService.scheduleHabitNotifications({
+      await notificationService.scheduleHabitNotifications({
         id: data.id,
         title: data.title,
         week_days: weekDays,
@@ -21,43 +21,43 @@ export const useHabitStore = defineStore('habit', () => {
   };
 
   const getDayInfo = async (date) => {
-    const response = await HabitService.getDayInfo(date);
+    const response = await habitService.getDayInfo(date);
     return response.data;
   };
 
   const getHabitsSummary = async (date = null) => {
-    const response = await HabitService.getSummary(date);
+    const response = await habitService.getSummary(date);
     return response.data;
   };
 
   const fetchAllHabits = async () => {
-    const response = await HabitService.getAllHabits();
+    const response = await habitService.getAllHabits();
     return response.data;
   };
 
   const getHabitStats = async (period, date = null) => {
-    const response = await HabitService.getStats(period, date);
+    const response = await habitService.getStats(period, date);
     return response.data;
   };
 
   const getHabitDetails = async (id) => {
-    const response = await HabitService.getDetails(id);
+    const response = await habitService.getDetails(id);
     return response.data;
   };
 
   const updateHabit = async (id, title, weekDays, reminder_time) => {
-    const response = await HabitService.update(id, title, weekDays, reminder_time);
+    const response = await habitService.update(id, title, weekDays, reminder_time);
     
     if (id) {
       if (reminder_time) {
-        await NotificationService.scheduleHabitNotifications({
+        await notificationService.scheduleHabitNotifications({
           id: id,
           title: title,
           week_days: weekDays,
           reminder_time: reminder_time,
         });
       } else {
-        await NotificationService.cancelHabitNotifications(id);
+        await notificationService.cancelHabitNotifications(id);
       }
     }
 
@@ -65,13 +65,13 @@ export const useHabitStore = defineStore('habit', () => {
   };
 
   const toggleHabit = async (habitId, date = null) => {
-    const response = await HabitService.toggle(habitId, date);
+    const response = await habitService.toggle(habitId, date);
     return response.data;
   };
 
   const deleteHabit = async (id) => {
-    await NotificationService.cancelHabitNotifications(id);
-    return await HabitService.delete(id);
+    await notificationService.cancelHabitNotifications(id);
+    return await habitService.delete(id);
   };
 
   return {

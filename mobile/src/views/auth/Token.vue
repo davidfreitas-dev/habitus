@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonInputOtp, onIonViewDidLeave } from '@ionic/vue';
 import { useToast } from '@/composables/useToast';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore } from '@/stores/authStore';
 
 import Container from '@/components/layout/Container.vue';
 import Button from '@/components/ui/Button.vue';

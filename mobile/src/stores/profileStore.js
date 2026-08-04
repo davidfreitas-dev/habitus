@@ -1,7 +1,7 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
-import { useAuthStore } from './auth';
-import { ProfileService } from '@/services/ProfileService';
+import { useAuthStore } from './authStore';
+import { profileService } from '@/services/profileService';
 
 export const useProfileStore = defineStore('profile', () => {
   const user = ref(null);
@@ -12,19 +12,19 @@ export const useProfileStore = defineStore('profile', () => {
       user.value = null;
       return;
     }
-    const data = await ProfileService.getProfile();
+    const data = await profileService.getProfile();
     user.value = data.data;
     return true;
   };
 
   const updateProfile = async (profileData) => {
-    const data = await ProfileService.updateProfile(profileData);
+    const data = await profileService.updateProfile(profileData);
     user.value = data.data;
     return true;
   };
 
   const changePassword = async (currentPassword, newPassword, confirmNewPassword) => {
-    return await ProfileService.changePassword(
+    return await profileService.changePassword(
       currentPassword,
       newPassword,
       confirmNewPassword
@@ -32,7 +32,7 @@ export const useProfileStore = defineStore('profile', () => {
   };
 
   const deleteAccount = async () => {
-    return await ProfileService.deleteAccount();
+    return await profileService.deleteAccount();
   };
 
   const clearProfile = () => {

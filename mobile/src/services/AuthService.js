@@ -1,7 +1,7 @@
 import api from '@/api';
 import { AUTH_ENDPOINTS } from '@/constants/endpoints';
 
-export const AuthService = {
+export const authService = {
   login(credentials) {
     return api.post(AUTH_ENDPOINTS.LOGIN, credentials);
   },

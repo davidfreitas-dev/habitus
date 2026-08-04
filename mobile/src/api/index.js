@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore } from '@/stores/authStore';
 import { AUTH_ENDPOINTS } from '@/constants/endpoints';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;

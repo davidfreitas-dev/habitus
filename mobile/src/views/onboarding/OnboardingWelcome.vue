@@ -5,8 +5,8 @@ import { IonPage, IonContent } from '@ionic/vue';
 import { useOnboarding } from '@/composables/useOnboarding';
 import { useNotifications } from '@/composables/useNotifications';
 import { useToast } from '@/composables/useToast';
-import { useHabitStore } from '@/stores/habits';
-import { NotificationService } from '@/services/NotificationService';
+import { useHabitStore } from '@/stores/habitsStore';
+import { notificationService } from '@/services/notificationService';
 import Container from '@/components/layout/Container.vue';
 import Button from '@/components/ui/Button.vue';
 
@@ -31,7 +31,7 @@ const requestNotificationPermission = async () => {
       try {
         const habitStore = useHabitStore();
         const habits = await habitStore.fetchAllHabits();
-        await NotificationService.rescheduleAllNotifications(habits);
+        await notificationService.rescheduleAllNotifications(habits);
       } catch (error) {
         console.error('Error rescheduling notifications on onboarding welcome:', error);
       }

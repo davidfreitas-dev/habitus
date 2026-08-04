@@ -3,7 +3,7 @@ import { reactive, watch } from 'vue';
 import { IonPage, IonContent, onIonViewWillEnter } from '@ionic/vue';
 import { useVuelidate } from '@vuelidate/core';
 import { required, email, helpers } from '@vuelidate/validators';
-import { useProfileStore } from '@/stores/profile';
+import { useProfileStore } from '@/stores/profileStore';
 import { useToast } from '@/composables/useToast';
 import { useLoading } from '@/composables/useLoading'; 
 import Header from '@/components/layout/Header.vue';

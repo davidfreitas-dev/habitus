@@ -151,31 +151,7 @@ O projeto requer **Node.js v22+**. A forma recomendada de instalar e gerenciar v
  
 4. **Adicione a plataforma Android ao projeto** (necessário apenas na primeira vez, caso a pasta `android/` ainda não exista):
 ```sh
-   npx cap add android
-```
-
-5. **Configurar Deep Links e Assets (Essencial caso a pasta Android seja recriada)**:
-Para garantir que as configurações de Deep Link (Intent Filters no `AndroidManifest.xml`) e os ícones nativos sejam injetados corretamente toda vez que a plataforma for adicionada ou recriada do zero, execute:
-```sh
-   npm run android:setup
-```
-*(Este script programático faz o patch dos Intent Filters do Deep Link no manifest e gera as resoluções de ícones e splash screens automáticos).*
-
-6. **Sincronize e Compile**:
-```sh
-   npm install
-   npm run build
-   npx cap sync android
-   cd android && ./gradlew assembleDebug
-```
-7. **Instale e execute em um emulador ou dispositivo** (opcional, para testar o build gerado):
-   - Crie um emulador pelo *Device Manager* do Android Studio (ou use um dispositivo físico com depuração USB habilitada), então:
-```sh
-     npx cap run android
-```
-   - Ou instale o APK gerado manualmente:
-```sh
-     adb install android/app/build/outputs/apk/debug/app-debug.apk
+   npm run setup:android 
 ```
 
 #### Configuração para iOS

@@ -2,7 +2,7 @@
 import { IonPage, IonContent, onIonViewWillEnter, onIonViewDidEnter, onIonViewDidLeave } from '@ionic/vue';
 import { ref, computed, watch, nextTick } from 'vue';
 import { useVOnboarding, VOnboardingStep, VOnboardingWrapper } from 'v-onboarding';
-import { useHabitStore } from '@/stores/habits';
+import { useHabitStore } from '@/stores/habitsStore';
 import { useLoading } from '@/composables/useLoading';
 import { useOnboarding } from '@/composables/useOnboarding';
 import { statsSteps } from '@/onboarding/statsSteps';

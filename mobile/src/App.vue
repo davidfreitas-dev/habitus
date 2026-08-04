@@ -8,10 +8,10 @@ import { ScreenOrientation } from '@capacitor/screen-orientation';
 import { useNetwork } from '@/composables/useNetwork';
 import { useStatusBar } from '@/composables/useStatusBar';
 import { useNotifications } from '@/composables/useNotifications';
-import { useAuthStore } from '@/stores/auth';
-import { useThemeStore } from '@/stores/theme';
-import { useHabitStore } from '@/stores/habits';
-import { NotificationService } from '@/services/NotificationService';
+import { useAuthStore } from '@/stores/authStore';
+import { useThemeStore } from '@/stores/themeStore';
+import { useHabitStore } from '@/stores/habitsStore';
+import { notificationService } from '@/services/notificationService';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import dayjs from '@/lib/dayjs';
 
@@ -73,7 +73,7 @@ onMounted(async () => {
     if (granted && authStore.isAuthenticated) {
       try {
         const habits = await habitStore.fetchAllHabits();
-        await NotificationService.rescheduleAllNotifications(habits);
+        await notificationService.rescheduleAllNotifications(habits);
       } catch (error) {
         console.error('Error rescheduling notifications:', error);
       }

@@ -15,7 +15,7 @@ class ChangePasswordRequestDTO
         #[Assert\NotBlank(message: 'A senha atual é obrigatória.')]
         public readonly string $currentPassword,
         #[Assert\NotBlank(message: 'A nova senha é obrigatória.')]
-        #[Assert\Length(min: 6, minMessage: 'A nova senha deve ter no mínimo {{ limit }} caracteres.')]
+        #[Assert\Length(min: 8, minMessage: 'A nova senha deve ter no mínimo {{ limit }} caracteres.')]
         public readonly string $newPassword,
         #[Assert\NotBlank(message: 'A confirmação da nova senha é obrigatória.')]
         public readonly string $newPasswordConfirm,

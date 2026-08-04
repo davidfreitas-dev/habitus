@@ -3,8 +3,8 @@ import { ref, computed, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { IonPage, IonContent, onIonViewWillEnter, onIonViewDidEnter } from '@ionic/vue';
 import { useVOnboarding, VOnboardingStep, VOnboardingWrapper } from 'v-onboarding';
-import { useProfileStore } from '@/stores/profile';
-import { useHabitStore } from '@/stores/habits';
+import { useProfileStore } from '@/stores/profileStore';
+import { useHabitStore } from '@/stores/habitsStore';
 import { useLoading } from '@/composables/useLoading';
 import { useToast } from '@/composables/useToast';
 import { useOnboarding } from '@/composables/useOnboarding';
@@ -161,8 +161,6 @@ const deleteHabit = async () => {
         message="Deseja realmente excluir este hábito?"
         @on-confirm="deleteHabit"
       />
-
-      <!-- Removed Alert component as showAlert is removed -->
     </ion-content>
 
     <VOnboardingWrapper

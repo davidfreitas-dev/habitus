@@ -2,8 +2,8 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonContent, IonPage, IonItem, IonLabel, IonList } from '@ionic/vue';
-import { useAuthStore } from '@/stores/auth';
-import { useProfileStore } from '@/stores/profile';
+import { useAuthStore } from '@/stores/authStore';
+import { useProfileStore } from '@/stores/profileStore';
 import { useToast } from '@/composables/useToast';
 import { useLoading } from '@/composables/useLoading';
 import Header from '@/components/layout/Header.vue';

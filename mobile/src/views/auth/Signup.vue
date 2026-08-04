@@ -4,7 +4,7 @@ import { ref, reactive, computed } from 'vue';
 import { useVuelidate } from '@vuelidate/core';
 import { required, email, minLength, helpers } from '@vuelidate/validators';
 import { IonPage, IonContent, onIonViewDidLeave } from '@ionic/vue';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/composables/useToast';
 import Container from '@/components/layout/Container.vue';
 import Input from '@/components/ui/Input.vue';

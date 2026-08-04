@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
-import { useProfileStore } from './profile';
-import { AuthService } from '@/services/AuthService';
+import { useProfileStore } from './profileStore';
+import { authService } from '@/services/authService';
 import { STORAGE_KEYS } from '@/constants/storage';
 
 export const useAuthStore = defineStore('auth', () => {
@@ -22,7 +22,7 @@ export const useAuthStore = defineStore('auth', () => {
   const logout = async () => {
     try {
       if (isAuthenticated.value) {
-        await AuthService.logout();
+        await authService.logout();
       }
 
       return true;
@@ -37,7 +37,7 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   const login = async (credentials) => {
-    const data = await AuthService.login(credentials);
+    const data = await authService.login(credentials);
     
     if (data.data?.access_token) {
       setTokens(data.data.access_token);
@@ -49,7 +49,7 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   const register = async (userData) => {
-    const data = await AuthService.register(userData);
+    const data = await authService.register(userData);
     
     if (data.data?.access_token) {
       setTokens(data.data.access_token);
@@ -62,7 +62,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const refreshAccessToken = async () => {
     try {
-      const data = await AuthService.refresh();
+      const data = await authService.refresh();
 
       if (data.data?.access_token) {
         setTokens(data.data.access_token);
@@ -78,7 +78,7 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   const forgotPassword = async (email) => {
-    const response = await AuthService.forgotPassword(email);
+    const response = await authService.forgotPassword(email);
     localStorage.setItem(STORAGE_KEYS.FORGOT_EMAIL, email);
     return response;
   };
@@ -90,7 +90,7 @@ export const useAuthStore = defineStore('auth', () => {
       throw new Error('E-mail de recuperação não encontrado.');
     }
 
-    const response = await AuthService.validateResetCode(email, code);
+    const response = await authService.validateResetCode(email, code);
     
     localStorage.setItem(STORAGE_KEYS.RESET_EMAIL, email);
     localStorage.setItem(STORAGE_KEYS.RESET_CODE, code);
@@ -106,7 +106,7 @@ export const useAuthStore = defineStore('auth', () => {
       throw new Error('Informações de recuperação incompletas.');
     }
 
-    const response = await AuthService.resetPassword(email, code, password, passwordConfirm);
+    const response = await authService.resetPassword(email, code, password, passwordConfirm);
     
     localStorage.removeItem(STORAGE_KEYS.FORGOT_EMAIL);
     localStorage.removeItem(STORAGE_KEYS.RESET_EMAIL);
@@ -116,7 +116,7 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   const verifyEmail = async (token) => {
-    return await AuthService.verifyEmail(token);
+    return await authService.verifyEmail(token);
   };
 
   return {
