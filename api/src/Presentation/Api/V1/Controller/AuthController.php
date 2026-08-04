@@ -82,7 +82,7 @@ class AuthController
             $response = $this->jsonResponseFactory->success(
                 $responseData,
                 'Usuário registrado e logado com sucesso. Por favor, verifique seu e-mail para confirmar sua conta.',
-                201
+                201,
             );
             return $this->withRefreshTokenCookie($response, $registerResponseDto->refreshToken);
         } catch (ConflictException $e) {
@@ -429,7 +429,7 @@ class AuthController
             'refresh_token=%s; HttpOnly; %s SameSite=Lax; Path=/api; Max-Age=%d',
             $refreshToken,
             $secure,
-            $maxAge
+            $maxAge,
         );
         return $response->withAddedHeader('Set-Cookie', $cookieValue);
     }
@@ -439,7 +439,7 @@ class AuthController
         $secure = isset($_ENV['APP_ENV']) && $_ENV['APP_ENV'] !== 'development' ? 'Secure;' : '';
         $cookieValue = sprintf(
             'refresh_token=; HttpOnly; %s SameSite=Lax; Path=/api; Expires=Thu, 01 Jan 1970 00:00:00 GMT',
-            $secure
+            $secure,
         );
         return $response->withAddedHeader('Set-Cookie', $cookieValue);
     }

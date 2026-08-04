@@ -72,7 +72,7 @@ class RateLimitMiddleware implements MiddlewareInterface
             foreach ($identifiers as $index => $identifier) {
                 $key = 'rate_limit:' . $identifier;
                 $current = $this->cache->incr($key);
-                
+
                 $blockCountKey = 'rate_limit_blocks:' . $identifier;
                 $blockCount = (int)$this->cache->getRaw($blockCountKey);
 
@@ -106,7 +106,7 @@ class RateLimitMiddleware implements MiddlewareInterface
         $key = 'rate_limit:' . $identifier;
 
         $current = $this->cache->incr($key);
-        
+
         $blockCountKey = 'rate_limit_blocks:' . $identifier;
         $blockCount = (int)$this->cache->getRaw($blockCountKey);
 
