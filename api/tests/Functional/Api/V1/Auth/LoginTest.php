@@ -89,10 +89,15 @@ class LoginTest extends FunctionalTestCase
         $this->assertNotNull($responseData, 'O corpo da resposta não é um JSON válido: ' . $body);
         $this->assertArrayHasKey('data', $responseData, "Resposta sem a chave 'data': " . $body);
         $this->assertArrayHasKey('access_token', $responseData['data']);
-        $this->assertArrayHasKey('refresh_token', $responseData['data']);
         $this->assertArrayHasKey('token_type', $responseData['data']);
         $this->assertArrayHasKey('expires_in', $responseData['data']);
         $this->assertEquals('Bearer', $responseData['data']['token_type']);
+
+        $setCookieHeaders = $response->getHeader('Set-Cookie');
+        $this->assertNotEmpty($setCookieHeaders, 'Nenhum cabeçalho Set-Cookie retornado');
+        $this->assertStringContainsString('refresh_token=', $setCookieHeaders[0]);
+        $this->assertStringContainsString('HttpOnly', $setCookieHeaders[0]);
+        $this->assertStringContainsString('Secure', $setCookieHeaders[0]);
     }
 
     public function testLoginWithInvalidCredentialsReturnsUnauthorized(): void

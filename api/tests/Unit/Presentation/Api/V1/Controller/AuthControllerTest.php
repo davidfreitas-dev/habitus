@@ -128,7 +128,6 @@ class AuthControllerTest extends TestCase
 
         $expectedResponseData = [
             'access_token' => 'mock_access_token',
-            'refresh_token' => 'mock_refresh_token',
             'token_type' => 'Bearer',
             'expires_in' => 3600,
         ];
@@ -373,7 +372,6 @@ class AuthControllerTest extends TestCase
 
         $expectedResponseData = [
             'access_token' => 'mock_access_token',
-            'refresh_token' => 'mock_refresh_token',
             'token_type' => 'Bearer',
             'expires_in' => 3600,
         ];
@@ -519,9 +517,9 @@ class AuthControllerTest extends TestCase
     public function testRefreshSuccess(): void
     {
         $refreshToken = 'valid_refresh_token';
-        $requestBody = ['refresh_token' => $refreshToken];
+        $requestCookies = ['refresh_token' => $refreshToken];
         $request = $this->createMock(Request::class);
-        $request->method('getParsedBody')->willReturn($requestBody);
+        $request->method('getCookieParams')->willReturn($requestCookies);
 
         $decodedToken = (object)['type' => 'refresh', 'jti' => 'jwt_id_123', 'sub' => 1];
         $this->jwtService->expects($this->once())->method('validateToken')->with($refreshToken)->willReturn($decodedToken);
@@ -542,7 +540,6 @@ class AuthControllerTest extends TestCase
 
         $expectedResponseData = [
             'access_token' => 'new_access_token',
-            'refresh_token' => 'new_refresh_token',
             'token_type' => 'Bearer',
             'expires_in' => 3600,
         ];
@@ -570,9 +567,9 @@ class AuthControllerTest extends TestCase
 
     public function testRefreshWithMissingToken(): void
     {
-        $requestBody = []; // Missing refresh_token
+        $requestCookies = []; // Missing refresh_token
         $request = $this->createMock(Request::class);
-        $request->method('getParsedBody')->willReturn($requestBody);
+        $request->method('getCookieParams')->willReturn($requestCookies);
 
         // Expect validateToken to throw AuthenticationException for missing token
         $this->jwtService->expects($this->once())
@@ -604,9 +601,9 @@ class AuthControllerTest extends TestCase
     public function testRefreshWithInvalidJwtToken(): void
     {
         $refreshToken = 'invalid.jwt.token';
-        $requestBody = ['refresh_token' => $refreshToken];
+        $requestCookies = ['refresh_token' => $refreshToken];
         $request = $this->createMock(Request::class);
-        $request->method('getParsedBody')->willReturn($requestBody);
+        $request->method('getCookieParams')->willReturn($requestCookies);
 
         // Expect validateToken to throw AuthenticationException for an invalid JWT
         $this->jwtService->expects($this->once())
@@ -638,9 +635,9 @@ class AuthControllerTest extends TestCase
     public function testRefreshWithWrongTokenType(): void
     {
         $refreshToken = 'valid.access.token';
-        $requestBody = ['refresh_token' => $refreshToken];
+        $requestCookies = ['refresh_token' => $refreshToken];
         $request = $this->createMock(Request::class);
-        $request->method('getParsedBody')->willReturn($requestBody);
+        $request->method('getCookieParams')->willReturn($requestCookies);
 
         $decodedToken = (object)['type' => 'access', 'jti' => 'jwt_id_123', 'sub' => 1]; // Wrong type
         $this->jwtService->expects($this->once())->method('validateToken')->with($refreshToken)->willReturn($decodedToken);
@@ -669,9 +666,9 @@ class AuthControllerTest extends TestCase
     public function testRefreshWithRevokedToken(): void
     {
         $refreshToken = 'valid.but.revoked.token';
-        $requestBody = ['refresh_token' => $refreshToken];
+        $requestCookies = ['refresh_token' => $refreshToken];
         $request = $this->createMock(Request::class);
-        $request->method('getParsedBody')->willReturn($requestBody);
+        $request->method('getCookieParams')->willReturn($requestCookies);
 
         $decodedToken = (object)['type' => 'refresh', 'jti' => 'jwt_id_revoked', 'sub' => 1];
         $this->jwtService->expects($this->once())->method('validateToken')->with($refreshToken)->willReturn($decodedToken);
@@ -701,9 +698,9 @@ class AuthControllerTest extends TestCase
     public function testRefreshUserNotFound(): void
     {
         $refreshToken = 'valid.token.user.not.found';
-        $requestBody = ['refresh_token' => $refreshToken];
+        $requestCookies = ['refresh_token' => $refreshToken];
         $request = $this->createMock(Request::class);
-        $request->method('getParsedBody')->willReturn($requestBody);
+        $request->method('getCookieParams')->willReturn($requestCookies);
 
         $decodedToken = (object)['type' => 'refresh', 'jti' => 'jwt_id_valid', 'sub' => 999]; // User ID 999 (not found)
         $this->jwtService->expects($this->once())->method('validateToken')->with($refreshToken)->willReturn($decodedToken);
@@ -734,9 +731,9 @@ class AuthControllerTest extends TestCase
     public function testRefreshGenericError(): void
     {
         $refreshToken = 'valid_token_but_generic_error';
-        $requestBody = ['refresh_token' => $refreshToken];
+        $requestCookies = ['refresh_token' => $refreshToken];
         $request = $this->createMock(Request::class);
-        $request->method('getParsedBody')->willReturn($requestBody);
+        $request->method('getCookieParams')->willReturn($requestCookies);
 
         $decodedToken = (object)['type' => 'refresh', 'jti' => 'jwt_id_generic', 'sub' => 1];
         $this->jwtService->expects($this->once())->method('validateToken')->with($refreshToken)->willReturn($decodedToken);

@@ -87,16 +87,17 @@ class RefreshTest extends FunctionalTestCase
         $this->assertNotNull($loginResponseData, 'A resposta de login não é um JSON válido: ' . $loginBody);
         $this->assertArrayHasKey('data', $loginResponseData, "A resposta de login não possui a chave 'data'");
         $this->assertArrayHasKey('access_token', $loginResponseData['data'], "A resposta de login não possui a chave 'access_token'");
-        $this->assertArrayHasKey('refresh_token', $loginResponseData['data'], "A resposta de login não possui a chave 'refresh_token'");
 
-        $refreshToken = $loginResponseData['data']['refresh_token'];
-
-        $refreshPayload = [
-            'refresh_token' => $refreshToken,
-        ];
+        $setCookieHeaders = $loginResponse->getHeader('Set-Cookie');
+        $this->assertNotEmpty($setCookieHeaders, 'Nenhum cabeçalho Set-Cookie retornado no login');
+        
+        // Extrair token do cookie
+        preg_match('/refresh_token=([^;]+)/', $setCookieHeaders[0], $matches);
+        $this->assertArrayHasKey(1, $matches, 'Token não encontrado no cookie');
+        $refreshToken = $matches[1];
 
         // Act
-        $response = $this->sendRequest('POST', '/api/v1/auth/refresh', $refreshPayload);
+        $response = $this->sendRequest('POST', '/api/v1/auth/refresh', [], ['Cookie' => 'refresh_token=' . $refreshToken]);
         $response->getBody()->rewind(); // Resetar o ponteiro do stream
         $body = $response->getBody()->getContents();
         $responseData = json_decode($body, true);
@@ -111,21 +112,19 @@ class RefreshTest extends FunctionalTestCase
         $this->assertNotNull($responseData, 'O corpo da resposta não é um JSON válido: ' . $body);
         $this->assertArrayHasKey('data', $responseData, "Response missing 'data' key: " . $body);
         $this->assertArrayHasKey('access_token', $responseData['data']);
-        $this->assertArrayHasKey('refresh_token', $responseData['data']);
         $this->assertArrayHasKey('token_type', $responseData['data']);
         $this->assertArrayHasKey('expires_in', $responseData['data']);
         $this->assertEquals('Bearer', $responseData['data']['token_type']);
+
+        $setCookieHeadersRefresh = $response->getHeader('Set-Cookie');
+        $this->assertNotEmpty($setCookieHeadersRefresh, 'Nenhum cabeçalho Set-Cookie retornado no refresh');
+        $this->assertStringContainsString('refresh_token=', $setCookieHeadersRefresh[0]);
     }
 
     public function testRefreshWithInvalidTokenReturnsUnauthorized(): void
     {
-        // Arrange
-        $payload = [
-            'refresh_token' => 'invalid-token',
-        ];
-
         // Act
-        $response = $this->sendRequest('POST', '/api/v1/auth/refresh', $payload);
+        $response = $this->sendRequest('POST', '/api/v1/auth/refresh', [], ['Cookie' => 'refresh_token=invalid-token']);
 
         // Assert
         $this->assertEquals(StatusCodeInterface::STATUS_UNAUTHORIZED, $response->getStatusCode());

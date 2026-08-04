@@ -75,15 +75,19 @@ class AuthController
 
             $responseData = [
                 JsonResponseKey::ACCESS_TOKEN->value => $registerResponseDto->accessToken,
-                JsonResponseKey::REFRESH_TOKEN->value => $registerResponseDto->refreshToken,
                 JsonResponseKey::TOKEN_TYPE->value => $registerResponseDto->tokenType,
                 JsonResponseKey::EXPIRES_IN->value => $registerResponseDto->expiresIn,
             ];
 
-            return $this->jsonResponseFactory->success(
+            $response = $this->jsonResponseFactory->success(
                 $responseData,
                 'Usuário registrado e logado com sucesso. Por favor, verifique seu e-mail para confirmar sua conta.',
                 201,
+            );
+
+            return $response->withHeader(
+                'Set-Cookie', 
+                'refresh_token=' . $registerResponseDto->refreshToken . '; HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth'
             );
         } catch (ConflictException $e) {
             $this->logger->warning('Conflito no registro de usuário', ['exception' => $e]);
@@ -121,12 +125,16 @@ class AuthController
 
             $responseData = [
                 JsonResponseKey::ACCESS_TOKEN->value => $loginResponseDto->accessToken,
-                JsonResponseKey::REFRESH_TOKEN->value => $loginResponseDto->refreshToken,
                 JsonResponseKey::TOKEN_TYPE->value => $loginResponseDto->tokenType,
                 JsonResponseKey::EXPIRES_IN->value => $loginResponseDto->expiresIn,
             ];
 
-            return $this->jsonResponseFactory->success($responseData, 'Login bem-sucedido');
+            $response = $this->jsonResponseFactory->success($responseData, 'Login bem-sucedido');
+
+            return $response->withHeader(
+                'Set-Cookie', 
+                'refresh_token=' . $loginResponseDto->refreshToken . '; HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth'
+            );
         } catch (ValidationException $e) {
             $this->logger->warning('Falha na validação do login de usuário', ['exception' => $e]);
 
@@ -149,8 +157,8 @@ class AuthController
     public function refresh(Request $request): Response
     {
         try {
-            $data = $request->getParsedBody();
-            $refreshToken = $data[JsonResponseKey::REFRESH_TOKEN->value] ?? '';
+            $cookies = $request->getCookieParams();
+            $refreshToken = $cookies['refresh_token'] ?? '';
             $decoded = $this->jwtService->validateToken($refreshToken);
 
             if (JwtTokenType::REFRESH->value !== $decoded->type) {
@@ -175,12 +183,16 @@ class AuthController
 
             $tokenData = [
                 JsonResponseKey::ACCESS_TOKEN->value => $newAccessToken,
-                JsonResponseKey::REFRESH_TOKEN->value => $newRefreshToken,
                 JsonResponseKey::TOKEN_TYPE->value => 'Bearer',
                 JsonResponseKey::EXPIRES_IN->value => $this->jwtService->getAccessTokenExpire(),
             ];
 
-            return $this->jsonResponseFactory->success($tokenData, 'Token atualizado com sucesso');
+            $response = $this->jsonResponseFactory->success($tokenData, 'Token atualizado com sucesso');
+
+            return $response->withHeader(
+                'Set-Cookie', 
+                'refresh_token=' . $newRefreshToken . '; HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth'
+            );
         } catch (\App\Domain\Exception\AuthenticationException $e) {
             return $this->jsonResponseFactory->fail(null, $e->getMessage(), 401);
         } catch (Throwable $e) {
@@ -200,7 +212,12 @@ class AuthController
             $exp = $request->getAttribute('token_exp');
             $this->jwtService->blockToken($jti, $exp);
 
-            return $this->jsonResponseFactory->success(null, 'Logout bem-sucedido');
+            $response = $this->jsonResponseFactory->success(null, 'Logout bem-sucedido');
+
+            return $response->withHeader(
+                'Set-Cookie', 
+                'refresh_token=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth'
+            );
         } catch (Throwable $throwable) {
             $this->logger->error('Ocorreu um erro inesperado durante o logout', ['exception' => $throwable]);
             return $this->jsonResponseFactory->error(

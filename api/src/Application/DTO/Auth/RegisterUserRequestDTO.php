@@ -21,7 +21,7 @@ class RegisterUserRequestDTO
         #[Assert\Email(message: 'O e-mail "{{ value }}" não é um e-mail válido.')]
         public readonly string $email,
         #[Assert\NotBlank(message: 'A senha é obrigatória.')]
-        #[Assert\Length(min: 6, minMessage: 'A senha deve ter no mínimo {{ limit }} caracteres.')]
+        #[Assert\Length(min: 8, minMessage: 'A senha deve ter no mínimo {{ limit }} caracteres.')]
         public readonly string $password,
         #[Assert\Regex(
             pattern: '/^\(?[1-9]{2}\)?\s?9?\d{4}-?\d{4}$/',
@@ -29,6 +29,8 @@ class RegisterUserRequestDTO
         )]
         public readonly ?string $phone,
         public readonly ?string $cpfcnpj,
+        #[Assert\Blank(message: 'Requisição inválida.')]
+        public readonly ?string $website = null,
     ) {
     }
 
@@ -40,6 +42,7 @@ class RegisterUserRequestDTO
             password: $data['password'] ?? '',
             phone: $data['phone'] ?? null,
             cpfcnpj: $data['cpfcnpj'] ?? null,
+            website: $data['website'] ?? null,
         );
     }
 
@@ -51,6 +54,7 @@ class RegisterUserRequestDTO
             'password' => $this->password,
             'phone' => $this->phone,
             'cpfcnpj' => $this->cpfcnpj,
+            'website' => $this->website,
         ];
     }
 }

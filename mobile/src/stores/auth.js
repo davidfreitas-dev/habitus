@@ -5,31 +5,17 @@ import { AuthService } from '@/services/AuthService';
 import { STORAGE_KEYS } from '@/constants/storage';
 
 export const useAuthStore = defineStore('auth', () => {
-  const accessToken = ref(localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN));
-  const refreshToken = ref(localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN));
+  const accessToken = ref(null);
   const sessionExpired = ref(false);
 
-  const isAuthenticated = computed(() => !!accessToken.value && !!refreshToken.value);
+  const isAuthenticated = computed(() => !!accessToken.value);
 
-  const setTokens = (access, refresh) => {
+  const setTokens = (access) => {
     accessToken.value = access;
-    refreshToken.value = refresh;
-
-    if (access) {
-      localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, access);
-    } else {
-      localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
-    }
-
-    if (refresh) {
-      localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refresh);
-    } else {
-      localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-    }
   };
 
   const clearTokens = () => {
-    setTokens(null, null);
+    setTokens(null);
     useProfileStore().clearProfile();
   };
 
@@ -53,8 +39,8 @@ export const useAuthStore = defineStore('auth', () => {
   const login = async (credentials) => {
     const data = await AuthService.login(credentials);
     
-    if (data.data?.access_token && data.data?.refresh_token) {
-      setTokens(data.data.access_token, data.data.refresh_token);
+    if (data.data?.access_token) {
+      setTokens(data.data.access_token);
       await useProfileStore().fetchProfile();
       return true;
     }
@@ -65,8 +51,8 @@ export const useAuthStore = defineStore('auth', () => {
   const register = async (userData) => {
     const data = await AuthService.register(userData);
     
-    if (data.data?.access_token && data.data?.refresh_token) {
-      setTokens(data.data.access_token, data.data.refresh_token);
+    if (data.data?.access_token) {
+      setTokens(data.data.access_token);
       await useProfileStore().fetchProfile();
       return true;
     }
@@ -75,16 +61,11 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   const refreshAccessToken = async () => {
-    if (!refreshToken.value) {
-      clearTokens();
-      return false;
-    }
-
     try {
-      const data = await AuthService.refresh(refreshToken.value);
+      const data = await AuthService.refresh();
 
-      if (data.data?.access_token && data.data?.refresh_token) {
-        setTokens(data.data.access_token, data.data.refresh_token);
+      if (data.data?.access_token) {
+        setTokens(data.data.access_token);
         await useProfileStore().fetchProfile();
         return true;
       }
@@ -140,7 +121,6 @@ export const useAuthStore = defineStore('auth', () => {
 
   return {
     accessToken,
-    refreshToken,
     isAuthenticated,
     sessionExpired,
     setTokens,

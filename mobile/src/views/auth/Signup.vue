@@ -15,7 +15,8 @@ const isLoading = ref(false);
 const formData = reactive({
   name: '',
   email: '',
-  password: ''
+  password: '',
+  website: '' // honeypot
 });
 
 const { showToast } = useToast();
@@ -47,6 +48,11 @@ const signUp = async () => {
   isLoading.value = true;
 
   try {
+    if (formData.website) {
+      // honeypot filled, ignore silently or throw error
+      throw new Error('Bot detectado');
+    }
+
     formData.name = capitalizeName(formData.name);
     await authStore.register(formData);
     router.push('/');
@@ -70,7 +76,7 @@ const rules = computed(() => {
     },
     password: { 
       required: helpers.withMessage('Informe uma senha', required),
-      minLength: helpers.withMessage('A senha deve ter no mínimo 6 caracteres', minLength(6))
+      minLength: helpers.withMessage('A senha deve ter no mínimo 8 caracteres', minLength(8))
     }
   };
 });
@@ -92,6 +98,7 @@ onIonViewDidLeave(() => {
   formData.name = '';
   formData.email = '';
   formData.password = '';
+  formData.website = '';
   v$.value.$reset();
 });
 </script>
@@ -135,6 +142,16 @@ onIonViewDidLeave(() => {
             :error-text="v$.password.$errors[0]?.$message"
             @blur="v$.password.$touch()"
           /> 
+
+          <div class="hp-field">
+            <Input
+              v-model="formData.website"
+              type="text"
+              label="Website"
+              tabindex="-1"
+              autocomplete="off"
+            />
+          </div>
 
           <div class="ion-margin-top ion-padding-top">
             <Button
@@ -221,5 +238,12 @@ form a {
   height: 1px;
   background: var(--color-text-primary);
   margin: 0 0.75rem;
+}
+
+.hp-field {
+  opacity: 0;
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
 }
 </style>
