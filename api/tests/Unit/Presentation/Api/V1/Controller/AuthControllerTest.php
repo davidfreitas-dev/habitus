@@ -128,6 +128,7 @@ class AuthControllerTest extends TestCase
 
         $expectedResponseData = [
             'access_token' => 'mock_access_token',
+            'refresh_token' => 'mock_refresh_token',
             'token_type' => 'Bearer',
             'expires_in' => 3600,
         ];
@@ -372,6 +373,7 @@ class AuthControllerTest extends TestCase
 
         $expectedResponseData = [
             'access_token' => 'mock_access_token',
+            'refresh_token' => 'mock_refresh_token',
             'token_type' => 'Bearer',
             'expires_in' => 3600,
         ];
@@ -540,6 +542,7 @@ class AuthControllerTest extends TestCase
 
         $expectedResponseData = [
             'access_token' => 'new_access_token',
+            'refresh_token' => 'new_refresh_token',
             'token_type' => 'Bearer',
             'expires_in' => 3600,
         ];

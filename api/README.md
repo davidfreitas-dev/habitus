@@ -121,14 +121,14 @@ docker compose up -d --build
 
 #### 6. Instale as dependências do Composer
 ```bash
-docker compose exec server composer install
+docker compose exec api composer install
 ```
 
 #### 7. Popule o Banco de Dados (Seeders)
 As tabelas `days` e `habits` precisam ser preenchidas com dados iniciais para que os endpoints de resumo e listagem de hábitos funcionem corretamente, especialmente em um novo ambiente de desenvolvimento.
 
 ```bash
-docker compose exec server composer seed
+docker compose exec api composer seed
 ```
 
 #### 8. Acesse a aplicação
@@ -193,39 +193,39 @@ Execute os comandos a partir do diretório raiz do projeto.
 Para rodar a suíte de testes completa (unitários, integração e funcionais):
 
 ```bash
-docker compose exec server composer test
+docker compose exec api composer test
 ```
 
 Para uma saída mais detalhada e legível (testdox):
 ```bash
-docker compose exec server composer test:testdox
+docker compose exec api composer test:testdox
 ```
 
 #### 2. Executar suítes específicas de testes
 
 ```bash
 # Apenas testes unitários
-docker compose exec server composer test:unit
+docker compose exec api composer test:unit
 
 # Apenas testes de integração
-docker compose exec server composer test:integration
+docker compose exec api composer test:integration
 
 # Apenas testes funcionais (API)
-docker compose exec server composer test:functional
+docker compose exec api composer test:functional
 ```
 
 #### 3. Executar um arquivo de teste específico
 Se você precisa validar um arquivo de teste em particular:
 
 ```bash
-docker compose exec server vendor/bin/phpunit tests/Unit/Domain/Entity/UserTest.php
+docker compose exec api vendor/bin/phpunit tests/Unit/Domain/Entity/UserTest.php
 ```
 
 #### 4. Gerar relatório de cobertura de código
 Para gerar um relatório HTML de cobertura de código:
 
 ```bash
-docker compose exec server composer test:coverage
+docker compose exec api composer test:coverage
 ```
 
 O relatório será gerado em `tools/coverage/index.html`.
@@ -314,20 +314,20 @@ project/
 
 ```bash
 # Verificar problemas de formatação (sem fazer alterações)
-docker compose exec server composer cs-check
+docker compose exec api composer cs-check
 
 # Corrigir automaticamente problemas de formatação
-docker compose exec server composer cs-fix
+docker compose exec api composer cs-fix
 ```
 
 ### Rector (Refatoração Automática)
 
 ```bash
 # Executar refatorações automáticas
-docker compose exec server composer rector
+docker compose exec api composer rector
 
 # Simular refatorações sem aplicar (dry-run)
-docker compose exec server composer rector:dry
+docker compose exec api composer rector:dry
 ```
 
 ---
@@ -352,7 +352,7 @@ docker compose down
 docker compose down -v 
 
 # Acessar o terminal do container da API
-docker compose exec server sh
+docker compose exec api sh
 
 # Limpar o cache do Redis (substitua pela sua senha)
 docker compose exec redis redis-cli -a SUA_SENHA_DO_REDIS FLUSHALL
