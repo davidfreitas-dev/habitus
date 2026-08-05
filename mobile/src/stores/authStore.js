@@ -6,16 +6,23 @@ import { STORAGE_KEYS } from '@/constants/storage';
 
 export const useAuthStore = defineStore('auth', () => {
   const accessToken = ref(null);
+  const refreshToken = ref(localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN) || null);
   const sessionExpired = ref(false);
 
   const isAuthenticated = computed(() => !!accessToken.value);
 
-  const setTokens = (access) => {
+  const setTokens = (access, refresh = null) => {
     accessToken.value = access;
+    if (refresh) {
+      refreshToken.value = refresh;
+      localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refresh);
+    }
   };
 
   const clearTokens = () => {
-    setTokens(null);
+    accessToken.value = null;
+    refreshToken.value = null;
+    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
     useProfileStore().clearProfile();
   };
 
@@ -40,7 +47,7 @@ export const useAuthStore = defineStore('auth', () => {
     const data = await authService.login(credentials);
     
     if (data.data?.access_token) {
-      setTokens(data.data.access_token);
+      setTokens(data.data.access_token, data.data.refresh_token);
       await useProfileStore().fetchProfile();
       return true;
     }
@@ -52,7 +59,7 @@ export const useAuthStore = defineStore('auth', () => {
     const data = await authService.register(userData);
     
     if (data.data?.access_token) {
-      setTokens(data.data.access_token);
+      setTokens(data.data.access_token, data.data.refresh_token);
       await useProfileStore().fetchProfile();
       return true;
     }
@@ -62,10 +69,13 @@ export const useAuthStore = defineStore('auth', () => {
 
   const refreshAccessToken = async () => {
     try {
-      const data = await authService.refresh();
+      if (!refreshToken.value) {
+        throw new Error('No refresh token available');
+      }
+      const data = await authService.refresh(refreshToken.value);
 
       if (data.data?.access_token) {
-        setTokens(data.data.access_token);
+        setTokens(data.data.access_token, data.data.refresh_token);
         await useProfileStore().fetchProfile();
         return true;
       }

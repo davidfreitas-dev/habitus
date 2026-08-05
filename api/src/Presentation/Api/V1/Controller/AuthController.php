@@ -75,6 +75,7 @@ class AuthController
 
             $responseData = [
                 JsonResponseKey::ACCESS_TOKEN->value => $registerResponseDto->accessToken,
+                JsonResponseKey::REFRESH_TOKEN->value => $registerResponseDto->refreshToken,
                 JsonResponseKey::TOKEN_TYPE->value => $registerResponseDto->tokenType,
                 JsonResponseKey::EXPIRES_IN->value => $registerResponseDto->expiresIn,
             ];
@@ -121,6 +122,7 @@ class AuthController
 
             $responseData = [
                 JsonResponseKey::ACCESS_TOKEN->value => $loginResponseDto->accessToken,
+                JsonResponseKey::REFRESH_TOKEN->value => $loginResponseDto->refreshToken,
                 JsonResponseKey::TOKEN_TYPE->value => $loginResponseDto->tokenType,
                 JsonResponseKey::EXPIRES_IN->value => $loginResponseDto->expiresIn,
             ];
@@ -150,7 +152,8 @@ class AuthController
     {
         try {
             $cookies = $request->getCookieParams();
-            $refreshToken = $cookies['refresh_token'] ?? '';
+            $data = $request->getParsedBody();
+            $refreshToken = $cookies['refresh_token'] ?? $data['refresh_token'] ?? '';
             $decoded = $this->jwtService->validateToken($refreshToken);
 
             if (JwtTokenType::REFRESH->value !== $decoded->type) {
@@ -175,6 +178,7 @@ class AuthController
 
             $tokenData = [
                 JsonResponseKey::ACCESS_TOKEN->value => $newAccessToken,
+                JsonResponseKey::REFRESH_TOKEN->value => $newRefreshToken,
                 JsonResponseKey::TOKEN_TYPE->value => 'Bearer',
                 JsonResponseKey::EXPIRES_IN->value => $this->jwtService->getAccessTokenExpire(),
             ];

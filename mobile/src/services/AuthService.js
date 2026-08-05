@@ -14,8 +14,8 @@ export const authService = {
     return api.post(AUTH_ENDPOINTS.LOGOUT);
   },
   
-  refresh() {
-    return api.post(AUTH_ENDPOINTS.REFRESH);
+  refresh(refreshToken) {
+    return api.post(AUTH_ENDPOINTS.REFRESH, { refresh_token: refreshToken });
   },
   
   forgotPassword(email) {
