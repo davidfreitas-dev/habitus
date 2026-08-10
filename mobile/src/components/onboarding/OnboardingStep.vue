@@ -19,6 +19,16 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['next', 'skip']);
+
+import { trackEvent } from '@/composables/useAnalytics';
+
+const handleNext = () => {
+  trackEvent('onboarding_step_completed', { 
+    step_index: props.index, 
+    step_title: props.step.content?.title 
+  });
+  emit('next');
+};
 </script>
 
 <template>
@@ -37,7 +47,7 @@ const emit = defineEmits(['next', 'skip']);
         <span v-if="total > 1" class="onboarding-step__counter">
           {{ index + 1 }} de {{ total }}
         </span>
-        <button class="onboarding-step__next" @click="emit('next')">
+        <button class="onboarding-step__next" @click="handleNext">
           {{ isLast ? 'Entendi' : 'Próximo' }}
         </button>
       </div>
