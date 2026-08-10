@@ -119,7 +119,7 @@ class JwtServiceTest extends TestCase
             ->with($userId)
             ->willReturn($user);
 
-        $_ENV['APP_URL'] = 'http://api.localhost';
+        $_ENV['API_URL'] = 'http://api.localhost';
 
         $token = $this->jwtService->generateAccessToken($userId, $email);
 
@@ -135,8 +135,8 @@ class JwtServiceTest extends TestCase
         $this->assertEquals('user', $decoded->role);
         $this->assertTrue($decoded->is_verified);
         $this->assertEquals(JwtTokenType::ACCESS->value, $decoded->type);
-        $this->assertEquals($_ENV['APP_URL'], $decoded->iss);
-        $this->assertEquals($_ENV['APP_URL'], $decoded->aud);
+        $this->assertEquals($_ENV['API_URL'], $decoded->iss);
+        $this->assertEquals($_ENV['API_URL'], $decoded->aud);
         $this->assertNotEmpty($decoded->jti);
     }
 
@@ -186,7 +186,7 @@ class JwtServiceTest extends TestCase
                 $this->matchesRegularExpression('/^[0-9a-f-]{36}$/')
             );
 
-        $_ENV['APP_URL'] = 'http://api.localhost';
+        $_ENV['API_URL'] = 'http://api.localhost';
 
         $token = $this->jwtService->generateRefreshToken($userId);
 
@@ -225,7 +225,7 @@ class JwtServiceTest extends TestCase
         $user = $this->createMockUser($userId, $email);
 
         $this->userRepository->method('findById')->willReturn($user);
-        $_ENV['APP_URL'] = 'http://api.localhost';
+        $_ENV['API_URL'] = 'http://api.localhost';
 
         $token = $this->jwtService->generateAccessToken($userId, $email);
 

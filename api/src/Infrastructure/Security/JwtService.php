@@ -44,8 +44,8 @@ class JwtService
         }
 
         $payload = [
-            'iss' => $_ENV['APP_URL'],
-            'aud' => $_ENV['APP_URL'],
+            'iss' => $_ENV['API_URL'],
+            'aud' => $_ENV['API_URL'],
             'iat' => $now,
             'exp' => $now + $this->accessTokenExpire,
             'jti' => $jti,
@@ -70,8 +70,8 @@ class JwtService
         }
 
         $payload = [
-            'iss' => $_ENV['APP_URL'],
-            'aud' => $_ENV['APP_URL'],
+            'iss' => $_ENV['API_URL'],
+            'aud' => $_ENV['API_URL'],
             'iat' => $now,
             'exp' => $now + $this->refreshTokenExpire,
             'jti' => $jti,
