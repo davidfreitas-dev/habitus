@@ -3,6 +3,7 @@ import { defineStore } from 'pinia';
 import { useProfileStore } from './profileStore';
 import { authService } from '@/services/authService';
 import { STORAGE_KEYS } from '@/constants/storage';
+import { trackEvent, setUserProperty } from '@/composables/useAnalytics';
 
 export const useAuthStore = defineStore('auth', () => {
   const accessToken = ref(null);
@@ -48,7 +49,27 @@ export const useAuthStore = defineStore('auth', () => {
     
     if (data.data?.access_token) {
       setTokens(data.data.access_token, data.data.refresh_token);
-      await useProfileStore().fetchProfile();
+      const profile = await useProfileStore().fetchProfile();
+      if (profile?.id) {
+        await setUserProperty('user_id', profile.id.toString());
+      }
+      await trackEvent('login', { method: 'email' });
+      return true;
+    }
+
+    return false;
+  };
+
+  const socialLogin = async (provider, idToken) => {
+    const data = await authService.socialLogin(provider, idToken);
+    
+    if (data.data?.access_token) {
+      setTokens(data.data.access_token, data.data.refresh_token);
+      const profile = await useProfileStore().fetchProfile();
+      if (profile?.id) {
+        await setUserProperty('user_id', profile.id.toString());
+      }
+      await trackEvent('login', { method: provider });
       return true;
     }
 
@@ -136,6 +157,7 @@ export const useAuthStore = defineStore('auth', () => {
     setTokens,
     clearTokens,
     login,
+    socialLogin,
     register,
     logout,
     handleSessionExpired,

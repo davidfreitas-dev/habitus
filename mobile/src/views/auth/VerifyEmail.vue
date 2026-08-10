@@ -104,9 +104,10 @@ onMounted(() => {
 }
 
 .logo-wrapper {
-  margin-bottom: 3rem;
   display: flex;
   justify-content: center;
+  align-items: center;
+  margin-top: calc(env(safe-area-inset-top) + 1rem);
 }
 
 .logo {

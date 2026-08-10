@@ -3,6 +3,8 @@ import { createPinia } from 'pinia';
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import App from './App.vue';
 import router from './router';
+import { initSocialLogin } from './composables/useSocialAuth';
+import { initGTM } from './composables/useAnalytics';
 
 import { IonicVue } from '@ionic/vue';
 
@@ -39,6 +41,9 @@ const app = createApp(App)
   .use(pinia)
   .use(router);
   
+initSocialLogin().catch(console.error);
+initGTM().catch(console.error);
+
 router.isReady().then(() => {
   app.mount('#app');
 });

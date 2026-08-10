@@ -33,6 +33,7 @@ return function (App $app): void {
         $group->group('/auth', function (RouteCollectorProxy $auth): void {
             $auth->post('/register', [AuthController::class, 'register']);
             $auth->post('/login', [AuthController::class, 'login']);
+            $auth->post('/social/{provider}', [AuthController::class, 'socialLogin']);
             $auth->post('/refresh', [AuthController::class, 'refresh']);
             $auth->post('/forgot-password', [AuthController::class, 'forgotPassword']);
             $auth->post('/validate-reset-code', [AuthController::class, 'validateResetCode']);

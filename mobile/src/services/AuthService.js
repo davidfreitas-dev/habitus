@@ -10,6 +10,10 @@ export const authService = {
     return api.post(AUTH_ENDPOINTS.REGISTER, userData);
   },
   
+  socialLogin(provider, idToken) {
+    return api.post(AUTH_ENDPOINTS.SOCIAL_LOGIN(provider), { idToken });
+  },
+  
   logout() {
     return api.post(AUTH_ENDPOINTS.LOGOUT);
   },

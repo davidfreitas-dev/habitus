@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonInputOtp, onIonViewDidLeave } from '@ionic/vue';
 import { useToast } from '@/composables/useToast';
 import { useAuthStore } from '@/stores/authStore';
+import { STORAGE_KEYS } from '@/constants/storage';
 
 import Container from '@/components/layout/Container.vue';
 import Button from '@/components/ui/Button.vue';
@@ -12,6 +13,7 @@ const router = useRouter();
 const authStore = useAuthStore();
 const isLoading = ref(false);
 const otpValue = ref('');
+const email = ref(localStorage.getItem(STORAGE_KEYS.FORGOT_EMAIL) || '');
 
 const { showToast } = useToast();
 
@@ -57,8 +59,9 @@ onIonViewDidLeave(() => {
 
           <label class="otp-label">Informe o código</label>
           <p class="otp-description">
-            Digite o código de 6 dígitos enviado para o seu e-mail
+            Digite o código de 6 dígitos enviado para o e-mail <strong>{{ email }}</strong>
           </p>
+
 
           <div class="otp-wrapper">
             <ion-input-otp
@@ -101,7 +104,7 @@ onIonViewDidLeave(() => {
 form {
   display: flex;
   flex-direction: column;
-  margin: 3rem 0;
+  margin: 1rem 0;
   padding: 0 .5rem;
 }
 
@@ -109,8 +112,7 @@ form {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 1.5rem;
-  margin-bottom: 1.5rem;
+  margin-top: calc(env(safe-area-inset-top) + 1rem);
 }
 
 .logo {
@@ -121,9 +123,9 @@ form {
 
 .otp-label {
   color: var(--color-text-primary);
+  font-size: 1.1rem;
   font-weight: 700;
   margin-top: 1.5rem;
-  margin-bottom: 1rem;
   display: block;
 }
 
@@ -131,7 +133,8 @@ form {
   color: var(--color-text-primary);
   opacity: 0.7;
   font-size: 0.875rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
+  line-height: 1.5;
 }
 
 .otp-wrapper {
@@ -155,7 +158,7 @@ form {
 .separator {
   display: flex;
   align-items: center;
-  margin: 1.25rem 0;
+  margin: 1rem 0;
   color: var(--color-text-primary);
   font-size: 0.85rem;
   font-weight: 700;

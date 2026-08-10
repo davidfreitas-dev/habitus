@@ -7,6 +7,7 @@ export const AUTH_ENDPOINTS = {
   RESET_PASSWORD: '/auth/reset-password',
   REFRESH: '/auth/refresh',
   VERIFY_EMAIL: '/auth/verify-email',
+  SOCIAL_LOGIN: (provider) => `/auth/social/${provider}`,
 };
 
 export const HABIT_ENDPOINTS = {

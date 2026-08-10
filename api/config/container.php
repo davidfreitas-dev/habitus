@@ -372,6 +372,29 @@ return [
         );
     },
 
+    \App\Infrastructure\Security\GoogleTokenVerifier::class => function (ContainerInterface $c) {
+        $clientId = $_ENV['GOOGLE_WEB_CLIENT_ID'] ?? '';
+        return new \App\Infrastructure\Security\GoogleTokenVerifier($clientId);
+    },
+
+    \App\Application\UseCase\AuthenticateWithSocialProviderUseCase::class => function (ContainerInterface $c) {
+        $roleRepository = $c->get(RoleRepositoryInterface::class);
+        $defaultUserRole = $roleRepository->findByName('customer');
+
+        if (!$defaultUserRole) {
+            throw new \RuntimeException("Default 'customer' role not found in the database.");
+        }
+
+        return new \App\Application\UseCase\AuthenticateWithSocialProviderUseCase(
+            $c->get(PDO::class),
+            $c->get(\App\Infrastructure\Security\GoogleTokenVerifier::class),
+            $c->get(PersonRepositoryInterface::class),
+            $c->get(UserRepositoryInterface::class),
+            $c->get(\App\Infrastructure\Security\JwtService::class),
+            $defaultUserRole
+        );
+    },
+
     DeleteUserUseCase::class => fn (ContainerInterface $c) => new DeleteUserUseCase(
         $c->get(UserRepositoryInterface::class),
         $c->get(PersonRepositoryInterface::class),

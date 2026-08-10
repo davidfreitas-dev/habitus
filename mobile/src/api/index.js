@@ -70,7 +70,7 @@ const queueRequest = async (originalRequest) => {
 };
 
 const isRefreshEndpointError = (error) => {
-  return error.config?.url === AUTH_ENDPOINTS.REFRESH;
+  return error.config?.url?.endsWith(AUTH_ENDPOINTS.REFRESH);
 };
 
 const isPublicAuthEndpoint = (error) => {
@@ -81,7 +81,7 @@ const isPublicAuthEndpoint = (error) => {
     AUTH_ENDPOINTS.VALIDATE_RESET_CODE,
     AUTH_ENDPOINTS.RESET_PASSWORD,
   ];
-  return publicAuthEndpoints.includes(error.config?.url);
+  return publicAuthEndpoints.some(endpoint => error.config?.url?.endsWith(endpoint));
 };
 
 const shouldRetryWithRefresh = (error) => {

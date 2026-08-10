@@ -7,6 +7,7 @@
         "beberlei/assert": "^3.3",
         "doctrine/collections": "^2.0",
         "firebase/php-jwt": "^6.10",
+        "google/apiclient": "^2.0",
         "monolog/monolog": "^3.5",
         "php-di/php-di": "^7.0",
         "phpmailer/phpmailer": "^7.0",

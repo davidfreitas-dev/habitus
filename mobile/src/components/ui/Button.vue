@@ -7,7 +7,7 @@ const props = defineProps({
   color: {
     type: String,
     default: 'default',
-    validator: (value) => ['default', 'primary', 'danger', 'outline'].includes(value),
+    validator: (value) => ['default', 'primary', 'danger', 'outline', 'light'].includes(value),
   },
   size: {
     type: String,

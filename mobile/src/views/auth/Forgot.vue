@@ -113,7 +113,7 @@ onIonViewDidLeave(() => {
 form {
   display: flex;
   flex-direction: column;
-  margin: 3rem 0;
+  margin: 1rem 0;
   padding: 0 .5rem;
 }
 
@@ -121,8 +121,7 @@ form {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 1.5rem;
-  margin-bottom: 1.5rem;
+  margin-top: calc(env(safe-area-inset-top) + 1rem);
 }
 
 .logo {
@@ -134,7 +133,7 @@ form {
 .separator {
   display: flex;
   align-items: center;
-  margin: 1.25rem 0;
+  margin: 1rem 0;
   color: var(--color-text-primary);
   font-size: 0.85rem;
   font-weight: 700;

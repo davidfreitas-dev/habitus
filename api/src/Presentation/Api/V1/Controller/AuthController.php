@@ -10,6 +10,7 @@ use App\Application\DTO\Auth\RegisterResponseDTO;
 use App\Application\DTO\Auth\RegisterUserRequestDTO;
 use App\Application\DTO\Auth\ResetPasswordRequestDTO;
 use App\Application\DTO\Auth\ValidateResetCodeRequestDTO;
+use App\Application\DTO\Auth\SocialLoginRequestDTO;
 use App\Application\Exception\EmailSendingFailedException;
 use App\Application\Service\ValidationService;
 use App\Application\UseCase\ForgotPasswordUseCase;
@@ -18,6 +19,7 @@ use App\Application\UseCase\RegisterUserUseCase;
 use App\Application\UseCase\ResetPasswordUseCase;
 use App\Application\UseCase\ValidateResetCodeUseCase;
 use App\Application\UseCase\VerifyEmailUseCase;
+use App\Application\UseCase\AuthenticateWithSocialProviderUseCase;
 use App\Domain\Enum\JsonResponseKey;
 use App\Domain\Enum\JwtTokenType;
 use App\Domain\Exception\AuthenticationException;
@@ -41,6 +43,7 @@ class AuthController
         private readonly ResetPasswordUseCase $resetPasswordUseCase,
         private readonly ValidateResetCodeUseCase $validateResetCodeUseCase,
         private readonly VerifyEmailUseCase $verifyEmailUseCase,
+        private readonly AuthenticateWithSocialProviderUseCase $authenticateWithSocialProviderUseCase,
         private readonly UserRepositoryInterface $userRepository,
         private readonly JwtService $jwtService,
         private readonly LoggerInterface $logger,
@@ -140,6 +143,48 @@ class AuthController
         } catch (Throwable $e) {
             $this->logger->error('Ocorreu um erro inesperado durante o login de usuário', ['exception' => $e]);
 
+            return $this->jsonResponseFactory->error(
+                'Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.',
+                null,
+                500,
+            );
+        }
+    }
+
+    public function socialLogin(Request $request, Response $response, array $args): Response
+    {
+        try {
+            $provider = $args['provider'] ?? '';
+            $data = $request->getParsedBody();
+            $idToken = $data['idToken'] ?? '';
+
+            if (empty($idToken)) {
+                return $this->jsonResponseFactory->fail(null, 'idToken não fornecido', 400);
+            }
+            
+            $dto = new SocialLoginRequestDTO($provider, $idToken);
+            $loginResponseDto = $this->authenticateWithSocialProviderUseCase->execute($dto);
+
+            $responseData = [
+                JsonResponseKey::ACCESS_TOKEN->value => $loginResponseDto->accessToken,
+                JsonResponseKey::REFRESH_TOKEN->value => $loginResponseDto->refreshToken,
+                JsonResponseKey::TOKEN_TYPE->value => $loginResponseDto->tokenType,
+                JsonResponseKey::EXPIRES_IN->value => $loginResponseDto->expiresIn,
+            ];
+
+            $res = $this->jsonResponseFactory->success($responseData, 'Login social bem-sucedido');
+            return $this->withRefreshTokenCookie($res, $loginResponseDto->refreshToken);
+        } catch (\App\Application\Exception\InvalidSocialTokenException $e) {
+            $this->logger->warning('Falha na autenticação social', ['exception' => $e]);
+            return $this->jsonResponseFactory->fail(null, $e->getMessage(), 401);
+        } catch (AuthenticationException $e) {
+            $this->logger->warning('Falha na autenticação do login social de usuário', ['exception' => $e]);
+            return $this->jsonResponseFactory->fail(null, $e->getMessage(), 401);
+        } catch (\InvalidArgumentException $e) {
+            $this->logger->warning('Provedor social inválido', ['exception' => $e]);
+            return $this->jsonResponseFactory->fail(null, 'Provedor não suportado', 400);
+        } catch (Throwable $e) {
+            $this->logger->error('Ocorreu um erro inesperado durante o login social', ['exception' => $e]);
             return $this->jsonResponseFactory->error(
                 'Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.',
                 null,

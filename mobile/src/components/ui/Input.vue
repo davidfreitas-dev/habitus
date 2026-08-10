@@ -64,6 +64,7 @@ const isInvalid = computed(() => !!props.errorText);
 
   <div class="input-container">
     <ion-input
+      v-bind="$attrs"
       mode="ios"
       :type="inputType"
       :value="modelValue"
@@ -94,8 +95,8 @@ const isInvalid = computed(() => !!props.errorText);
 ion-label {
   color: var(--color-text-primary);
   font-weight: 700;
-  margin-top: 1.5rem;
-  margin-bottom: 1rem;
+  margin-top: 1.25rem;
+  margin-bottom: .85rem;
 }
 
 ion-input {
