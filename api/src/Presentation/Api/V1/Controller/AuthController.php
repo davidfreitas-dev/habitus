@@ -9,17 +9,17 @@ use App\Application\DTO\Auth\LoginRequestDTO;
 use App\Application\DTO\Auth\RegisterResponseDTO;
 use App\Application\DTO\Auth\RegisterUserRequestDTO;
 use App\Application\DTO\Auth\ResetPasswordRequestDTO;
-use App\Application\DTO\Auth\ValidateResetCodeRequestDTO;
 use App\Application\DTO\Auth\SocialLoginRequestDTO;
+use App\Application\DTO\Auth\ValidateResetCodeRequestDTO;
 use App\Application\Exception\EmailSendingFailedException;
 use App\Application\Service\ValidationService;
+use App\Application\UseCase\AuthenticateWithSocialProviderUseCase;
 use App\Application\UseCase\ForgotPasswordUseCase;
 use App\Application\UseCase\LoginUseCase;
 use App\Application\UseCase\RegisterUserUseCase;
 use App\Application\UseCase\ResetPasswordUseCase;
 use App\Application\UseCase\ValidateResetCodeUseCase;
 use App\Application\UseCase\VerifyEmailUseCase;
-use App\Application\UseCase\AuthenticateWithSocialProviderUseCase;
 use App\Domain\Enum\JsonResponseKey;
 use App\Domain\Enum\JwtTokenType;
 use App\Domain\Exception\AuthenticationException;
@@ -161,7 +161,7 @@ class AuthController
             if (empty($idToken)) {
                 return $this->jsonResponseFactory->fail(null, 'idToken não fornecido', 400);
             }
-            
+
             $dto = new SocialLoginRequestDTO($provider, $idToken);
             $loginResponseDto = $this->authenticateWithSocialProviderUseCase->execute($dto);
 

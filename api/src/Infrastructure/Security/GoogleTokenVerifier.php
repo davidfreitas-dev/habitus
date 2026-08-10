@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Security;
 
-use Google_Client;
 use App\Application\Exception\InvalidSocialTokenException;
+use Google_Client;
 
 class GoogleTokenVerifier
 {
-    public function __construct(private readonly string $webClientId) {}
+    public function __construct(private readonly string $webClientId)
+    {
+    }
 
     public function verify(string $idToken): array
     {

@@ -391,7 +391,7 @@ return [
             $c->get(PersonRepositoryInterface::class),
             $c->get(UserRepositoryInterface::class),
             $c->get(\App\Infrastructure\Security\JwtService::class),
-            $defaultUserRole
+            $defaultUserRole,
         );
     },
 

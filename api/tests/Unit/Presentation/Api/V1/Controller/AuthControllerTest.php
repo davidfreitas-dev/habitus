@@ -16,6 +16,7 @@ use App\Application\UseCase\RegisterUserUseCase;
 use App\Application\UseCase\ResetPasswordUseCase;
 use App\Application\UseCase\ValidateResetCodeUseCase;
 use App\Application\UseCase\VerifyEmailUseCase;
+use App\Application\UseCase\AuthenticateWithSocialProviderUseCase;
 use App\Domain\Exception\ConflictException;
 use App\Domain\Exception\ValidationException;
 use App\Domain\Repository\UserRepositoryInterface;
@@ -45,6 +46,8 @@ class AuthControllerTest extends TestCase
 
     private VerifyEmailUseCase&MockObject $verifyEmailUseCase;
 
+    private AuthenticateWithSocialProviderUseCase&MockObject $authenticateWithSocialProviderUseCase;
+
     private UserRepositoryInterface&MockObject $userRepository;
 
     private JwtService&MockObject $jwtService;
@@ -67,6 +70,7 @@ class AuthControllerTest extends TestCase
         $this->resetPasswordUseCase = $this->createMock(ResetPasswordUseCase::class);
         $this->validateResetCodeUseCase = $this->createMock(ValidateResetCodeUseCase::class);
         $this->verifyEmailUseCase = $this->createMock(VerifyEmailUseCase::class);
+        $this->authenticateWithSocialProviderUseCase = $this->createMock(AuthenticateWithSocialProviderUseCase::class);
         $this->userRepository = $this->createMock(UserRepositoryInterface::class);
         $this->jwtService = $this->createMock(JwtService::class);
         $this->logger = $this->createMock(LoggerInterface::class);
@@ -80,6 +84,7 @@ class AuthControllerTest extends TestCase
             $this->resetPasswordUseCase,
             $this->validateResetCodeUseCase,
             $this->verifyEmailUseCase,
+            $this->authenticateWithSocialProviderUseCase,
             $this->userRepository,
             $this->jwtService,
             $this->logger,

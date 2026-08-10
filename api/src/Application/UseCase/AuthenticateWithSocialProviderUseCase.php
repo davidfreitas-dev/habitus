@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Application\UseCase;
 
-use App\Application\DTO\Auth\SocialLoginRequestDTO;
 use App\Application\DTO\Auth\LoginResponseDTO;
+use App\Application\DTO\Auth\SocialLoginRequestDTO;
 use App\Domain\Entity\Person;
 use App\Domain\Entity\Role;
 use App\Domain\Entity\User;
@@ -27,7 +27,8 @@ class AuthenticateWithSocialProviderUseCase
         private readonly UserRepositoryInterface $userRepository,
         private readonly JwtService $jwtService,
         private readonly Role $defaultUserRole,
-    ) {}
+    ) {
+    }
 
     public function execute(SocialLoginRequestDTO $dto): LoginResponseDTO
     {
@@ -41,7 +42,7 @@ class AuthenticateWithSocialProviderUseCase
         };
 
         $email = $identity['email'];
-        
+
         $user = $this->userRepository->findByEmail($email);
 
         if (!$user instanceof User) {
@@ -49,7 +50,7 @@ class AuthenticateWithSocialProviderUseCase
             try {
                 // Check if person exists
                 $person = $this->personRepository->findByEmail($email);
-                
+
                 if (!$person instanceof Person) {
                     $person = new Person(
                         name: $identity['name'] ?? 'Usuário',
@@ -60,7 +61,7 @@ class AuthenticateWithSocialProviderUseCase
 
                 // Create user (password is not strictly needed for social login, but we can set a random one or empty)
                 $randomPassword = \bin2hex(\random_bytes(16)); // Random strong password
-                
+
                 $user = new User(
                     person: $person,
                     role: $this->defaultUserRole,
@@ -70,7 +71,7 @@ class AuthenticateWithSocialProviderUseCase
                 );
 
                 $user = $this->userRepository->create($user);
-                
+
                 $this->pdo->commit();
             } catch (Exception $e) {
                 $this->pdo->rollBack();
