@@ -3,8 +3,6 @@ import { defineStore } from 'pinia';
 import { useProfileStore } from './profileStore';
 import { authService } from '@/services/authService';
 import { STORAGE_KEYS } from '@/constants/storage';
-import { trackEvent, setUserProperty } from '@/composables/useAnalytics';
-
 export const useAuthStore = defineStore('auth', () => {
   const accessToken = ref(null);
   const refreshToken = ref(localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN) || null);
@@ -49,11 +47,7 @@ export const useAuthStore = defineStore('auth', () => {
     
     if (data.data?.access_token) {
       setTokens(data.data.access_token, data.data.refresh_token);
-      const profile = await useProfileStore().fetchProfile();
-      if (profile?.id) {
-        await setUserProperty('user_id', profile.id.toString());
-      }
-      await trackEvent('login', { method: 'email' });
+      await useProfileStore().fetchProfile();
       return true;
     }
 
@@ -65,11 +59,7 @@ export const useAuthStore = defineStore('auth', () => {
     
     if (data.data?.access_token) {
       setTokens(data.data.access_token, data.data.refresh_token);
-      const profile = await useProfileStore().fetchProfile();
-      if (profile?.id) {
-        await setUserProperty('user_id', profile.id.toString());
-      }
-      await trackEvent('login', { method: provider });
+      await useProfileStore().fetchProfile();
       return true;
     }
 

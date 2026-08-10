@@ -20,13 +20,7 @@ const props = defineProps({
 
 const emit = defineEmits(['next', 'skip']);
 
-import { trackEvent } from '@/composables/useAnalytics';
-
 const handleNext = () => {
-  trackEvent('onboarding_step_completed', { 
-    step_index: props.index, 
-    step_title: props.step.content?.title 
-  });
   emit('next');
 };
 </script>

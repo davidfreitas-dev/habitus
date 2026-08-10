@@ -32,7 +32,6 @@
     "@capacitor/screen-orientation": "^8.0.1",
     "@capacitor/splash-screen": "^8.0.0",
     "@capacitor/status-bar": "^8.0.0",
-    "@capgo/capacitor-gtm": "^8.0.36",
     "@capgo/capacitor-social-login": "^8.3.40",
     "@ionic/vue": "8.7.17",
     "@ionic/vue-router": "8.7.17",

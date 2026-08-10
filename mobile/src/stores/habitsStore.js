@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia';
 import { habitService } from '@/services/habitService';
 import { notificationService } from '@/services/notificationService';
-import { trackEvent } from '@/composables/useAnalytics';
-
 export const useHabitStore = defineStore('habit', () => {
   const createHabit = async (title, weekDays, reminderTime) => {
     const response = await habitService.create(title, weekDays, reminderTime);
@@ -17,8 +15,6 @@ export const useHabitStore = defineStore('habit', () => {
         reminder_time: reminderTime,
       });
     }
-
-    trackEvent('habit_created', { habit_id: data.id });
 
     return response.data;
   };
@@ -69,15 +65,6 @@ export const useHabitStore = defineStore('habit', () => {
 
   const toggleHabit = async (habitId, date = null) => {
     const response = await habitService.toggle(habitId, date);
-    
-    // Dispara evento de conclusão/toggle
-    trackEvent('habit_completed', { habit_id: habitId });
-    
-    // Se a API retornar dados de streak/ofensiva (ex: response.data.streak), podemos rastrear:
-    if (response.data?.streak && [7, 21, 30, 100].includes(response.data.streak)) {
-      trackEvent('streak_milestone', { milestone: response.data.streak, habit_id: habitId });
-    }
-
     return response.data;
   };
 

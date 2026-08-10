@@ -4,8 +4,6 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import App from './App.vue';
 import router from './router';
 import { initSocialLogin } from './composables/useSocialAuth';
-import { initGTM } from './composables/useAnalytics';
-
 import { IonicVue } from '@ionic/vue';
 
 /* Core CSS required for Ionic components to work properly */
@@ -42,8 +40,6 @@ const app = createApp(App)
   .use(router);
   
 initSocialLogin().catch(console.error);
-initGTM().catch(console.error);
-
 router.isReady().then(() => {
   app.mount('#app');
 });
