@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (navToggle && navLinks) {
     navToggle.addEventListener('click', function() {
       navLinks.classList.toggle('open');
+      navToggle.classList.toggle('open');
     });
   }
 
@@ -17,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.nav__links a').forEach(function(link) {
       link.addEventListener('click', function() {
         navLinks.classList.remove('open');
+        if (navToggle) navToggle.classList.remove('open');
       });
     });
   }

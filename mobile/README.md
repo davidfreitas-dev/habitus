@@ -237,14 +237,29 @@ Para alterar a cor de fundo:
        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
    </style>
    ```
-3. Recompile o projeto Android para aplicar as alterações.
+3. Recompile o projeto Android para aplicar as alterações:
+   ```sh
+   npx cap sync android
+   ```
+
+---
+
+## 🚀 Publicação na Google Play Store
+
+### Declaração de ID de Publicidade (Advertising ID)
+O aplicativo utiliza recursos de Login Social (como Google ou Facebook), que exigem a permissão `com.google.android.gms.permission.AD_ID` configurada no `AndroidManifest.xml` para fins de segurança, prevenção de fraude ou analytics. 
+
+Ao submeter ou atualizar o app na **Google Play Console**, é **obrigatório** preencher esta declaração:
+1. No menu lateral da Play Console, acesse **Conteúdo do app (App content)**.
+2. Procure por **ID de publicidade (Advertising ID)** e clique em Iniciar/Gerenciar.
+3. Responda **Sim** para a pergunta "O app usa um ID de publicidade?".
+4. Na justificativa do uso, marque opções como **Análise (Analytics)** e/ou **Prevenção contra fraude, segurança e conformidade**.
 
 ---
 
 ## 🏗️ Arquitetura do Projeto
 
 O projeto segue uma estrutura de pastas organizada por camadas (Views -> Stores -> Services -> API Client):
-
 ```text
 src/
 ├── api/            # Configuração do cliente HTTP (Axios) e interceptores
