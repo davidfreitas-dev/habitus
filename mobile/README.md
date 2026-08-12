@@ -223,6 +223,22 @@ Os assets gráficos do aplicativo móvel são gerados a partir da pasta `mobile/
    docker compose exec mobile npx capacitor-assets generate
    ```
 
+### Modificando a cor de fundo da Splash Screen (Android 12+)
+
+Devido às mudanças na Splash Screen API nativa do Android 12+, a cor de fundo deve ser configurada diretamente no projeto Android, pois a propriedade `backgroundColor` do arquivo `capacitor.config.json` é ignorada pelo sistema durante o carregamento inicial.
+
+Para alterar a cor de fundo:
+1. Abra o arquivo `android/app/src/main/res/values/styles.xml`.
+2. Configure a propriedade `windowSplashScreenBackground` dentro do tema `AppTheme.NoActionBarLaunch` para a cor desejada (em formato HEX). Exemplo:
+   ```xml
+   <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+       <item name="windowSplashScreenBackground">#C6FF34</item>
+       <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_round</item>
+       <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
+   </style>
+   ```
+3. Recompile o projeto Android para aplicar as alterações.
+
 ---
 
 ## 🏗️ Arquitetura do Projeto

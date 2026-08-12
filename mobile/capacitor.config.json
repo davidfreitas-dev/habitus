@@ -1,6 +1,6 @@
 {
   "appId": "br.dev.davidfreitas.habitus",
-  "appName": "habitus",
+  "appName": "Habitus",
   "webDir": "dist",
   "plugins": {
     "LocalNotifications": {
@@ -10,8 +10,7 @@
     "SplashScreen": {
         "launchShowDuration": 2000,
         "launchAutoHide": true,
-        "launchFadeOutDuration": 1000,
-        "backgroundColor": "#C6FF34"
+        "launchFadeOutDuration": 1000
     }
   }
 }
