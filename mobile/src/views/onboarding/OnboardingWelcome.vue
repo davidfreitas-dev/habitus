@@ -1,7 +1,8 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { IonPage, IonContent } from '@ionic/vue';
+import { IonPage, IonContent, IonIcon } from '@ionic/vue';
+import { notificationsOutline } from 'ionicons/icons';
 import { useOnboarding } from '@/composables/useOnboarding';
 import { useNotifications } from '@/composables/useNotifications';
 import { useToast } from '@/composables/useToast';
@@ -59,11 +60,13 @@ const skipNotifications = () => {
         <div class="welcome-container">
           <div class="welcome-content">
             <div class="welcome-illustration">
-              <img
-                src="../../../assets/notifications.png"
-                alt="Notificações"
-                class="welcome-image"
-              >
+              <div class="waves left">
+                <span /><span /><span />
+              </div>
+              <ion-icon :icon="notificationsOutline" class="welcome-icon" />
+              <div class="waves right">
+                <span /><span /><span />
+              </div>
             </div>
 
             <h1 class="welcome-title">
@@ -117,21 +120,95 @@ const skipNotifications = () => {
 }
 
 .welcome-illustration {
-  width: 250px;
-  height: 250px;
-  border-radius: 50%;
-  background: var(--color-background-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 2rem;
+  margin-top: 1rem;
+  position: relative;
 }
 
-.welcome-image {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  transform: scale(1.3);
+.waves {
+  position: absolute;
+  top: 15px;
+  width: 50px;
+  height: 50px;
+}
+
+.waves.left {
+  left: calc(50% - 85px);
+  transform: rotate(-10deg);
+}
+
+.waves.right {
+  right: calc(50% - 85px);
+  transform: rotate(10deg);
+}
+
+.waves span {
+  position: absolute;
+  bottom: 0;
+  border: 3px solid transparent;
+  /* Making it less circular by using an elliptical border-radius */
+  border-radius: 100% 0 0 0;
+  animation: waveSequential 2s infinite ease-out;
+  opacity: 0;
+}
+
+.waves.left span {
+  right: 0;
+  border-top-color: var(--color-primary);
+  border-left-color: var(--color-primary);
+  border-radius: 100% 0 0 0;
+}
+
+.waves.right span {
+  left: 0;
+  border-top-color: var(--color-primary);
+  border-right-color: var(--color-primary);
+  border-radius: 0 100% 0 0;
+}
+
+/* Sequential sizing for perfect arcs */
+.waves span:nth-child(1) {
+  width: 12px; height: 12px;
+  animation-delay: 0s;
+}
+
+.waves span:nth-child(2) {
+  width: 24px; height: 24px;
+  animation-delay: 0.15s;
+}
+
+.waves span:nth-child(3) {
+  width: 36px; height: 36px;
+  animation-delay: 0.3s;
+}
+
+@keyframes waveSequential {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  40% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+.welcome-icon {
+  font-size: 120px;
+  color: var(--color-primary);
+  animation: ring 2s ease-in-out infinite;
+  transform-origin: top center;
+  z-index: 2;
+}
+
+@keyframes ring {
+  0% { transform: rotate(0); }
+  5% { transform: rotate(15deg); }
+  10% { transform: rotate(-10deg); }
+  15% { transform: rotate(5deg); }
+  20% { transform: rotate(-5deg); }
+  25% { transform: rotate(2deg); }
+  30% { transform: rotate(0); }
+  100% { transform: rotate(0); }
 }
 
 .welcome-title {

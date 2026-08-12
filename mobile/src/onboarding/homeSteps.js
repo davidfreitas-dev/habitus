@@ -1,12 +1,17 @@
 export const homeSteps = [
   {
-    attachTo: { element: '#onboarding-summary-grid' },
+    attachTo: { element: '#onboarding-current-day' },
     content: {
       title: 'Seu mapa de hábitos',
-      description: 'Cada quadrado representa um dia, e o último é o dia de hoje. Quanto mais verde, mais hábitos você completou — toque em qualquer quadrado para ver os hábitos daquele dia.'
+      description: 'Cada quadro representa um dia do ano. Este último quadro com a borda diferenciada sempre marca o dia de hoje. Quanto mais verde, mais hábitos você completou — toque em qualquer quadrado para ver os detalhes daquele dia.'
     },
     options: {
-      popper: { placement: 'top' }
+      popper: { 
+        placement: 'top',
+        modifiers: [
+          { name: 'offset', options: { offset: [0, 12] } }
+        ]
+      }
     }
   },
   {
@@ -16,7 +21,12 @@ export const homeSteps = [
       description: 'Toque aqui para criar o seu primeiro hábito e começar a acompanhar seu progresso diário.'
     },
     options: {
-      popper: { placement: 'bottom' }
+      popper: { 
+        placement: 'bottom',
+        modifiers: [
+          { name: 'offset', options: { offset: [0, 12] } }
+        ]
+      }
     }
   }
 ];

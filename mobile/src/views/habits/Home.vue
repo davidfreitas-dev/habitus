@@ -55,14 +55,14 @@ const onHomeOnboardingExit = () => {
   finishHomeOnboarding();
 };
 
-// homeSteps[0] aponta para #onboarding-summary-grid, que só existe no DOM
+// homeSteps[0] aponta para #onboarding-current-day, que só existe no DOM
 // quando summary.length > 0. Para um usuário novo (sem hábitos), esse
 // elemento não é renderizado — então removemos esse step da lista nesse caso,
 // evitando que o v-onboarding tente ancorar num elemento inexistente.
 const activeHomeSteps = computed(() =>
   summary.value.length
     ? homeSteps
-    : homeSteps.filter((step) => step.attachTo.element !== '#onboarding-summary-grid')
+    : homeSteps.filter((step) => step.attachTo.element !== '#onboarding-current-day')
 );
 
 const maybeStartHomeOnboarding = async () => {

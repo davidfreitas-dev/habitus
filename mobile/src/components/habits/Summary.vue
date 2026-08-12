@@ -56,6 +56,7 @@ const getCompleted = (date) => {
     <HabitDay
       v-for="(date, index) in datesFromYearStart"
       :key="index"
+      :id="isCurrentDay(date) ? 'onboarding-current-day' : null"
       :is-current-day="isCurrentDay(date)"
       :amount-of-habits="getAmount(date)"
       :amount-completed="getCompleted(date)"

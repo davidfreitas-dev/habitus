@@ -26,15 +26,12 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['update:modelValue', 'blur']);
+const emit = defineEmits(['update:modelValue', 'blur', 'keyup']);
 
 const updateValue = (event) => {
   emit('update:modelValue', event.detail.value);
 };
 
-// O Input.vue tem múltiplos elementos raiz, então o Vue não repassa
-// automaticamente um @blur do componente pai para o ion-input interno.
-// Por isso emitimos o evento manualmente aqui.
 const handleBlur = (event) => {
   emit('blur', event);
 };
@@ -52,8 +49,6 @@ const inputType = computed(() => {
   return props.type;
 });
 
-// Quem decide QUANDO existe erro é o pai (via Vuelidate: .$touch() no
-// blur e .$validate() no submit). Aqui só refletimos se há mensagem.
 const isInvalid = computed(() => !!props.errorText);
 </script>
 
@@ -72,6 +67,7 @@ const isInvalid = computed(() => !!props.errorText);
       :class="{ 'has-error': isInvalid }"
       @ion-input="updateValue"
       @ion-blur="handleBlur"
+      @keyup="$emit('keyup', $event)"
     />
 
     <ion-icon
@@ -101,6 +97,7 @@ ion-label {
 
 ion-input {
   width: 100%;
+  border: 1px solid var(--color-border-default);
   border-radius: var(--border-radius-default);
   background: var(--color-background-secondary);
 
@@ -112,18 +109,25 @@ ion-input {
   --padding-start: 1rem;
   --padding-end: 1rem;
 
-  /* Remove a linha nativa que o Ionic desenha abaixo do input quando
-     helper/error text ou counter estão presentes. */
-  --border-width: 0;
-  --border-color: transparent;
+  /* Remove a linha nativa que o Ionic desenha abaixo/acima do input */
+  --border-width: 0 !important;
+  --border-color: transparent !important;
+  --border-style: none !important;
+  --highlight-height: 0;
+  --highlight-color-focused: transparent;
+  --highlight-color-valid: transparent;
+  --highlight-color-invalid: transparent;
 }
 
+ion-input.has-focus,
 ion-input:focus-within {
-  box-shadow: 0 0 0 2px var(--color-primary);
+  border-color: var(--color-primary);
+  box-shadow: none !important;
 }
 
 ion-input.has-error {
-  box-shadow: 0 0 0 2px var(--color-danger, #eb445a);
+  border-color: var(--color-danger, #eb445a);
+  box-shadow: none !important;
 }
 
 .input-container {

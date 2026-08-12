@@ -117,11 +117,13 @@ const availableWeekDays = [
 </script>
 
 <template>
-  <form>    
+  <form @submit.prevent="submitForm">    
     <p>Qual seu comprometimento?</p>
     <Input
+      id="onboarding-habit-name"
       v-model="formData.title"
       placeholder="Exercícios, dormir bem, etc..."
+      @keyup.enter="submitForm"
     /> 
 
     <div id="onboarding-recurrence">
@@ -163,10 +165,10 @@ const availableWeekDays = [
     </div>
 
     <Button
+      type="submit"
       color="primary"
       class="ion-margin-top"
       :is-loading="isLoading"
-      @click="submitForm"
     >
       Confirmar
     </Button>

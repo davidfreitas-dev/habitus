@@ -18,9 +18,7 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 8100,
     allowedHosts: ['mobile.localhost', 'localhost'],
-    hmr: {
-      clientPort: 80,
-    },
+    hmr: true,
     proxy: {
       '/api': {
         target: 'http://localhost:80',

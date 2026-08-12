@@ -14,12 +14,17 @@ const props = defineProps({
     default: 'default',
     validator: (value) => ['default', 'auto', 'small'].includes(value),
   },
+  type: {
+    type: String,
+    default: 'button'
+  },
 });
 </script>
 
 <template>
   <ion-button
     mode="md"
+    :type="type"
     :class="[color, size]"
     :disabled="isLoading || isDisabled"
   >

@@ -94,7 +94,19 @@ const shouldRetryWithRefresh = (error) => {
 };
 
 api.interceptors.request.use(
-  addAuthorizationHeader,
+  (config) => {
+    config = addAuthorizationHeader(config);
+    
+    // Adiciona timestamp para evitar cache agressivo de GET requests em WebViews (produção)
+    if (config.method === 'get') {
+      config.params = {
+        ...config.params,
+        _t: Date.now()
+      };
+    }
+    
+    return config;
+  },
   (error) => {
     console.error('Erro na requisição da API:', error);
     return Promise.reject(error);

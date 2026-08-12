@@ -90,17 +90,18 @@ onIonViewDidEnter(async () => {
             id="onboarding-profile-link"
             class="ion-no-padding"
             router-link="/profile"
+            detail="true"
           >
             <ion-label class="ion-no-margin ion-padding-top ion-padding-bottom">
               Editar perfil
             </ion-label>
           </ion-item>
-          <ion-item class="ion-no-padding" router-link="/password-change">
+          <ion-item class="ion-no-padding" router-link="/password-change" detail="true">
             <ion-label class="ion-no-margin ion-padding-top ion-padding-bottom">
               Alterar senha
             </ion-label>
           </ion-item>
-          <ion-item class="ion-no-padding" router-link="/delete-account">
+          <ion-item class="ion-no-padding" router-link="/delete-account" detail="true">
             <ion-label class="ion-no-margin ion-padding-top ion-padding-bottom">
               Excluir conta
             </ion-label>
@@ -122,7 +123,7 @@ onIonViewDidEnter(async () => {
             </ion-label>
             <Toggle v-model:checked="isDarkMode" />
           </ion-item>
-          <ion-item class="ion-no-padding" router-link="/about">
+          <ion-item class="ion-no-padding" router-link="/about" detail="true">
             <ion-label class="ion-no-margin ion-padding-top ion-padding-bottom">
               Sobre o app
             </ion-label>

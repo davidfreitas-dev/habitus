@@ -115,11 +115,11 @@ onIonViewDidEnter(async () => {
     </Header>
     <ion-content>
       <Container>
-        <PeriodSelector v-model="activePeriod" />
+        <PeriodSelector id="onboarding-period-selector" v-model="activePeriod" />
 
         <div class="stats-container">
           <p class="chart-description">
-            Sua taxa de conclusão média para cada dia da semana no período selecionado.
+            O gráfico abaixo mostra sua taxa de conclusão média para cada dia da semana no período selecionado.
           </p>
           <div class="chart-card">
             <div class="chart-header">
@@ -192,6 +192,7 @@ onIonViewDidEnter(async () => {
 .chart-description {
   color: var(--color-text-secondary);
   font-size: 14px;
+  margin: 0;
 }
 
 .chart-card {

@@ -5,13 +5,13 @@
   "plugins": {
     "LocalNotifications": {
       "smallIcon": "ic_stat_habitus",
-      "iconColor": "#acde2d"      
+      "iconColor": "#C6FF34"      
     },
     "SplashScreen": {
         "launchShowDuration": 2000,
         "launchAutoHide": true,
         "launchFadeOutDuration": 1000,
-        "backgroundColor": "#acde2d"
+        "backgroundColor": "#C6FF34"
     }
   }
 }

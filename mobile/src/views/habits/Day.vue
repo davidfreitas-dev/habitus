@@ -18,6 +18,7 @@ import Breadcrumb from '@/components/layout/Breadcrumb.vue';
 import ProgressBar from '@/components/ui/Progressbar.vue';
 import Checkbox from '@/components/ui/Checkbox.vue';
 import Button from '@/components/ui/Button.vue';
+import CongratsModal from '@/components/habits/CongratsModal.vue';
 import OnboardingStep from '@/components/onboarding/OnboardingStep.vue';
 
 // Ajuste os caminhos de `onboarding/daySteps` e
@@ -100,11 +101,19 @@ const maybeStartDayOnboarding = async () => {
   startDayOnboarding();
 };
 
+const showCongrats = ref(false);
+
 const handleToggleHabit = async (habitId) => {
   await withLoading(async () => {
     const formattedDate = parsedDate.value.format('YYYY-MM-DD');
+    const wasCompleted = progressPercentage.value === 100;
+    
     await habitStore.toggleHabit(habitId, formattedDate);
     await getDayInfo();
+    
+    if (!wasCompleted && progressPercentage.value === 100) {
+      showCongrats.value = true;
+    }
   }, 'Erro ao carregar os dados do dia.');
 };
 
@@ -172,6 +181,8 @@ const router = useRouter();
         </ion-text>
       </Container>
     </ion-content>
+    
+    <CongratsModal v-model:isOpen="showCongrats" />
 
     <VOnboardingWrapper
       ref="onboardingWrapper"
