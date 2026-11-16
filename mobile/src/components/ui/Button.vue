@@ -1,24 +1,26 @@
-<script setup>
+<script setup lang="ts">
 import { IonButton, IonSpinner } from '@ionic/vue';
 
-const props = defineProps({
-  isDisabled: Boolean,
-  isLoading: Boolean,
-  color: {
-    type: String,
-    default: 'default',
-    validator: (value) => ['default', 'primary', 'danger', 'outline', 'light'].includes(value),
-  },
-  size: {
-    type: String,
-    default: 'default',
-    validator: (value) => ['default', 'auto', 'small'].includes(value),
-  },
-  type: {
-    type: String,
-    default: 'button'
-  },
-});
+type ButtonColor = 'default' | 'primary' | 'danger' | 'outline' | 'light';
+type ButtonSize = 'default' | 'auto' | 'small';
+type ButtonType = 'button' | 'submit' | 'reset';
+
+withDefaults(
+  defineProps<{
+    isDisabled?: boolean;
+    isLoading?: boolean;
+    color?: ButtonColor;
+    size?: ButtonSize;
+    type?: ButtonType;
+  }>(),
+  {
+    isDisabled: false,
+    isLoading: false,
+    color: 'default',
+    size: 'default',
+    type: 'button',
+  }
+);
 </script>
 
 <template>

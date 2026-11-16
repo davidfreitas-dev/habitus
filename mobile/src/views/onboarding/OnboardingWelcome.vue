@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonIcon } from '@ionic/vue';
@@ -149,7 +149,6 @@ const skipNotifications = () => {
   position: absolute;
   bottom: 0;
   border: 3px solid transparent;
-  /* Making it less circular by using an elliptical border-radius */
   border-radius: 100% 0 0 0;
   animation: waveSequential 2s infinite ease-out;
   opacity: 0;
@@ -169,7 +168,6 @@ const skipNotifications = () => {
   border-radius: 0 100% 0 0;
 }
 
-/* Sequential sizing for perfect arcs */
 .waves span:nth-child(1) {
   width: 12px; height: 12px;
   animation-delay: 0s;

@@ -1,5 +1,5 @@
-<script setup>
-import { ref, reactive, computed } from 'vue';
+<script setup lang="ts">
+import { ref, reactive, computed, unref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useVuelidate } from '@vuelidate/core';
 import { required, email, helpers } from '@vuelidate/validators';
@@ -27,7 +27,7 @@ const handleContinue = async () => {
     const response = await authStore.forgotPassword(formData.email);
     showToast('success', response.message || 'E-mail de recuperação enviado!');
     router.push('/forgot/token');
-  } catch (err) {
+  } catch (err: any) {
     console.error('Forgot password failed:', err);
     showToast('error', err.response?.data?.message || 'Erro ao solicitar recuperação de senha.');
   } finally {
@@ -67,7 +67,7 @@ onIonViewDidLeave(() => {
   <ion-page>
     <ion-content :fullscreen="true">
       <Container>
-        <form>
+        <form @submit.prevent="submitForm">
           <div class="logo-wrapper">
             <img
               src="../../../assets/logo.png"
@@ -81,16 +81,16 @@ onIonViewDidLeave(() => {
             type="text"
             label="Endereço de e-mail"
             placeholder="exemplo@email.com"
-            :error-text="v$.email.$errors[0]?.$message"
+            :error-text="String(unref(v$.email.$errors[0]?.$message) || '')"
             @blur="v$.email.$touch()"
           /> 
           
           <div class="ion-margin-top ion-padding-top">
             <Button
+              type="submit"
               color="primary"
               :is-loading="isLoading"
               :is-disabled="v$.$invalid"
-              @click="submitForm"
             >
               Continuar
             </Button>

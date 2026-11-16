@@ -1,6 +1,6 @@
-<script setup>
+<script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, unref } from 'vue';
 import { useVuelidate } from '@vuelidate/core';
 import { required, email, minLength, helpers } from '@vuelidate/validators';
 import { IonPage, IonContent, IonFooter, onIonViewDidLeave } from '@ionic/vue';
@@ -25,13 +25,13 @@ const formData = reactive({
 const { showToast } = useToast();
 const router = useRouter();
 
-const containsNameAndSurname = (value) => {
+const containsNameAndSurname = (value: string) => {
   if (!value) return true;
   const parts = value.trim().split(/\s+/).filter(Boolean);
   return parts.length >= 2;
 };
 
-const capitalizeName = (name) => {
+const capitalizeName = (name: string) => {
   if (!name) return '';
   const prepositions = ['de', 'da', 'do', 'dos', 'das', 'e'];
   return name
@@ -52,21 +52,19 @@ const signUp = async () => {
 
   try {
     if (formData.website) {
-      // honeypot filled, ignore silently or throw error
       throw new Error('Bot detectado');
     }
 
     formData.name = capitalizeName(formData.name);
     await authStore.register(formData);
     router.push('/');
-  } catch (err) {
+  } catch (err: any) {
     console.error('Registration failed:', err);
     showToast('error', err.response?.data?.message || 'Erro ao criar conta.');
   } finally {
     isLoadingEmail.value = false;
   }
 };
-
 
 const rules = computed(() => {
   return {
@@ -111,7 +109,7 @@ onIonViewDidLeave(() => {
   <ion-page>
     <ion-content :fullscreen="true">
       <Container>
-        <form>
+        <form @submit.prevent="submitForm">
           <div class="logo-wrapper">
             <img
               src="../../../assets/logo.png"
@@ -125,7 +123,7 @@ onIonViewDidLeave(() => {
             type="text"
             label="Seu nome e sobrenome"
             placeholder="Fulano de Tal"
-            :error-text="v$.name.$errors[0]?.$message"
+            :error-text="String(unref(v$.name.$errors[0]?.$message) || '')"
             @blur="v$.name.$touch()"
           /> 
 
@@ -134,7 +132,7 @@ onIonViewDidLeave(() => {
             type="text"
             label="Seu melhor e-mail"
             placeholder="exemplo@email.com"
-            :error-text="v$.email.$errors[0]?.$message"
+            :error-text="String(unref(v$.email.$errors[0]?.$message) || '')"
             @blur="v$.email.$touch()"
           /> 
           
@@ -143,7 +141,7 @@ onIonViewDidLeave(() => {
             type="password"
             label="Sua senha"
             placeholder="Digite sua senha"
-            :error-text="v$.password.$errors[0]?.$message"
+            :error-text="String(unref(v$.password.$errors[0]?.$message) || '')"
             @blur="v$.password.$touch()"
           /> 
 
@@ -178,10 +176,10 @@ onIonViewDidLeave(() => {
 
           <div class="ion-margin-top">
             <Button
+              type="submit"
               color="primary"
               :is-loading="isLoadingEmail"
               :is-disabled="v$.$invalid || !formData.agreeToTerms"
-              @click="submitForm"
             >
               Criar conta
             </Button>

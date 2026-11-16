@@ -6,17 +6,19 @@
   />
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useRouter } from 'vue-router';
 import { IonIcon } from '@ionic/vue';
 import { arrowBack } from 'ionicons/icons';
 
-const props = defineProps({
-  route: {
-    type: String,
-    default: ''
+const props = withDefaults(
+  defineProps<{
+    route?: string;
+  }>(),
+  {
+    route: '',
   }
-});
+);
 
 const router = useRouter();
 

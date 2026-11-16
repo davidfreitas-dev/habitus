@@ -1,38 +1,36 @@
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue';
-import { IonInput, IonLabel, IonIcon } from '@ionic/vue';
+import { IonInput, IonLabel, IonIcon, type InputCustomEvent } from '@ionic/vue';
 import { eyeOutline, eyeOffOutline } from 'ionicons/icons';
 
-const props = defineProps({
-  type: {
-    type: String,
-    default: ''
-  },
-  label: {
-    type: String,
-    default: ''
-  },
-  placeholder: {
-    type: String,
-    default: ''
-  },
-  modelValue: {
-    type: [ String, Number ],
-    default: ''
-  },
-  errorText: {
-    type: String,
-    default: ''
+const props = withDefaults(
+  defineProps<{
+    type?: string;
+    label?: string;
+    placeholder?: string;
+    modelValue?: string | number | null;
+    errorText?: string;
+  }>(),
+  {
+    type: 'text',
+    label: '',
+    placeholder: '',
+    modelValue: '',
+    errorText: '',
   }
-});
+);
 
-const emit = defineEmits(['update:modelValue', 'blur', 'keyup']);
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string | number | null | undefined): void;
+  (e: 'blur', event: any): void;
+  (e: 'keyup', event: KeyboardEvent): void;
+}>();
 
-const updateValue = (event) => {
+const updateValue = (event: InputCustomEvent) => {
   emit('update:modelValue', event.detail.value);
 };
 
-const handleBlur = (event) => {
+const handleBlur = (event: any) => {
   emit('blur', event);
 };
 
@@ -42,7 +40,7 @@ const togglePasswordVisibility = () => {
   isPasswordVisible.value = !isPasswordVisible.value;
 };
 
-const inputType = computed(() => {
+const inputType = computed<any>(() => {
   if (props.type === 'password') {
     return isPasswordVisible.value ? 'text' : 'password';
   }
@@ -53,7 +51,7 @@ const isInvalid = computed(() => !!props.errorText);
 </script>
 
 <template>
-  <ion-label>
+  <ion-label v-if="label">
     {{ label }}
   </ion-label>
 
@@ -109,7 +107,6 @@ ion-input {
   --padding-start: 1rem;
   --padding-end: 1rem;
 
-  /* Remove a linha nativa que o Ionic desenha abaixo/acima do input */
   --border-width: 0 !important;
   --border-color: transparent !important;
   --border-style: none !important;

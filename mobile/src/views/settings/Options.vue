@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref, computed, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { 
@@ -26,9 +26,6 @@ import ModalDialog from '@/components/layout/ModalDialog.vue';
 import Toggle from '@/components/ui/Toggle.vue';
 import OnboardingStep from '@/components/onboarding/OnboardingStep.vue';
 
-// Ajuste os caminhos de `onboarding/optionsSteps` e
-// `components/onboarding/OnboardingStep.vue` conforme o local real.
-
 const router = useRouter();
 const { withLoading } = useLoading();
 const authStore = useAuthStore();
@@ -36,10 +33,10 @@ const themeStore = useThemeStore();
 
 const isDarkMode = computed({
   get: () => themeStore.isDarkMode,
-  set: (value) => themeStore.setDarkMode(value),
+  set: (value: boolean) => themeStore.setDarkMode(value),
 });
 
-const modalRef = ref(null);
+const modalRef = ref<any>(null);
     
 const handleLogOut = () => {
   modalRef.value?.setOpen(true);
@@ -54,7 +51,7 @@ const logOut = async () => {
 
 // --- Onboarding: tour da tela de Opções ---
 const { isStepSeen, markStepSeen } = useOnboarding();
-const onboardingWrapper = ref(null);
+const onboardingWrapper = ref<any>(null);
 const { start: startOptionsOnboarding, finish: finishOptionsOnboarding } = useVOnboarding(onboardingWrapper);
 
 const onOptionsOnboardingComplete = () => {
@@ -90,18 +87,26 @@ onIonViewDidEnter(async () => {
             id="onboarding-profile-link"
             class="ion-no-padding"
             router-link="/profile"
-            detail="true"
+            :detail="true"
           >
             <ion-label class="ion-no-margin ion-padding-top ion-padding-bottom">
               Editar perfil
             </ion-label>
           </ion-item>
-          <ion-item class="ion-no-padding" router-link="/password-change" detail="true">
+          <ion-item
+            class="ion-no-padding"
+            router-link="/password-change"
+            :detail="true"
+          >
             <ion-label class="ion-no-margin ion-padding-top ion-padding-bottom">
               Alterar senha
             </ion-label>
           </ion-item>
-          <ion-item class="ion-no-padding" router-link="/delete-account" detail="true">
+          <ion-item
+            class="ion-no-padding"
+            router-link="/delete-account"
+            :detail="true"
+          >
             <ion-label class="ion-no-margin ion-padding-top ion-padding-bottom">
               Excluir conta
             </ion-label>
@@ -123,7 +128,11 @@ onIonViewDidEnter(async () => {
             </ion-label>
             <Toggle v-model:checked="isDarkMode" />
           </ion-item>
-          <ion-item class="ion-no-padding" router-link="/about" detail="true">
+          <ion-item
+            class="ion-no-padding"
+            router-link="/about"
+            :detail="true"
+          >
             <ion-label class="ion-no-margin ion-padding-top ion-padding-bottom">
               Sobre o app
             </ion-label>

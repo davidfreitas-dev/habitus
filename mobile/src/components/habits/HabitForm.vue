@@ -1,31 +1,45 @@
-<script setup>
+<script setup lang="ts">
 import { ref, watch } from 'vue';
-import { IonDatetime, IonDatetimeButton, IonModal, IonList, IonItem, IonLabel } from '@ionic/vue';
+import { IonDatetime, IonDatetimeButton, IonModal, IonItem, IonLabel } from '@ionic/vue';
 import Input from '@/components/ui/Input.vue';
 import Checkbox from '@/components/ui/Checkbox.vue';
 import Button from '@/components/ui/Button.vue';
 import Toggle from '@/components/ui/Toggle.vue';
+import type { HabitDraft, HabitFormSubmitPayload } from '@/types';
 
-const emit = defineEmits(['onError', 'onSubmit']);
+const emit = defineEmits<{
+  (e: 'onError', message: string): void;
+  (e: 'onSubmit', payload: HabitFormSubmitPayload): void;
+}>();
 
-const props = defineProps({
-  habit: {
-    type: Object,
-    default: () => ({
+const props = withDefaults(
+  defineProps<{
+    habit?: HabitDraft;
+    isLoading?: boolean;
+  }>(),
+  {
+    habit: () => ({
       id: null,
       title: '',
       week_days: '',
+      reminder_time: null,
     }),
-  },
-});
+    isLoading: false,
+  }
+);
 
 const getLocalISOString = () => {
   const now = new Date();
   const offset = now.getTimezoneOffset() * 60000;
-  return new Date(now - offset).toISOString();
+  return new Date(now.getTime() - offset).toISOString();
 };
 
-const formData = ref({
+const formData = ref<{
+  title: string;
+  weekDays: number[];
+  reminderEnabled: boolean;
+  reminderTime: string;
+}>({
   title: '',
   weekDays: [],
   reminderEnabled: false,
@@ -67,13 +81,11 @@ const clearFormData = () => {
 
 defineExpose({ clearFormData });
 
-const isLoading = ref(false);
-
-const isDayChecked = (index) => {
+const isDayChecked = (index: number) => {
   return formData.value.weekDays.includes(index);
 };
 
-const toggleWeekDay = (index) => {
+const toggleWeekDay = (index: number) => {
   const days = formData.value.weekDays;
 
   if (days.includes(index)) {

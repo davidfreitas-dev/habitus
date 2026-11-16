@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref, computed, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { IonPage, IonContent, IonText, onIonViewWillEnter, onIonViewDidEnter } from '@ionic/vue';
@@ -10,6 +10,7 @@ import { useLoading } from '@/composables/useLoading';
 import { useToast } from '@/composables/useToast';
 import { useOnboarding } from '@/composables/useOnboarding';
 import { daySteps } from '@/onboarding/daySteps';
+import type { DayInfo } from '@/types';
 
 import Header from '@/components/layout/Header.vue';
 import Container from '@/components/layout/Container.vue';
@@ -21,20 +22,16 @@ import Button from '@/components/ui/Button.vue';
 import CongratsModal from '@/components/habits/CongratsModal.vue';
 import OnboardingStep from '@/components/onboarding/OnboardingStep.vue';
 
-// Ajuste os caminhos de `onboarding/daySteps` e
-// `components/onboarding/OnboardingStep.vue` conforme o local real.
-
-
 const profileStore = useProfileStore();
 const habitStore = useHabitStore();
 
-const dayInfo = ref({
+const dayInfo = ref<DayInfo>({
   possible_habits: [],
   completed_habits: []
 });
 
 const route = useRoute();
-const date = ref(route.params.date);
+const date = ref(route.params.date as string);
 const {
   parsedDate,
   dayOfWeek,
@@ -42,23 +39,23 @@ const {
   isDateInPast
 } = useParsedDate(date.value);
 
-const { showToast } = useToast(); // Initialize useToast
+const { showToast } = useToast();
 
 const getDayInfo = async () => {
   const formattedDate = parsedDate.value.format('YYYY-MM-DD');
   try {
     const response = await habitStore.getDayInfo(formattedDate);
     dayInfo.value = response;
-  } catch (err) {
+  } catch (err: any) {
     console.error('Error fetching day info:', err);
     showToast('error', err.response?.data?.message || 'Erro ao carregar hábitos do dia.');
-    throw err; // Re-throw to propagate to withLoading
+    throw err;
   }
 };
 
 const { withLoading, isLoading } = useLoading();
 
-let dayDataLoaded = null;
+let dayDataLoaded: Promise<void> | null = null;
 
 onIonViewWillEnter(() => {
   dayDataLoaded = withLoading(async () => {
@@ -78,11 +75,9 @@ onIonViewDidEnter(async () => {
   await maybeStartDayOnboarding();
 });
 
-// --- Onboarding: tour da tela do dia (barra de progresso + checklist) ---
-// Só mostra o tour para o dia atual (não em datas passadas, que são
-// somente leitura), e só quando já existe pelo menos 1 hábito pra marcar.
+// --- Onboarding: tour da tela do dia ---
 const { isStepSeen, markStepSeen } = useOnboarding();
-const onboardingWrapper = ref(null);
+const onboardingWrapper = ref<any>(null);
 const { start: startDayOnboarding, finish: finishDayOnboarding } = useVOnboarding(onboardingWrapper);
 
 const onDayOnboardingComplete = () => {
@@ -103,7 +98,7 @@ const maybeStartDayOnboarding = async () => {
 
 const showCongrats = ref(false);
 
-const handleToggleHabit = async (habitId) => {
+const handleToggleHabit = async (habitId: number | string) => {
   await withLoading(async () => {
     const formattedDate = parsedDate.value.format('YYYY-MM-DD');
     const wasCompleted = progressPercentage.value === 100;
@@ -117,7 +112,7 @@ const handleToggleHabit = async (habitId) => {
   }, 'Erro ao carregar os dados do dia.');
 };
 
-const isHabitChecked = (habitId) => {
+const isHabitChecked = (habitId: number | string) => {
   if (!dayInfo.value.completed_habits) {
     return false;
   }
@@ -182,7 +177,7 @@ const router = useRouter();
       </Container>
     </ion-content>
     
-    <CongratsModal v-model:isOpen="showCongrats" />
+    <CongratsModal v-model:is-open="showCongrats" />
 
     <VOnboardingWrapper
       ref="onboardingWrapper"

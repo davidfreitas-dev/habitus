@@ -3,7 +3,7 @@
     mode="md"
     :key="modelValue"
     :value="modelValue"
-    @ion-change="$emit('update:modelValue', $event.detail.value)"
+    @ion-change="$emit('update:modelValue', ($event.detail.value as string))"
   >
     <ion-segment-button 
       v-for="segment in segments" 
@@ -15,22 +15,27 @@
   </ion-segment>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { IonSegment, IonSegmentButton, IonLabel } from '@ionic/vue';
 
-defineProps({
-  modelValue: {
-    type: String,
-    required: true,
-  },
-  segments: {
-    type: Array,
-    required: true,
-    default: () => [],
-  },
-});
+export interface SegmentItem {
+  label: string;
+  value: string;
+}
 
-defineEmits(['update:modelValue']);
+withDefaults(
+  defineProps<{
+    modelValue: string;
+    segments?: SegmentItem[];
+  }>(),
+  {
+    segments: () => [],
+  }
+);
+
+defineEmits<{
+  (e: 'update:modelValue', value: string): void;
+}>();
 </script>
 
 <style scoped>

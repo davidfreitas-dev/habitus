@@ -6,6 +6,6 @@
   </ion-header>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { IonHeader, IonToolbar } from '@ionic/vue';
 </script>

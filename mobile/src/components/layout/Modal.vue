@@ -25,33 +25,33 @@
   </ion-modal>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { IonModal, IonHeader, IonToolbar, IonContent, IonTitle, IonIcon } from '@ionic/vue';
 import { arrowBack } from 'ionicons/icons';
 
-const props = defineProps({
-  presentingElement: { 
-    type: Object, 
-    default: () => {} 
-  },
-  title: { 
-    type: String,
-    default: '',
+withDefaults(
+  defineProps<{
+    presentingElement?: any;
+    title?: string;
+  }>(),
+  {
+    presentingElement: undefined,
+    title: '',
   }
-});
+);
 
-const canDismiss = (data, role) => {
+const canDismiss = (_data?: any, role?: string) => {
   return role !== 'gesture' && role !== 'backdrop';
 };
 
 const isOpen = ref(false);
 
-const setOpen = (status) => {
+const setOpen = (status: boolean) => {
   isOpen.value = status;
 };
 
-defineExpose({setOpen});
+defineExpose({ setOpen });
 </script>
 
 <style scoped>

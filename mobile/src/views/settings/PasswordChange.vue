@@ -1,5 +1,5 @@
-<script setup>
-import { reactive } from 'vue';
+<script setup lang="ts">
+import { reactive, unref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useVuelidate } from '@vuelidate/core';
 import { required, minLength, sameAs, helpers } from '@vuelidate/validators';
@@ -87,14 +87,14 @@ const submitForm = async () => {
       <Container>
         <Heading title="Alteração de Senha" />
 
-        <form>
+        <form @submit.prevent="submitForm">
           <div>
             <Input
               v-model="formData.currentPassword"
               type="password"
               label="Digite a senha atual"
               placeholder="Senha atual"
-              :error-text="v$.currentPassword.$errors[0]?.$message"
+              :error-text="String(unref(v$.currentPassword.$errors[0]?.$message) || '')"
               @blur="v$.currentPassword.$touch()"
             />
 
@@ -103,7 +103,7 @@ const submitForm = async () => {
               type="password"
               label="Digite a nova senha"
               placeholder="Nova senha"
-              :error-text="v$.newPassword.$errors[0]?.$message"
+              :error-text="String(unref(v$.newPassword.$errors[0]?.$message) || '')"
               @blur="v$.newPassword.$touch()"
             />
 
@@ -112,16 +112,16 @@ const submitForm = async () => {
               type="password"
               label="Confirme a nova senha"
               placeholder="Repita a nova senha"
-              :error-text="v$.confNewPassword.$errors[0]?.$message"
+              :error-text="String(unref(v$.confNewPassword.$errors[0]?.$message) || '')"
               @blur="v$.confNewPassword.$touch()"
             />
           </div>
 
           <Button
+            type="submit"
             color="primary"
             :is-disabled="v$.$invalid"
             :is-loading="isLoading"
-            @click="submitForm"
           >
             Confirmar
           </Button>

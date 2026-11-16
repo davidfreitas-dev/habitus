@@ -1,5 +1,5 @@
-<script setup>
-import { reactive, watch } from 'vue';
+<script setup lang="ts">
+import { reactive, watch, unref } from 'vue';
 import { IonPage, IonContent, onIonViewWillEnter } from '@ionic/vue';
 import { useVuelidate } from '@vuelidate/core';
 import { required, email, helpers } from '@vuelidate/validators';
@@ -89,14 +89,14 @@ const submitForm = async () => {
       <Container>
         <Heading title="Edição de Perfil" />
 
-        <form>
+        <form @submit.prevent="submitForm">
           <div>
             <Input
               v-model="formData.name"
               type="text"
               label="Nome"
               placeholder="Digite seu nome"
-              :error-text="v$.name.$errors[0]?.$message"
+              :error-text="String(unref(v$.name.$errors[0]?.$message) || '')"
               @blur="v$.name.$touch()"
             />
 
@@ -105,16 +105,16 @@ const submitForm = async () => {
               type="email"
               label="E-mail"
               placeholder="Digite seu e-mail"
-              :error-text="v$.email.$errors[0]?.$message"
+              :error-text="String(unref(v$.email.$errors[0]?.$message) || '')"
               @blur="v$.email.$touch()"
             />
           </div>
 
           <Button
+            type="submit"
             color="primary"
             :is-disabled="v$.$invalid"
             :is-loading="isLoading"
-            @click="submitForm"
           >
             Confirmar
           </Button>

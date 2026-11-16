@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import dayjs from '@/lib/dayjs';
 import { useDayDimensions } from '@/composables/useDayDimensions';
@@ -10,7 +10,7 @@ const startWeekdayFromYear = ref(dayjs().startOf('year').day());
 
 <template>
   <template
-    v-for="(n, index) in startWeekdayFromYear"
+    v-for="(_n, index) in startWeekdayFromYear"
     :key="index"
   >
     <div :style="[ daySize ]" />

@@ -1,6 +1,6 @@
-<script setup>
+<script setup lang="ts">
 import { IonPage, IonContent, onIonViewWillEnter, onIonViewDidEnter, onIonViewDidLeave } from '@ionic/vue';
-import { ref, computed, watch, nextTick } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useVOnboarding, VOnboardingStep, VOnboardingWrapper } from 'v-onboarding';
 import { useHabitStore } from '@/stores/habitsStore';
 import { useLoading } from '@/composables/useLoading';
@@ -13,16 +13,13 @@ import BarChart from '@/components/habits/BarChart.vue';
 import PeriodSelector from '@/components/habits/PeriodSelector.vue';
 import OnboardingStep from '@/components/onboarding/OnboardingStep.vue';
 import dayjs from '@/lib/dayjs';
-
-// Ajuste os caminhos de import de `onboarding/statsSteps` e
-// `components/onboarding/OnboardingStep.vue` para o local real
-// onde esses arquivos ficaram no seu projeto.
+import type { DailyStat, StatsPeriod } from '@/types';
 
 const ERROR_MSG = 'Erro ao carregar estatísticas';
 const today = () => dayjs().format('YYYY-MM-DD');
 
-const activePeriod = ref('W');
-const statsData = ref([]);
+const activePeriod = ref<StatsPeriod>('W');
+const statsData = ref<DailyStat[]>([]);
 const currentStreak = ref(0);
 const longestStreak = ref(0);
 const habitStore = useHabitStore();
@@ -62,7 +59,7 @@ watch(averagePercentage, (newVal) => {
   requestAnimationFrame(step);
 }, { immediate: true });
 
-const loadStats = async (period) => {
+const loadStats = async (period: StatsPeriod | string) => {
   const result = await habitStore.getHabitStats(period, today());
   statsData.value = result.daily_stats;
   currentStreak.value = result.current_streak;
@@ -72,7 +69,7 @@ const loadStats = async (period) => {
 watch(activePeriod, (period) =>
   withLoading(() => loadStats(period), ERROR_MSG));
 
-let statsLoaded = null;
+let statsLoaded: Promise<void> | null = null;
 
 onIonViewWillEnter(() => {
   statsLoaded = withLoading(() => loadStats(activePeriod.value), ERROR_MSG);
@@ -84,7 +81,7 @@ onIonViewDidLeave(() => {
 
 // --- Onboarding: tour da tela de Estatísticas ---
 const { isStepSeen, markStepSeen } = useOnboarding();
-const onboardingWrapper = ref(null);
+const onboardingWrapper = ref<any>(null);
 const { start: startStatsOnboarding, finish: finishStatsOnboarding } = useVOnboarding(onboardingWrapper);
 
 const onStatsOnboardingComplete = () => {

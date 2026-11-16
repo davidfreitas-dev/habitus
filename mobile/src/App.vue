@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { onMounted, watch } from 'vue';
 import { IonApp, IonRouterOutlet } from '@ionic/vue';
 import { Capacitor } from '@capacitor/core';
@@ -15,7 +15,6 @@ import { notificationService } from '@/services/notificationService';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import dayjs from '@/lib/dayjs';
 
-
 const { isConnected } = useNetwork();
 const { setStatusBar, Style } = useStatusBar();
 const { checkPermission } = useNotifications();
@@ -24,7 +23,7 @@ const authStore = useAuthStore();
 const themeStore = useThemeStore();
 const habitStore = useHabitStore();
 
-const applyTheme = (isDark) => {
+const applyTheme = (isDark: boolean) => {
   document.body.classList.toggle('dark', isDark);
   setStatusBar(isDark ? Style.Dark : Style.Light, isDark ? '#09090a' : '#ffffff');
 };
@@ -48,8 +47,8 @@ onMounted(async () => {
     CapApp.addListener('appUrlOpen', (event) => {
       try {
         const url = new URL(event.url);
-        const path = url.pathname; // ex: "/verify-email"
-        const search = url.search; // ex: "?token=xxx"
+        const path = url.pathname;
+        const search = url.search;
         
         if (path === '/verify-email') {
           router.push(`${path}${search}`);
@@ -60,7 +59,7 @@ onMounted(async () => {
     });
 
     // Listener para redirecionar ao clicar em uma notificação
-    LocalNotifications.addListener('localNotificationActionPerformed', (notificationAction) => {
+    LocalNotifications.addListener('localNotificationActionPerformed', () => {
       try {
         const today = dayjs().format('YYYY-MM-DD');
         router.push(`/day/${today}`);
@@ -80,7 +79,6 @@ onMounted(async () => {
     }
   }
 });
-
 </script>
 
 <template>

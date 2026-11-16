@@ -1,23 +1,30 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { IonModal } from '@ionic/vue';
 import confetti from 'canvas-confetti';
 import Button from '@/components/ui/Button.vue';
 
-const props = defineProps({
-  isOpen: Boolean,
-});
+defineProps<{
+  isOpen: boolean;
+}>();
 
-const emit = defineEmits(['update:isOpen']);
+const emit = defineEmits<{
+  (e: 'update:isOpen', value: boolean): void;
+}>();
 
-const messages = [
+interface CongratsMessage {
+  title: string;
+  text: string;
+}
+
+const messages: CongratsMessage[] = [
   { title: 'Missão Cumprida! 🚀', text: 'Você fechou o dia com chave de ouro e completou todos os seus hábitos. O amanhã começa agora!' },
   { title: 'Você é Imparável! ⚡', text: 'Nenhum hábito ficou para trás. Mantenha esse ritmo e os resultados virão de forma extraordinária.' },
   { title: '100% Concluído! ✨', text: 'Incrível! Você dominou o seu dia e cumpriu todas as metas. Descanse e prepare-se para o próximo round.' },
   { title: 'Invicto! 🏆', text: 'Todos os hábitos de hoje foram concluídos. Você está construindo uma versão incrível de si mesmo!' }
 ];
 
-const currentMessage = ref(messages[0]);
+const currentMessage = ref<CongratsMessage>(messages[0]);
 
 const closeModal = () => {
   emit('update:isOpen', false);
@@ -39,7 +46,6 @@ const fireConfetti = () => {
     colors: ['#a3e635', '#9333ea', '#0d9488']
   });
 };
-
 </script>
 
 <template>

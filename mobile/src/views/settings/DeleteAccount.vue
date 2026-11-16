@@ -1,10 +1,9 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { IonContent, IonPage, IonItem, IonLabel, IonList } from '@ionic/vue';
+import { IonContent, IonPage, IonItem, IonLabel } from '@ionic/vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useProfileStore } from '@/stores/profileStore';
-import { useToast } from '@/composables/useToast';
 import { useLoading } from '@/composables/useLoading';
 import Header from '@/components/layout/Header.vue';
 import Heading from '@/components/layout/Heading.vue';
@@ -18,10 +17,9 @@ const profileStore = useProfileStore();
 
 const router = useRouter();
 
-const { showToast } = useToast();
 const { isLoading, withLoading } = useLoading();
 
-const modalRef = ref(null);
+const modalRef = ref<any>(null);
 
 const handleDeleteClick = () => {
   modalRef.value?.setOpen(true);

@@ -5,7 +5,7 @@
   </ion-button>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { IonButton, IonIcon } from '@ionic/vue';
 import { add } from 'ionicons/icons';
 </script>

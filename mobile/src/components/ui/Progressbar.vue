@@ -1,11 +1,7 @@
-<script setup>
-const props = defineProps({
-  progress: {
-    type: [ String, Number ],
-    required: true,
-    validator: (value) => value >= 0 && value <= 100
-  }
-});
+<script setup lang="ts">
+defineProps<{
+  progress: string | number;
+}>();
 </script>
 
 <template>

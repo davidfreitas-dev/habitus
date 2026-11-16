@@ -1,20 +1,19 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue';
 import { useDayDimensions } from '@/composables/useDayDimensions';
 
-const props = defineProps({
-  isCurrentDay: Boolean,
-  amountOfHabits: {
-    type: Number,
-    default: 0,
-    required: true
-  },
-  amountCompleted: {
-    type: Number,
-    default: 0,
-    required: true
+const props = withDefaults(
+  defineProps<{
+    isCurrentDay?: boolean;
+    amountOfHabits?: number;
+    amountCompleted?: number;
+  }>(),
+  {
+    isCurrentDay: false,
+    amountOfHabits: 0,
+    amountCompleted: 0,
   }
-});
+);
 
 const { daySize } = useDayDimensions();
 

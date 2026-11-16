@@ -1,26 +1,31 @@
-<script setup>
+<script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { Bar } from 'vue-chartjs';
-import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
+import { 
+  Chart as ChartJS, 
+  Title, 
+  Tooltip, 
+  Legend, 
+  BarElement, 
+  CategoryScale, 
+  LinearScale,
+  type ChartData,
+  type ChartOptions
+} from 'chart.js';
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
-const props = defineProps({
-  data: { 
-    type: Array, 
-    required: true     
-  },
-  labels: { 
-    type: Array, 
-    required: true     
-  }
-});
+const props = defineProps<{
+  data: number[];
+  labels: string[];
+}>();
 
-const getCSSVar = (name, fallback) => getComputedStyle(document.body).getPropertyValue(name).trim() || fallback;
+const getCSSVar = (name: string, fallback = ''): string => 
+  getComputedStyle(document.body).getPropertyValue(name).trim() || fallback;
 
 const BAR_DEFAULTS = {
   borderRadius: 20,
-  borderSkipped: false,
+  borderSkipped: false as const,
   barThickness: 28,
   categoryPercentage: 0.8,
   barPercentage: 0.9,
@@ -31,7 +36,7 @@ const primaryColor = ref(getCSSVar('--color-primary'));
 const backgroundColor = ref(getCSSVar('--color-background-elevated'));
 const tickColor = ref(getCSSVar('--color-neutral-500', '#a1a1aa'));
 
-let observer;
+let observer: MutationObserver | null = null;
 
 onMounted(() => {
   observer = new MutationObserver(() => {
@@ -44,7 +49,7 @@ onMounted(() => {
 
 onUnmounted(() => observer?.disconnect());
 
-const chartData = computed(() => ({
+const chartData = computed<ChartData<'bar'>>(() => ({
   labels: [...props.labels],
   datasets: [
     {
@@ -64,7 +69,7 @@ const chartData = computed(() => ({
   ]
 }));
 
-const chartOptions = computed(() => ({
+const chartOptions = computed<ChartOptions<'bar'>>(() => ({
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
@@ -82,7 +87,7 @@ const chartOptions = computed(() => ({
       border: { display: false },
       ticks: {
         color: tickColor.value,
-        font: { size: 16, weight: '600' }
+        font: { size: 16, weight: 'bold' }
       }
     }
   }

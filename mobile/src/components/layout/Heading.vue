@@ -2,13 +2,15 @@
   <h1>{{ title }}</h1>
 </template>
 
-<script setup>
-const props = defineProps({
-  title: {
-    type: String,
-    default: 'Heading'
+<script setup lang="ts">
+withDefaults(
+  defineProps<{
+    title?: string;
+  }>(),
+  {
+    title: 'Heading',
   }
-});
+);
 </script>
 
 <style scoped>

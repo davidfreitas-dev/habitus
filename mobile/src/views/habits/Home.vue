@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref, computed, nextTick } from 'vue';
 import { IonPage, IonContent, IonRow, onIonViewWillEnter, onIonViewDidEnter, IonText } from '@ionic/vue';
 import { useVOnboarding, VOnboardingStep, VOnboardingWrapper } from 'v-onboarding';
@@ -17,9 +17,7 @@ import Container from '@/components/layout/Container.vue';
 import Summary from '@/components/habits/Summary.vue';
 import OnboardingStep from '@/components/onboarding/OnboardingStep.vue';
 import dayjs from '@/lib/dayjs';
-
-// Ajuste os caminhos de `onboarding/homeSteps` e
-// `components/onboarding/OnboardingStep.vue` conforme o local real.
+import type { SummaryDay } from '@/types';
 
 const { generateDatesFromYearBeginning } = useGenerateRange();
 const { withLoading } = useLoading();
@@ -31,8 +29,8 @@ const user = computed(() => {
   return profileStore.user;
 });
 
-const summary = ref([]);
-const contentRef = ref(null);
+const summary = ref<SummaryDay[]>([]);
+const contentRef = ref<any>(null);
 const { showToast } = useToast();
 
 const scrollToBottom = async () => {
@@ -44,7 +42,7 @@ const scrollToBottom = async () => {
 
 // --- Onboarding: tour da tela Início ---
 const { isStepSeen, markStepSeen } = useOnboarding();
-const onboardingWrapper = ref(null);
+const onboardingWrapper = ref<any>(null);
 const { start: startHomeOnboarding, finish: finishHomeOnboarding } = useVOnboarding(onboardingWrapper);
 
 const onHomeOnboardingComplete = () => {
@@ -55,26 +53,19 @@ const onHomeOnboardingExit = () => {
   finishHomeOnboarding();
 };
 
-// homeSteps[0] aponta para #onboarding-current-day, que só existe no DOM
-// quando summary.length > 0. Para um usuário novo (sem hábitos), esse
-// elemento não é renderizado — então removemos esse step da lista nesse caso,
-// evitando que o v-onboarding tente ancorar num elemento inexistente.
 const activeHomeSteps = computed(() =>
   summary.value.length
     ? homeSteps
-    : homeSteps.filter((step) => step.attachTo.element !== '#onboarding-current-day')
+    : homeSteps.filter((step) => (step.attachTo as any)?.element !== '#onboarding-current-day')
 );
 
 const maybeStartHomeOnboarding = async () => {
   if (await isStepSeen('home')) return;
-  // Só mostra o tour se o usuário ainda não tem nenhum hábito hoje.
-  // O botão "+ Novo" existe sempre; o grid só existe quando há summary,
-  // por isso esperamos o próximo tick antes de iniciar.
   await nextTick();
   startHomeOnboarding();
 };
 
-let summaryLoaded = null;
+let summaryLoaded: Promise<void> | null = null;
 
 const getSummary = async () => {
   try {
@@ -82,20 +73,17 @@ const getSummary = async () => {
     const response = await habitStore.getHabitsSummary(today);
     summary.value = Array.isArray(response) ? response : [];
     scrollToBottom();
-  } catch (err) {
+  } catch (err: any) {
     console.error('Error fetching habits summary:', err);
     showToast('error', err.response?.data?.message || 'Erro ao carregar resumo de hábitos.');
     throw err;
   }
 };
 
-const amountOfDaysToFill = ref(0);
-const datesFromYearStart = ref([]);
-const minimumSummaryDatesSize = ref(18 * 5);
+const datesFromYearStart = ref<Date[]>([]);
 
 onIonViewWillEnter(() => {
   datesFromYearStart.value = generateDatesFromYearBeginning();
-  amountOfDaysToFill.value = minimumSummaryDatesSize.value - datesFromYearStart.value.length;
   summaryLoaded = withLoading(getSummary, 'Erro ao carregar o resumo de hábitos.');
 });
 
@@ -159,7 +147,3 @@ onIonViewDidEnter(async () => {
     </VOnboardingWrapper>
   </ion-page>
 </template>
-
-<style scoped>
-/* Scoped styles */
-</style>

@@ -1,7 +1,7 @@
-<script setup>
+<script setup lang="ts">
 import { alertController } from '@ionic/vue';
 
-const setOpen = async (header, message) => {
+const setOpen = async (header: string, message: string) => {
   const alert = await alertController.create({
     header: header,
     message: message,

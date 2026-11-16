@@ -100,15 +100,15 @@
   </ion-page>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
-import { IonPage, IonContent, IonLabel, IonSegment, IonSegmentButton } from '@ionic/vue';
+import { IonPage, IonContent } from '@ionic/vue';
 import Header from '@/components/layout/Header.vue';
 import Container from '@/components/layout/Container.vue';
-import Segment from '@/components/ui/Segment.vue';
+import Segment, { type SegmentItem } from '@/components/ui/Segment.vue';
 import BackButton from '@/components/layout/BackButton.vue';
 
-const segments = ref([
+const segments = ref<SegmentItem[]>([
   { 
     label: 'Política de Privacidade', 
     value: 'first' 

@@ -8,19 +8,11 @@
   </div>
 </template>
 
-<script setup>
-const props = defineProps({
-  weekDay: {
-    type: String,
-    default: '',
-    required: true
-  },
-  date: {
-    type: String,
-    default: '',
-    required: true
-  }
-});
+<script setup lang="ts">
+defineProps<{
+  weekDay: string;
+  date: string;
+}>();
 </script>
 
 <style scoped>

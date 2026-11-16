@@ -1,16 +1,21 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue';
+import type { StatsPeriod } from '@/types';
 
-const props = defineProps({
-  modelValue: {
-    type: String,
-    required: true
-  }
-});
+interface PeriodItem {
+  label: string;
+  value: StatsPeriod;
+}
 
-const emit = defineEmits(['update:modelValue']);
+const props = defineProps<{
+  modelValue: StatsPeriod | string;
+}>();
 
-const periods = [
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: StatsPeriod): void;
+}>();
+
+const periods: PeriodItem[] = [
   { label: 'S', value: 'W' },
   { label: 'M', value: 'M' },
   { label: '3M', value: '3M' },
@@ -20,7 +25,7 @@ const periods = [
 
 const activeIndex = computed(() => periods.findIndex(p => p.value === props.modelValue));
 
-const selectPeriod = (period) => {
+const selectPeriod = (period: PeriodItem) => {
   emit('update:modelValue', period.value);
 };
 </script>

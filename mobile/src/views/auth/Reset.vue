@@ -1,6 +1,6 @@
-<script setup>
+<script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, unref } from 'vue';
 import { useVuelidate } from '@vuelidate/core';
 import { required, sameAs, helpers } from '@vuelidate/validators';
 import { IonPage, IonContent, onIonViewDidLeave } from '@ionic/vue';
@@ -27,7 +27,7 @@ const handleConfirm = async () => {
     const response = await authStore.resetPassword(formData.password, formData.confPassword);
     showToast('success', response.message || 'Senha redefinida com sucesso!');
     router.push('/signin');
-  } catch (err) {
+  } catch (err: any) {
     console.error('Password reset failed:', err);
     const apiErrorMessage = err.response?.data?.data?.[0] || err.response?.data?.message;    
     showToast('error', apiErrorMessage || 'Erro ao redefinir senha.');
@@ -72,7 +72,7 @@ onIonViewDidLeave(() => {
   <ion-page>
     <ion-content :fullscreen="true">
       <Container>
-        <form>
+        <form @submit.prevent="submitForm">
           <div class="logo-wrapper">
             <img
               src="../../../assets/logo.png"
@@ -86,7 +86,7 @@ onIonViewDidLeave(() => {
             type="password"
             label="Digite a nova senha"
             placeholder="Sua nova senha"
-            :error-text="v$.password.$errors[0]?.$message"
+            :error-text="String(unref(v$.password.$errors[0]?.$message) || '')"
             @blur="v$.password.$touch()"
           /> 
 
@@ -95,16 +95,16 @@ onIonViewDidLeave(() => {
             type="password"
             label="Confirme a nova senha"
             placeholder="Repita a senha"
-            :error-text="v$.confPassword.$errors[0]?.$message"
+            :error-text="String(unref(v$.confPassword.$errors[0]?.$message) || '')"
             @blur="v$.confPassword.$touch()"
           /> 
 
           <div class="ion-margin-top ion-padding-top">
             <Button
+              type="submit"
               color="primary"
               :is-loading="isLoading"
               :is-disabled="v$.$invalid"
-              @click="submitForm"
             >
               Confirmar
             </Button>

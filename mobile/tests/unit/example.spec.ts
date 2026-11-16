@@ -1,10 +1,14 @@
-import { mount } from '@vue/test-utils'
-import HomePage from '@/views/HomePage.vue'
-import { describe, expect, test } from 'vitest'
+import { mount } from '@vue/test-utils';
+import Heading from '@/components/layout/Heading.vue';
+import { describe, expect, test } from 'vitest';
 
-describe('HomePage.vue', () => {
-  test('renders home vue', () => {
-    const wrapper = mount(HomePage)
-    expect(wrapper.text()).toMatch('Ready to create an app?')
-  })
-})
+describe('Heading.vue', () => {
+  test('renders title properly', () => {
+    const wrapper = mount(Heading, {
+      props: {
+        title: 'Meus Hábitos'
+      }
+    });
+    expect(wrapper.text()).toContain('Meus Hábitos');
+  });
+});

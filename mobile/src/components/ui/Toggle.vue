@@ -1,16 +1,20 @@
-<script setup>
-import { IonToggle } from '@ionic/vue';
+<script setup lang="ts">
+import { IonToggle, type ToggleCustomEvent } from '@ionic/vue';
 
-defineProps({
-  checked: {
-    type: Boolean,
-    default: false,
-  },
-});
+withDefaults(
+  defineProps<{
+    checked?: boolean;
+  }>(),
+  {
+    checked: false,
+  }
+);
 
-const emit = defineEmits(['update:checked']);
+const emit = defineEmits<{
+  (e: 'update:checked', checked: boolean): void;
+}>();
 
-const onToggleChange = (event) => {
+const onToggleChange = (event: ToggleCustomEvent) => {
   emit('update:checked', event.detail.checked);
 };
 </script>

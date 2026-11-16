@@ -1,32 +1,36 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { IonModal, IonContent } from '@ionic/vue';
 import Button from '@/components/ui/Button.vue';
 
-const props = defineProps({
-  message: {
-    type: String,
-    default: ''
-  },
-});
+withDefaults(
+  defineProps<{
+    message?: string;
+  }>(),
+  {
+    message: '',
+  }
+);
 
-const modal = ref();
+const modal = ref<any>();
 
-const setOpen = (status) => {
+const setOpen = (status: boolean) => {
   if (status) {
-    modal.value.$el.present();
+    modal.value?.$el?.present();
   } else {
-    modal.value.$el.dismiss();
+    modal.value?.$el?.dismiss();
   }
 };
 
 defineExpose({ setOpen });
 
 const closeModal = () => {
-  modal.value.$el.dismiss();
+  modal.value?.$el?.dismiss();
 };
 
-const emit = defineEmits(['on-confirm']);
+const emit = defineEmits<{
+  (e: 'on-confirm'): void;
+}>();
 
 const confirmAction = () => {
   emit('on-confirm');

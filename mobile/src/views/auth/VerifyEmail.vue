@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent } from '@ionic/vue';
@@ -7,13 +7,14 @@ import { useToast } from '@/composables/useToast';
 import Container from '@/components/layout/Container.vue';
 import Button from '@/components/ui/Button.vue';
 
-const props = defineProps({
-  token: {
-    type: String,
-    required: false,
-    default: '',
+const props = withDefaults(
+  defineProps<{
+    token?: string;
+  }>(),
+  {
+    token: '',
   }
-});
+);
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -34,9 +35,9 @@ const performVerification = async () => {
   try {
     const response = await authStore.verifyEmail(props.token);
     success.value = true;
-    message.value = response.data?.message || 'E-mail verificado com sucesso!';
+    message.value = (response as any).data?.message || 'E-mail verificado com sucesso!';
     showToast('success', message.value);
-  } catch (err) {
+  } catch (err: any) {
     console.error('Email verification failed:', err);
     success.value = false;
     message.value = err.response?.data?.message || 'Erro ao verificar e-mail. O link pode ter expirado ou é inválido.';
@@ -65,8 +66,10 @@ onMounted(() => {
           </div>
 
           <div v-if="isLoading" class="loading-state">
-            <div class="spinner"></div>
-            <p class="loading-text">Verificando seu e-mail, por favor aguarde...</p>
+            <div class="spinner" />
+            <p class="loading-text">
+              Verificando seu e-mail, por favor aguarde...
+            </p>
           </div>
 
           <div v-else class="result-state">
@@ -75,8 +78,12 @@ onMounted(() => {
               <span v-else>✗</span>
             </div>
 
-            <h2 class="title">{{ success ? 'Sucesso!' : 'Ops!' }}</h2>
-            <p class="description">{{ message }}</p>
+            <h2 class="title">
+              {{ success ? 'Sucesso!' : 'Ops!' }}
+            </h2>
+            <p class="description">
+              {{ message }}
+            </p>
 
             <div class="actions">
               <Button

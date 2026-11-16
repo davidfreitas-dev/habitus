@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref, computed, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { IonPage, IonContent, onIonViewWillEnter, onIonViewDidEnter } from '@ionic/vue';
@@ -17,9 +17,7 @@ import BackButton from '@/components/layout/BackButton.vue';
 import HabitForm from '@/components/habits/HabitForm.vue';
 import ModalDialog from '@/components/layout/ModalDialog.vue';
 import OnboardingStep from '@/components/onboarding/OnboardingStep.vue';
-
-// Ajuste os caminhos de `onboarding/formSteps` e
-// `components/onboarding/OnboardingStep.vue` conforme o local real.
+import type { HabitDraft, HabitFormSubmitPayload } from '@/types';
 
 const profileStore = useProfileStore();
 const habitStore = useHabitStore();
@@ -27,12 +25,14 @@ const habitStore = useHabitStore();
 const route = useRoute();
 const router = useRouter();
 
+const habitId = route.params.id as string | undefined;
+
 const pageTitle = computed(() => {
-  return route.params.id ? 'Editar hábito' : 'Criar hábito';
+  return habitId ? 'Editar hábito' : 'Criar hábito';
 });
 
-const habit = ref({
-  id: route.params.id,
+const habit = ref<HabitDraft>({
+  id: habitId,
   title: '',
   week_days: '',
   reminder_time: null,
@@ -41,7 +41,7 @@ const habit = ref({
 const { showToast } = useToast();
 const { isLoading, withLoading } = useLoading();
 
-let detailsLoaded = null;
+let detailsLoaded: Promise<void> | null = null;
 
 onIonViewWillEnter(() => {
   detailsLoaded = withLoading(async () => {
@@ -64,9 +64,8 @@ onIonViewDidEnter(async () => {
 });
 
 // --- Onboarding: tour do formulário de criação de hábito ---
-// Só mostra o tour ao CRIAR um hábito (não ao editar), e apenas na primeira vez.
 const { isStepSeen, markStepSeen } = useOnboarding();
-const onboardingWrapper = ref(null);
+const onboardingWrapper = ref<any>(null);
 const { start: startFormOnboarding, finish: finishFormOnboarding } = useVOnboarding(onboardingWrapper);
 
 const onFormOnboardingComplete = () => {
@@ -78,20 +77,20 @@ const onFormOnboardingExit = () => {
 };
 
 const maybeStartFormOnboarding = async () => {
-  if (route.params.id) return; // está editando, não criando
+  if (route.params.id) return;
   if (await isStepSeen('form')) return;
   await nextTick();
   startFormOnboarding();
 };
 
-const habitFormRef = ref(null);
-const dialogRef = ref(null);
+const habitFormRef = ref<any>(null);
+const dialogRef = ref<any>(null);
 
-const handleFormError = (message) => {
+const handleFormError = (message: string) => {
   showToast('info', message);
 };
 
-const createHabit = async (formData) => {
+const createHabit = async (formData: HabitFormSubmitPayload) => {
   await withLoading(async () => {
     await habitStore.createHabit(formData.title, formData.weekDays, formData.reminder_time);
     habitFormRef.value?.clearFormData();
@@ -99,15 +98,16 @@ const createHabit = async (formData) => {
   }, 'Erro ao criar hábito.');
 };
 
-const updateHabit = async (formData) => {
+const updateHabit = async (formData: HabitFormSubmitPayload) => {
+  if (!habit.value.id) return;
   await withLoading(async () => {
-    await habitStore.updateHabit(habit.value.id, formData.title, formData.weekDays, formData.reminder_time);
+    await habitStore.updateHabit(habit.value.id!, formData.title, formData.weekDays, formData.reminder_time);
     showToast('success', 'Hábito atualizado com sucesso!');
     router.go(-1);
   }, 'Erro ao atualizar hábito.');
 };
 
-const handleHabit = (formData) => {
+const handleHabit = (formData: HabitFormSubmitPayload) => {
   if (habit.value.id) {
     updateHabit(formData);
   } else {
@@ -120,8 +120,9 @@ const handleDelete = () => {
 };
 
 const deleteHabit = async () => {
+  if (!habit.value.id) return;
   await withLoading(async () => {
-    await habitStore.deleteHabit(habit.value.id);
+    await habitStore.deleteHabit(habit.value.id!);
     router.go(-1);
   }, 'Erro ao excluir hábito.');
 };

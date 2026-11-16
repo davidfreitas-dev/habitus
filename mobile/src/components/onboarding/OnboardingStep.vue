@@ -1,24 +1,23 @@
-<script setup>
-const props = defineProps({
-  step: {
-    type: Object,
-    required: true
-  },
-  index: {
-    type: Number,
-    required: true
-  },
-  isLast: {
-    type: Boolean,
-    default: false
-  },
-  total: {
-    type: Number,
-    default: 1
-  }
-});
+<script setup lang="ts">
+import type { StepEntity } from 'v-onboarding';
 
-const emit = defineEmits(['next', 'skip']);
+withDefaults(
+  defineProps<{
+    step: StepEntity;
+    index: number;
+    isLast?: boolean;
+    total?: number;
+  }>(),
+  {
+    isLast: false,
+    total: 1,
+  }
+);
+
+const emit = defineEmits<{
+  (e: 'next'): void;
+  (e: 'skip'): void;
+}>();
 
 const handleNext = () => {
   emit('next');
@@ -28,10 +27,10 @@ const handleNext = () => {
 <template>
   <div class="onboarding-step">
     <h4 class="onboarding-step__title">
-      {{ step.content?.title }}
+      {{ (step.content as any)?.title }}
     </h4>
     <p class="onboarding-step__description">
-      {{ step.content?.description }}
+      {{ (step.content as any)?.description }}
     </p>
     <div class="onboarding-step__footer">
       <button class="onboarding-step__skip" @click="emit('skip')">

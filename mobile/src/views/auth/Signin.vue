@@ -1,5 +1,5 @@
-<script setup>
-import { ref, reactive, computed } from 'vue';
+<script setup lang="ts">
+import { ref, reactive, computed, unref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useVuelidate } from '@vuelidate/core';
 import { required, email, helpers } from '@vuelidate/validators';
@@ -27,14 +27,13 @@ const signIn = async () => {
   try {
     await authStore.login(formData);
     router.push('/');
-  } catch (err) {
+  } catch (err: any) {
     console.error('Login failed:', err);
     showToast('error', err.response?.data?.message || 'Erro ao fazer login.');
   } finally {
     isLoadingEmail.value = false;
   }
 };
-
 
 const rules = computed(() => {
   return {
@@ -72,7 +71,7 @@ onIonViewDidLeave(() => {
   <ion-page>
     <ion-content :fullscreen="true">
       <Container>
-        <form>
+        <form @submit.prevent="submitForm">
           <div class="logo-wrapper">
             <img
               src="../../../assets/logo.png"
@@ -86,7 +85,7 @@ onIonViewDidLeave(() => {
             type="text"
             label="Seu e-mail"
             placeholder="exemplo@email.com"
-            :error-text="v$.email.$errors[0]?.$message"
+            :error-text="String(unref(v$.email.$errors[0]?.$message) || '')"
             @blur="v$.email.$touch()"
           /> 
 
@@ -95,7 +94,7 @@ onIonViewDidLeave(() => {
             type="password"
             label="Sua senha"
             placeholder="Digite sua senha"
-            :error-text="v$.password.$errors[0]?.$message"
+            :error-text="String(unref(v$.password.$errors[0]?.$message) || '')"
             @blur="v$.password.$touch()"
           /> 
 
@@ -104,10 +103,10 @@ onIonViewDidLeave(() => {
           </router-link>
 
           <Button
+            type="submit"
             color="primary"
             :is-loading="isLoadingEmail"
             :is-disabled="v$.$invalid"
-            @click="submitForm"
           >
             Entrar
           </Button>

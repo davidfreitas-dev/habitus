@@ -1,7 +1,7 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { IonPage, IonContent, IonInputOtp, onIonViewDidLeave } from '@ionic/vue';
+import { IonPage, IonContent, IonInputOtp, onIonViewDidLeave, type InputCustomEvent } from '@ionic/vue';
 import { useToast } from '@/composables/useToast';
 import { useAuthStore } from '@/stores/authStore';
 import { STORAGE_KEYS } from '@/constants/storage';
@@ -23,7 +23,7 @@ const handleContinue = async () => {
   try {
     await authStore.validateResetCode(otpValue.value);
     router.push({ name: 'Reset' });
-  } catch (err) {
+  } catch (err: any) {
     console.error('Token validation failed:', err);
     showToast('error', err.response?.data?.message || 'Código inválido.');
   } finally {
@@ -31,12 +31,12 @@ const handleContinue = async () => {
   }
 };
 
-const onOtpInput = (event) => {
-  otpValue.value = event.detail.value ?? '';
+const onOtpInput = (event: any) => {
+  otpValue.value = String(event.detail?.value ?? '');
 };
 
-const onOtpComplete = (event) => {
-  otpValue.value = event.detail.value ?? '';
+const onOtpComplete = (event: any) => {
+  otpValue.value = String(event.detail?.value ?? '');
 };
 
 onIonViewDidLeave(() => {
@@ -48,7 +48,7 @@ onIonViewDidLeave(() => {
   <ion-page>
     <ion-content :fullscreen="true">
       <Container>
-        <form>
+        <form @submit.prevent="handleContinue">
           <div class="logo-wrapper">
             <img
               src="../../../assets/logo.png"
@@ -61,7 +61,6 @@ onIonViewDidLeave(() => {
           <p class="otp-description">
             Digite o código de 6 dígitos enviado para o e-mail <strong>{{ email }}</strong>
           </p>
-
 
           <div class="otp-wrapper">
             <ion-input-otp
@@ -78,10 +77,10 @@ onIonViewDidLeave(() => {
 
           <div class="ion-margin-top ion-padding-top">
             <Button
+              type="submit"
               color="primary"
               :is-loading="isLoading"
               :is-disabled="otpValue.length < 6"
-              @click="handleContinue"
             >
               Continuar
             </Button>

@@ -1,21 +1,3 @@
-<script setup>
-import { computed } from 'vue';
-import { IonRow, IonAvatar, IonIcon } from '@ionic/vue';
-import { person } from 'ionicons/icons';
-import dayjs from '@/lib/dayjs';
-
-const props = defineProps({
-  name: {
-    type: String,
-    default: ''
-  },
-});
-
-const firstName = computed(() => props.name.split(' ')[0]);
-
-const currentDate = dayjs().format('dddd, D MMM');
-</script>
-
 <template>
   <router-link to="/tabs/options">
     <ion-row class="ion-justify-content-start ion-align-items-center">
@@ -29,6 +11,26 @@ const currentDate = dayjs().format('dddd, D MMM');
     </ion-row>
   </router-link>
 </template>
+
+<script setup lang="ts">
+import { computed } from 'vue';
+import { IonRow, IonAvatar, IonIcon } from '@ionic/vue';
+import { person } from 'ionicons/icons';
+import dayjs from '@/lib/dayjs';
+
+const props = withDefaults(
+  defineProps<{
+    name?: string;
+  }>(),
+  {
+    name: '',
+  }
+);
+
+const firstName = computed(() => props.name.split(' ')[0]);
+
+const currentDate = dayjs().format('dddd, D MMM');
+</script>
 
 <style scoped>
 a {

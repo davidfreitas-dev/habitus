@@ -12,24 +12,28 @@
   </ion-row>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { IonRow, IonCheckbox, IonLabel } from '@ionic/vue';
 
-const props = defineProps({
-  isChecked: Boolean,
-  isDisabled: Boolean,
-  label: {
-    type: String,
-    default: ''
-  },
-  size: {
-    type: String,
-    default: 'default',
-    validator: (val) => ['default', 'small'].includes(val)
+withDefaults(
+  defineProps<{
+    isChecked?: boolean;
+    isDisabled?: boolean;
+    label?: string;
+    size?: 'default' | 'small';
+  }>(),
+  {
+    isChecked: false,
+    isDisabled: false,
+    label: '',
+    size: 'default',
   }
-});
+);
 
-const emit = defineEmits(['handleCheckboxChange', 'handleItem']);
+const emit = defineEmits<{
+  (e: 'handleCheckboxChange'): void;
+  (e: 'handleItem'): void;
+}>();
 
 const handleItem = () => {
   emit('handleItem');

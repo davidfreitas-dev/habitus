@@ -10,7 +10,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue';
 
 const weekDays = ref(['D', 'S', 'T', 'Q', 'Q', 'S', 'S']);

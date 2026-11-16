@@ -24,7 +24,7 @@
   </ion-button>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonButton, IonSpinner } from '@ionic/vue';
@@ -32,23 +32,26 @@ import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/composables/useToast';
 import { loginWithGoogle } from '@/composables/useSocialAuth';
 
-const props = defineProps({
-  isDisabled: {
-    type: Boolean,
-    default: false
-  },
-  label: {
-    type: String,
-    default: 'Entrar com Google'
+withDefaults(
+  defineProps<{
+    isDisabled?: boolean;
+    label?: string;
+  }>(),
+  {
+    isDisabled: false,
+    label: 'Entrar com Google',
   }
-});
+);
 
 const authStore = useAuthStore();
 const router = useRouter();
 const { showToast } = useToast();
 const isLoadingGoogle = ref(false);
 
-const emit = defineEmits(['login-start', 'login-end']);
+const emit = defineEmits<{
+  (e: 'login-start'): void;
+  (e: 'login-end'): void;
+}>();
 
 const doGoogleLogin = async () => {
   try {

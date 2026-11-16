@@ -1,0 +1,19 @@
+import type { StepEntity } from 'v-onboarding';
+
+export const optionsSteps: StepEntity[] = [
+  {
+    attachTo: { element: '#onboarding-profile-link' },
+    content: {
+      title: 'Personalize seu perfil',
+      description: 'Acesse suas configurações de perfil, altere a senha, ou ative o modo escuro para uma experiência mais confortável.'
+    },
+    options: {
+      popper: { 
+        placement: 'bottom',
+        modifiers: [
+          { name: 'offset', options: { offset: [0, 12] } }
+        ]
+      }
+    }
+  }
+];
