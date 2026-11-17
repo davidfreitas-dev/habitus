@@ -50,4 +50,20 @@ describe('HabitDay.vue', () => {
     expect(wrapper.classes()).toContain('habit-day-100');
     expect(wrapper.classes()).toContain('active');
   });
+
+  it('emits click when clicked or triggered via keyboard', async () => {
+    const wrapper = mount(HabitDay, {
+      props: {
+        date: '2026-11-17',
+        amountOfHabits: 2,
+        amountCompleted: 1,
+      },
+    });
+
+    await wrapper.trigger('click');
+    expect(wrapper.emitted('click')).toHaveLength(1);
+
+    await wrapper.trigger('keydown.enter');
+    expect(wrapper.emitted('click')).toHaveLength(2);
+  });
 });

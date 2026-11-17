@@ -7,6 +7,11 @@ import {
   IonRow,
   IonIcon,
   IonText,
+  IonList,
+  IonItemSliding,
+  IonItem,
+  IonItemOptions,
+  IonItemOption,
   IonRefresher,
   IonRefresherContent,
   IonSkeletonText,
@@ -17,6 +22,7 @@ import {
   notifications,
   notificationsOff,
   trashOutline,
+  createOutline,
   calendarOutline,
 } from 'ionicons/icons';
 import { useHabitStore } from '@/stores/habitsStore';
@@ -42,6 +48,15 @@ const selectedWeekDay = ref<number | null>(null);
 const isLoadingHabits = ref(false);
 const habitToDelete = ref<Habit | null>(null);
 const deleteDialogRef = ref<InstanceType<typeof ModalDialog> | null>(null);
+const ionListRef = ref<InstanceType<typeof IonList> | null>(null);
+
+const closeSlidingItems = async () => {
+  try {
+    await ionListRef.value?.$el?.closeSlidingItems?.();
+  } catch {
+    // Ignore if not rendered or already closed
+  }
+};
 
 const weekDayFilters: FilterChipItem<number | null>[] = [
   { label: 'Todos', value: null },
@@ -133,11 +148,13 @@ const handleRefresh = async (event: RefresherCustomEvent) => {
 };
 
 const handleEditHabit = async (habitId: number) => {
+  await closeSlidingItems();
   await triggerHaptic('light');
   router.push(`/habit/${habitId}`);
 };
 
 const promptDeleteHabit = async (habit: Habit) => {
+  await closeSlidingItems();
   await triggerHaptic('light');
   habitToDelete.value = habit;
   deleteDialogRef.value?.setOpen(true);
@@ -159,6 +176,7 @@ const confirmDeleteHabit = async () => {
 };
 
 onIonViewWillEnter(() => {
+  closeSlidingItems();
   loadHabits();
 });
 </script>
@@ -203,59 +221,84 @@ onIonViewWillEnter(() => {
           </div>
         </div>
 
-        <div v-else-if="filteredHabits.length > 0" class="habits-list">
-          <div
+        <ion-list
+          v-else-if="filteredHabits.length > 0"
+          ref="ionListRef"
+          lines="none"
+          class="habits-list ion-no-padding"
+        >
+          <ion-item-sliding
             v-for="habit in filteredHabits"
             :key="habit.id"
-            class="habit-card"
-            @click="handleEditHabit(habit.id)"
+            class="habit-sliding-item"
           >
-            <div class="habit-card__header">
-              <div class="habit-card__info">
-                <h3 class="habit-card__title">
-                  {{ habit.title }}
-                </h3>
-                <span class="habit-card__subtitle">
-                  {{ getFrequencySummary(habit) }}
-                </span>
-              </div>
+            <ion-item-options side="start" class="sliding-options-start">
+              <ion-item-option
+                class="sliding-option-btn sliding-option-edit"
+                aria-label="Editar hábito"
+                @click="handleEditHabit(habit.id)"
+              >
+                <ion-icon slot="top" :icon="createOutline" />
+                <span class="sliding-option-label">Editar</span>
+              </ion-item-option>
+            </ion-item-options>
 
-              <div class="habit-card__actions" @click.stop>
-                <div
-                  class="reminder-badge"
-                  :class="{ 'reminder-badge--off': !formatReminderTime(habit.reminder_time) }"
-                >
-                  <ion-icon
-                    :icon="formatReminderTime(habit.reminder_time) ? notifications : notificationsOff"
-                    class="reminder-badge__icon"
-                  />
-                  <span v-if="formatReminderTime(habit.reminder_time)">
-                    {{ formatReminderTime(habit.reminder_time) }}
+            <ion-item class="habit-card-item ion-no-padding" lines="none">
+              <div
+                class="habit-card"
+                @click="handleEditHabit(habit.id)"
+              >
+                <div class="habit-card__header">
+                  <div class="habit-card__info">
+                    <h3 class="habit-card__title">
+                      {{ habit.title }}
+                    </h3>
+                    <span class="habit-card__subtitle">
+                      {{ getFrequencySummary(habit) }}
+                    </span>
+                  </div>
+
+                  <div class="habit-card__actions" @click.stop>
+                    <div
+                      class="reminder-badge"
+                      :class="{ 'reminder-badge--off': !formatReminderTime(habit.reminder_time) }"
+                    >
+                      <ion-icon
+                        :icon="formatReminderTime(habit.reminder_time) ? notifications : notificationsOff"
+                        class="reminder-badge__icon"
+                      />
+                      <span v-if="formatReminderTime(habit.reminder_time)">
+                        {{ formatReminderTime(habit.reminder_time) }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="week-badges">
+                  <span
+                    v-for="(dayLetter, idx) in shortWeekDays"
+                    :key="idx"
+                    class="week-badge"
+                    :class="{ 'week-badge--active': isDayActive(habit, idx) }"
+                  >
+                    {{ dayLetter }}
                   </span>
                 </div>
-                <button
-                  type="button"
-                  class="icon-btn icon-btn--danger"
-                  aria-label="Excluir hábito"
-                  @click="promptDeleteHabit(habit)"
-                >
-                  <ion-icon :icon="trashOutline" />
-                </button>
               </div>
-            </div>
+            </ion-item>
 
-            <div class="week-badges">
-              <span
-                v-for="(dayLetter, idx) in shortWeekDays"
-                :key="idx"
-                class="week-badge"
-                :class="{ 'week-badge--active': isDayActive(habit, idx) }"
+            <ion-item-options side="end" class="sliding-options-end">
+              <ion-item-option
+                class="sliding-option-btn sliding-option-delete"
+                aria-label="Excluir hábito"
+                @click="promptDeleteHabit(habit)"
               >
-                {{ dayLetter }}
-              </span>
-            </div>
-          </div>
-        </div>
+                <ion-icon slot="top" :icon="trashOutline" />
+                <span class="sliding-option-label">Excluir</span>
+              </ion-item-option>
+            </ion-item-options>
+          </ion-item-sliding>
+        </ion-list>
 
         <div v-else class="empty-state ion-text-center ion-padding">
           <div class="empty-state__icon">
@@ -308,12 +351,89 @@ onIonViewWillEnter(() => {
 }
 
 .habits-list {
+  background: transparent;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
+.habit-sliding-item {
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: transparent;
+}
+
+.habit-card-item {
+  --background: transparent;
+  --inner-padding-end: 0;
+  --padding-start: 0;
+  width: 100%;
+}
+
+.sliding-options-start {
+  border-top-left-radius: var(--radius-xl);
+  border-bottom-left-radius: var(--radius-xl);
+  overflow: hidden;
+  background: var(--color-background-elevated);
+}
+
+.sliding-options-end {
+  border-top-right-radius: var(--radius-xl);
+  border-bottom-right-radius: var(--radius-xl);
+  overflow: hidden;
+  background: var(--color-background-elevated);
+}
+
+.sliding-option-btn {
+  padding: 0 20px;
+  min-width: 76px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.sliding-option-btn ion-icon {
+  font-size: 1.45rem;
+  margin-bottom: 2px;
+}
+
+.sliding-option-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.sliding-option-edit {
+  --background: var(--color-background-elevated);
+  --color: var(--color-text-primary);
+  color: var(--color-text-primary);
+}
+
+.sliding-option-edit ion-icon,
+.sliding-option-edit .sliding-option-label {
+  color: var(--color-text-primary);
+}
+
+.sliding-option-edit:active {
+  --background: var(--color-background-primary);
+}
+
+.sliding-option-delete {
+  --background: var(--color-background-elevated);
+  --color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.sliding-option-delete ion-icon,
+.sliding-option-delete .sliding-option-label {
+  color: var(--color-danger);
+}
+
+.sliding-option-delete:active {
+  --background: var(--color-background-primary);
+}
+
 .habit-card {
+  width: 100%;
   background: var(--color-background-secondary);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-xl);
@@ -322,7 +442,7 @@ onIonViewWillEnter(() => {
   flex-direction: column;
   gap: 14px;
   cursor: pointer;
-  transition: border-color 0.15s ease;
+  transition: transform 0.15s ease, border-color 0.15s ease;
 }
 
 .habit-card:active {
@@ -363,24 +483,6 @@ onIonViewWillEnter(() => {
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
-}
-
-.icon-btn {
-  background: var(--color-background-elevated);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  color: var(--color-text-accent);
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.05rem;
-  cursor: pointer;
-}
-
-.icon-btn--danger {
-  color: var(--color-danger);
 }
 
 .week-badges {

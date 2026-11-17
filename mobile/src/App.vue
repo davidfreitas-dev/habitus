@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { IonApp, IonRouterOutlet } from '@ionic/vue';
 import { Capacitor } from '@capacitor/core';
 import { ScreenOrientation } from '@capacitor/screen-orientation';
@@ -12,9 +13,10 @@ import { useThemeStore } from '@/stores/themeStore';
 import { useHabitStore } from '@/stores/habitsStore';
 import { notificationService } from '@/services/notificationService';
 
+const router = useRouter();
 const { isConnected } = useNetwork();
 const { setStatusBar, Style } = useStatusBar();
-const { checkPermission } = useNotifications();
+const { checkPermission, listenNotificationActionPerformed } = useNotifications();
 useDeepLinks();
 
 const authStore = useAuthStore();
@@ -40,6 +42,16 @@ onMounted(async () => {
 
   if (Capacitor.isNativePlatform()) {
     await ScreenOrientation.lock({ orientation: 'portrait' });
+
+    void listenNotificationActionPerformed((habitId) => {
+      if (authStore.isAuthenticated) {
+        if (habitId) {
+          router.push(`/tabs/home?action=today&habitId=${habitId}`);
+        } else {
+          router.push('/tabs/home?action=today');
+        }
+      }
+    });
 
     const granted = await checkPermission();
     if (granted && authStore.isAuthenticated) {

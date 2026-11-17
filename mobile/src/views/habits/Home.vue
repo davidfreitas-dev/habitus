@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, nextTick, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import {
   IonPage,
   IonContent,
@@ -25,6 +26,7 @@ import ButtonNew from '@/components/habits/ButtonNew.vue';
 import WeekDays from '@/components/habits/WeekDays.vue';
 import Container from '@/components/layout/Container.vue';
 import Summary from '@/components/habits/Summary.vue';
+import DaySheetModal from '@/components/habits/DaySheetModal.vue';
 import OnboardingTour from '@/components/onboarding/OnboardingTour.vue';
 import dayjs from '@/lib/dayjs';
 import { getErrorMessage } from '@/types';
@@ -50,6 +52,33 @@ const contentRef = ref<IonContentElement | null>(null);
 const summaryScrollRef = ref<HTMLElement | null>(null);
 const onboardingTourRef = ref<InstanceType<typeof OnboardingTour> | null>(null);
 const isLoadingSummary = ref(false);
+const isDaySheetOpen = ref(false);
+const selectedDate = ref<Date | null>(null);
+
+const route = useRoute();
+
+watch(
+  () => [route.query.action, route.query.date],
+  ([action, queryDate]) => {
+    if (action === 'today') {
+      selectedDate.value = new Date();
+      isDaySheetOpen.value = true;
+    } else if (queryDate && typeof queryDate === 'string') {
+      const parsed = dayjs(queryDate).toDate();
+      if (!isNaN(parsed.getTime())) {
+        selectedDate.value = parsed;
+        isDaySheetOpen.value = true;
+      }
+    }
+  },
+  { immediate: true }
+);
+
+const handleSelectDay = async (date: Date) => {
+  await triggerHaptic('light');
+  selectedDate.value = date;
+  isDaySheetOpen.value = true;
+};
 
 const skeletonCount = computed(() => (isHorizontalLayout.value ? 126 : 35));
 
@@ -179,6 +208,7 @@ onIonViewDidEnter(async () => {
               id="onboarding-summary-grid"
               :dates-from-year-start="datesFromYearStart"
               :summary="summary"
+              @select-day="handleSelectDay"
             />
           </div>
         </div>
@@ -192,6 +222,11 @@ onIonViewDidEnter(async () => {
         </ion-text>
       </Container>
     </ion-content>
+
+    <DaySheetModal
+      v-model:is-open="isDaySheetOpen"
+      :date="selectedDate"
+    />
 
     <OnboardingTour
       ref="onboardingTourRef"

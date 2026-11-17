@@ -76,8 +76,8 @@ try {
   }
 
   // 4. Exclui androidbrowserhelper (usado apenas pelo AppleProvider não utilizado e que chama APIs descontinuadas do Android 15)
-  if (!gradleContent.includes("module: 'androidbrowserhelper'")) {
-    const excludeBlock = `\nconfigurations.configureEach {\n    exclude group: 'com.google.androidbrowserhelper', module: 'androidbrowserhelper'\n}\n`;
+  if (!gradleContent.includes('module: \'androidbrowserhelper\'')) {
+    const excludeBlock = '\nconfigurations.configureEach {\n    exclude group: \'com.google.androidbrowserhelper\', module: \'androidbrowserhelper\'\n}\n';
     gradleContent = gradleContent.replace(/\nrepositories\s*\{/, `${excludeBlock}\nrepositories {`);
     updatedGradle = true;
   }

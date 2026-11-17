@@ -90,7 +90,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/day/:date',
     name: 'Day',
-    component: () => import('@/views/habits/Day.vue'),
+    redirect: (to) => ({ path: '/tabs/home', query: { date: to.params.date } }),
     meta: { requiresAuth: true }
   },
   {

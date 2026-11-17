@@ -26,8 +26,23 @@ export function useNotifications() {
     return permissions.display === 'granted';
   };
 
+  const listenNotificationActionPerformed = async (
+    callback: (habitId?: number | string) => void
+  ) => {
+    if (!isNative) return null;
+
+    return await LocalNotifications.addListener(
+      'localNotificationActionPerformed',
+      (action) => {
+        const habitId = action.notification.extra?.habitId;
+        callback(habitId);
+      }
+    );
+  };
+
   return {
     checkPermission,
     requestPermission,
+    listenNotificationActionPerformed,
   };
 }

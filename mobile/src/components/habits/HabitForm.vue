@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { IonDatetime, IonDatetimeButton, IonModal, IonItem, IonLabel } from '@ionic/vue';
+import { IonDatetime, IonDatetimeButton, IonModal, IonItem, IonLabel, IonChip } from '@ionic/vue';
 import { useNotifications } from '@/composables/useNotifications';
 import { useHaptics } from '@/composables/useHaptics';
 import Input from '@/components/ui/Input.vue';
@@ -114,6 +114,28 @@ const toggleWeekDay = async (index: number) => {
   days.push(index);
 };
 
+const templatesScrollRef = ref<HTMLElement | null>(null);
+const presetsScrollRef = ref<HTMLElement | null>(null);
+
+const centerChip = (container: HTMLElement | null, event?: MouseEvent) => {
+  if (!container || !event?.currentTarget) return;
+  const chipEl = event.currentTarget as HTMLElement;
+
+  const chipLeft = chipEl.offsetLeft;
+  const chipWidth = chipEl.offsetWidth;
+  const containerWidth = container.offsetWidth;
+  const targetScrollLeft = chipLeft - (containerWidth / 2) + (chipWidth / 2);
+
+  if (typeof container.scrollTo === 'function') {
+    container.scrollTo({
+      left: Math.max(0, targetScrollLeft),
+      behavior: 'smooth',
+    });
+  } else {
+    container.scrollLeft = Math.max(0, targetScrollLeft);
+  }
+};
+
 const recurrencePresets = [
   { label: 'Todos os dias', days: [0, 1, 2, 3, 4, 5, 6] },
   { label: 'Dias úteis', days: [1, 2, 3, 4, 5] },
@@ -125,8 +147,9 @@ const isPresetActive = (presetDays: readonly number[]): boolean => {
   return presetDays.every((day) => formData.value.weekDays.includes(day));
 };
 
-const applyPreset = async (presetDays: readonly number[]) => {
+const applyPreset = async (presetDays: readonly number[], event?: MouseEvent) => {
   await triggerHaptic('light');
+  centerChip(presetsScrollRef.value, event);
   if (isPresetActive(presetDays)) {
     formData.value.weekDays = [];
   } else {
@@ -163,10 +186,59 @@ const availableWeekDays = [
   'Sexta-feira',
   'Sábado',
 ];
+
+interface HabitTemplate {
+  title: string;
+  emoji: string;
+  weekDays: number[];
+  reminderTime: string | null;
+}
+
+const habitTemplates: HabitTemplate[] = [
+  { emoji: '💧', title: 'Beber 2L de água', weekDays: [0, 1, 2, 3, 4, 5, 6], reminderTime: '09:00' },
+  { emoji: '🏃', title: 'Caminhada 30 min', weekDays: [1, 2, 3, 4, 5], reminderTime: '07:00' },
+  { emoji: '📖', title: 'Ler 15 páginas', weekDays: [0, 1, 2, 3, 4, 5, 6], reminderTime: '21:00' },
+  { emoji: '🧘', title: 'Meditar 10 min', weekDays: [0, 1, 2, 3, 4, 5, 6], reminderTime: '08:00' },
+  { emoji: '😴', title: 'Dormir 8 horas', weekDays: [0, 1, 2, 3, 4, 5, 6], reminderTime: '22:30' },
+  { emoji: '💻', title: 'Estudar 45 min', weekDays: [1, 2, 3, 4, 5], reminderTime: '19:00' },
+];
+
+const applyTemplate = async (template: HabitTemplate, event?: MouseEvent) => {
+  await triggerHaptic('light');
+  centerChip(templatesScrollRef.value, event);
+  formData.value.title = template.title;
+  formData.value.weekDays = [...template.weekDays];
+  if (template.reminderTime) {
+    formData.value.reminderEnabled = true;
+    const today = new Date();
+    const [hh, mm] = template.reminderTime.split(':');
+    today.setHours(Number(hh), Number(mm), 0, 0);
+    const offset = today.getTimezoneOffset() * 60000;
+    formData.value.reminderTime = new Date(today.getTime() - offset).toISOString();
+  }
+};
 </script>
 
 <template>
   <form @submit.prevent="submitForm">
+    <div v-if="!habit?.id" class="templates-section">
+      <p class="section-label">
+        Sugestões populares
+      </p>
+      <div ref="templatesScrollRef" class="templates-scroll">
+        <ion-chip
+          v-for="tpl in habitTemplates"
+          :key="tpl.title"
+          :outline="true"
+          class="template-chip"
+          @click="applyTemplate(tpl, $event)"
+        >
+          <span class="template-emoji">{{ tpl.emoji }}</span>
+          <ion-label>{{ tpl.title }}</ion-label>
+        </ion-chip>
+      </div>
+    </div>
+
     <p>Qual seu comprometimento?</p>
     <Input
       id="onboarding-habit-name"
@@ -178,17 +250,17 @@ const availableWeekDays = [
     <div id="onboarding-recurrence">
       <p>Qual a recorrência?</p>
 
-      <div class="recurrence-presets">
-        <button
+      <div ref="presetsScrollRef" class="recurrence-presets">
+        <ion-chip
           v-for="preset in recurrencePresets"
           :key="preset.label"
-          type="button"
+          :outline="!isPresetActive(preset.days)"
           class="preset-chip"
           :class="{ active: isPresetActive(preset.days) }"
-          @click="applyPreset(preset.days)"
+          @click="applyPreset(preset.days, $event)"
         >
-          {{ preset.label }}
-        </button>
+          <ion-label>{{ preset.label }}</ion-label>
+        </ion-chip>
       </div>
 
       <Checkbox
@@ -245,29 +317,82 @@ p {
   margin-top: 1.5rem;
 }
 
+.templates-section {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.templates-section .section-label {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.templates-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.templates-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.template-chip {
+  --background: var(--color-background-secondary);
+  --color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-default);
+  margin: 0;
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.template-chip:active {
+  --background: var(--color-background-elevated);
+}
+
+.template-emoji {
+  margin-right: 6px;
+  font-size: 0.95rem;
+}
+
 .recurrence-presets {
   display: flex;
-  flex-wrap: wrap;
   gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
   margin-bottom: 12px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.recurrence-presets::-webkit-scrollbar {
+  display: none;
 }
 
 .preset-chip {
+  --background: var(--color-background-secondary);
+  --color: var(--color-text-secondary);
   border: 1px solid var(--color-border-default);
-  background: var(--color-background-secondary);
-  color: var(--color-text-secondary);
-  border-radius: var(--radius-full);
-  padding: 6px 12px;
   font-size: 0.8125rem;
   font-weight: 700;
+  margin: 0;
+  flex-shrink: 0;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .preset-chip.active {
-  background: var(--color-primary);
+  --background: var(--color-primary);
+  --color: var(--color-neutral-900);
   border-color: var(--color-primary);
-  color: var(--color-neutral-900);
 }
 
 ion-item {

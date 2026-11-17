@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useRouter } from 'vue-router';
 import dayjs from '@/lib/dayjs';
 import { useDayDimensions } from '@/composables/useDayDimensions';
 import HabitDaysStartGap from '@/components/habits/HabitDaysStartGap.vue';
@@ -20,7 +19,10 @@ const props = withDefaults(
   }
 );
 
-const router = useRouter();
+const emit = defineEmits<{
+  (e: 'selectDay', date: Date): void;
+}>();
+
 const { daySize, isHorizontalLayout } = useDayDimensions();
 
 const startWeekdayFromYear = computed(() => dayjs().startOf('year').day());
@@ -31,12 +33,7 @@ const placeholderCount = computed(() => {
 });
 
 const handleNavigate = (date: Date) => {
-  router.push({
-    name: 'Day', 
-    params: {
-      date: dayjs(date).format('YYYY-MM-DD')
-    }
-  });
+  emit('selectDay', date);
 };
 
 const isCurrentDay = (date: Date) => {
@@ -69,6 +66,7 @@ const getCompleted = (date: Date) => {
       :key="index"
       :id="isCurrentDay(date) ? 'onboarding-current-day' : undefined"
       :is-current-day="isCurrentDay(date)"
+      :date="date"
       :amount-of-habits="getAmount(date)"
       :amount-completed="getCompleted(date)"
       @click="handleNavigate(date)"
