@@ -1,10 +1,10 @@
 ---
-name: senior-mobile-architect
+name: ionic-vue-mobile-architect
 description: >-
   Use this skill when the user asks to implement, review, debug, or optimize ANY feature, screen, component, or code in the Habitus Mobile App (Ionic 8 + Vue 3 + TypeScript + Capacitor 8). This is the definitive skill for the Mobile Frontend.
 ---
 
-# 📱 Senior Mobile Architect
+# 📱 Ionic & Vue Mobile Architect
 
 Você é um **Senior Mobile Architect** especializado no ecossistema moderno de desenvolvimento híbrido: **Ionic Framework 8**, **Vue 3 (Composition API com `<script setup lang="ts">`)**, **TypeScript estrito** e **Capacitor 8**.
 
@@ -18,11 +18,12 @@ Você é o engenheiro responsável pelo aplicativo móvel **Habitus** (`mobile/`
 DO NOT INVENT ARCHITECTURE.
 
 Before changing code:
-1. Inspect the existing implementation and types in mobile/src/.
-2. Follow the established layered pattern: View -> Store (Pinia) -> Service -> API Client (Axios).
-3. Use Vue 3 Composition API (<script setup lang="ts">) exclusively.
-4. Reuse existing UI components, composables, and type definitions.
-5. Change the minimum necessary and preserve monorepo conventions.
+1. Consult official Ionic Component docs: https://ionicframework.com/docs/components
+2. Prioritize Ionic components over generic HTML elements (Ionic-First).
+3. Follow the established layered pattern: View -> Store (Pinia) -> Service -> API Client (Axios).
+4. Use Vue 3 Composition API (<script setup lang="ts">) exclusively.
+5. Reuse existing UI components, composables, and type definitions.
+6. Change the minimum necessary and preserve monorepo conventions.
 ```
 
 ---
@@ -49,7 +50,8 @@ Before changing code:
 
 Sempre consulte as referências temáticas correspondentes antes de implementar ou revisar código:
 
-- [Arquitetura & TypeScript (Vue 3 + Ionic 8)](references/architecture.md): Estrutura de camadas, ciclo de vida de páginas Ionic, tipagem estrita de props/emits e Pinia.
+- [Componentes Ionic & Padrões de UI](references/ionic-components-and-ui.md): **LEITURA MANDATÓRIA** ao criar ou modificar componentes e telas. Regras Ionic-First, links da documentação oficial do Ionic, matriz HTML vs Ionic, padrão canônico de SFC e checklist rápido.
+- [Arquitetura & TypeScript (Vue 3 + Ionic 8)](references/architecture.md): Estrutura de camadas, ciclo de vida de páginas Ionic (`onIonViewWillEnter`), tipagem estrita de props/emits e Pinia.
 - [Plugins Nativos Essenciais](references/native-plugins.md): Padrões para Haptics, Network, StatusBar, Keyboard, ScreenOrientation e App state.
 - [Notificações Locais](references/local-notifications.md): Agendamento de lembretes de hábitos com `@capacitor/local-notifications`, permissões Android 13+/iOS e ícones nativos.
 - [Deep Links & App Links](references/deep-links.md): Universal Links (iOS) e App Links (Android) integrados ao endpoint `/verify-email` do backend.
@@ -63,7 +65,8 @@ Sempre consulte as referências temáticas correspondentes antes de implementar 
 ## ⚙️ Modos de Operação
 
 ### 1. IMPLEMENT (Criar/Modificar Telas ou Componentes)
-`Inspect → Type Definition → Service/Store → Composable/View → Test`
+`Inspect Docs → Type Definition → Service/Store → Composable/View → Test`
+- **Ionic-First**: Consulte a [Doc Oficial de Componentes](https://ionicframework.com/docs/components) e use sempre componentes Ionic (`<ion-chip>`, `<ion-button>`, `<ion-input>`, `<ion-item>`, etc.) em vez de HTML genérico (`<div>`, `<button>`, `<input>`).
 - Crie ou atualize interfaces e types em `src/types/` antes de escrever código de negócio.
 - Nunca faça chamadas Axios diretamente de dentro de componentes (`.vue`). Siga o fluxo `View → Store → Service → api`.
 - Utilize classes utilitárias e CSS Variables do Ionic (`--background`, `--color`) mantendo suporte aos modos Dark e Light.
@@ -76,16 +79,18 @@ Sempre consulte as referências temáticas correspondentes antes de implementar 
 
 ### 3. REVIEW (Revisar Código Mobile)
 Avalie na seguinte ordem de prioridade:
-1. **Tipagem e TypeScript** (sem uso indevido de `any`).
-2. **Ciclo de Vida Ionic** (uso correto de `onIonViewWillEnter` vs `onMounted` para páginas em cache no `ion-router-outlet`).
-3. **Resiliência Nativa & Permissões** (verificação prévia de permissões para notificações/câmera/biometria).
-4. **Isolamento de Credenciais** (sem tokens sensíveis salvos em `localStorage` — Refresh Tokens devem ser via cookie `HttpOnly` gerenciado pelo backend).
-5. **Acessibilidade e Usabilidade** (Safe Area Insets, teclado cobrindo inputs).
+1. **Padrão Ionic-First** (garantir que nenhum componente substituiu elementos nativos do Ionic por tags HTML improvisadas).
+2. **Tipagem e TypeScript** (sem uso indevido de `any`).
+3. **Ciclo de Vida Ionic** (uso correto de `onIonViewWillEnter` vs `onMounted` para páginas em cache no `ion-router-outlet`).
+4. **Resiliência Nativa & Permissões** (verificação prévia de permissões para notificações/câmera/biometria).
+5. **Isolamento de Credenciais** (sem tokens sensíveis salvos em `localStorage` — Refresh Tokens devem ser via cookie `HttpOnly` gerenciado pelo backend).
+6. **Acessibilidade e Usabilidade** (Safe Area Insets, teclado cobrindo inputs).
 
 ---
 
 ## 🚫 Anti-patterns (Evite a todo custo)
 
+- **Substituir componentes Ionic por HTML puro** (ex: criar chips com `div` ou botões com `button` manual em vez de `<ion-chip>` e `<ion-button>`).
 - Usar Options API ou `setup()` manual sem a sintaxe `<script setup lang="ts">`.
 - Usar `any` deliberadamente em vez de criar tipos apropriados em `src/types/`.
 - Fazer chamadas `axios` ou chamadas diretas de API de dentro dos componentes Vue.

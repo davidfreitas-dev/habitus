@@ -1,8 +1,8 @@
 # Project: Habits — Developer Guidelines
 
 This document consolidates the global guidelines for the Habits ecosystem:
-- **Habits REST API** — PHP 8.4 + Slim Framework 4.x (backend, managed via the `senior-backend-architect` skill)
-- **Habits Mobile App** — Ionic 8 + Vue 3 + TypeScript + Capacitor 8 (frontend, managed via the `senior-mobile-architect` skill)
+- **Habits REST API** — PHP 8.4 + Slim Framework 4.x (backend, managed via the `slim-php-backend-architect` skill)
+- **Habits Mobile App** — Ionic 8 + Vue 3 + TypeScript + Capacitor 8 (frontend, managed via the `ionic-vue-mobile-architect` skill)
 
 ---
 
@@ -31,22 +31,23 @@ These rules apply to **both projects** and must **NEVER** be violated under any 
 
 ## 2. REST API (Backend Delegation)
 
-All architecture rules, domain knowledge, implementation flows, Redis caching decorator guidelines, security rules, and Docker/PHPUnit/Composer commands for the **Habits REST API (`api/`)** are maintained in the **`senior-backend-architect`** skill (`.agents/skills/senior-backend-architect/SKILL.md`).
+All architecture rules, domain knowledge, implementation flows, Redis caching decorator guidelines, security rules, and Docker/PHPUnit/Composer commands for the **Habits REST API (`api/`)** are maintained in the **`slim-php-backend-architect`** skill (`.agents/skills/slim-php-backend-architect/SKILL.md`).
 
-> **Mandatory Rule**: Whenever a task involves implementing, reviewing, debugging, testing, or optimizing any code in `api/`, **always activate and follow the `senior-backend-architect` skill**. Never run PHP or Composer commands directly on the host machine; always use `docker compose exec api <command>` from the workspace root.
+> **Mandatory Rule**: Whenever a task involves implementing, reviewing, debugging, testing, or optimizing any code in `api/`, **always activate and follow the `slim-php-backend-architect` skill**. Never run PHP or Composer commands directly on the host machine; always use `docker compose exec api <command>` from the workspace root.
 
 ---
 
 ## 3. Mobile App (Frontend Delegation)
 
-All architecture rules, Vue 3 Composition API guidelines with `<script setup lang="ts">`, TypeScript standards, Capacitor 8 native plugin integrations (Local Notifications, Haptics, Network, StatusBar, Keyboard), Deep Links, assets, and Docker/Vite/Capacitor commands for the **Habitus Mobile App (`mobile/`)** are maintained in the **`senior-mobile-architect`** skill (`.agents/skills/senior-mobile-architect/SKILL.md`).
+All architecture rules, Vue 3 Composition API guidelines with `<script setup lang="ts">`, TypeScript standards, Capacitor 8 native plugin integrations (Local Notifications, Haptics, Network, StatusBar, Keyboard), Deep Links, assets, and Docker/Vite/Capacitor commands for the **Habitus Mobile App (`mobile/`)** are maintained in the **`ionic-vue-mobile-architect`** skill (`.agents/skills/ionic-vue-mobile-architect/SKILL.md`).
 
 > **Mandatory Rule**: Whenever a task involves implementing, reviewing, debugging, styling, or compiling code in `mobile/`:
-> 1. **Always activate and follow the `senior-mobile-architect` skill**.
-> 2. **Docker vs. Host Division**:
+> 1. **Always activate and follow the `ionic-vue-mobile-architect` skill**.
+> 2. **Ionic-First**: Always check official Ionic Component docs ([https://ionicframework.com/docs/components](https://ionicframework.com/docs/components)) and use native Ionic components (`ion-chip`, `ion-button`, etc.) instead of generic HTML.
+> 3. **Docker vs. Host Division**:
 >    - Run package management, Vite builds, Lint and Vitest inside Docker: `docker compose exec mobile <command>`.
 >    - Run native synchronization and IDE launch commands on the host macOS: `npx cap sync`, `npx cap open ios`, `npx cap open android`.
-> 3. **TypeScript Only**: Use strict types, Vue 3 `<script setup lang="ts">`, and maintain types in `src/types/`.
+> 4. **TypeScript Only**: Use strict types, Vue 3 `<script setup lang="ts">`, and maintain types in `src/types/`.
 
 ---
 
@@ -59,10 +60,11 @@ All architecture rules, Vue 3 Composition API guidelines with `<script setup lan
 ✅ Always add sensitive files to `.gitignore`  
 
 ### REST API (`api/`)
-✅ Activate the `senior-backend-architect` skill  
+✅ Activate the `slim-php-backend-architect` skill  
 ✅ Always run PHP/Composer/PHPUnit via Docker (`docker compose exec api ...`)  
 
 ### Mobile App (`mobile/`)
-✅ Activate the `senior-mobile-architect` skill  
+✅ Activate the `ionic-vue-mobile-architect` skill  
 ✅ Always use `<script setup lang="ts">` and layered architecture (View → Store → Service → API)  
+✅ Always prioritize Ionic components over generic HTML  
 ✅ Run web tasks via Docker (`docker compose exec mobile ...`) and native syncing on host (`npx cap sync`)
