@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, nextTick } from 'vue';
+import { ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { IonPage, IonContent, onIonViewWillEnter, onIonViewDidEnter } from '@ionic/vue';
-import { useVOnboarding, VOnboardingStep, VOnboardingWrapper } from 'v-onboarding';
-import { useProfileStore } from '@/stores/profileStore';
 import { useHabitStore } from '@/stores/habitsStore';
 import { useLoading } from '@/composables/useLoading';
 import { useToast } from '@/composables/useToast';
-import { useOnboarding } from '@/composables/useOnboarding';
+import { useHaptics } from '@/composables/useHaptics';
 import { formSteps } from '@/onboarding/formSteps';
 import Header from '@/components/layout/Header.vue';
 import Heading from '@/components/layout/Heading.vue';
@@ -16,11 +14,11 @@ import Button from '@/components/ui/Button.vue';
 import BackButton from '@/components/layout/BackButton.vue';
 import HabitForm from '@/components/habits/HabitForm.vue';
 import ModalDialog from '@/components/layout/ModalDialog.vue';
-import OnboardingStep from '@/components/onboarding/OnboardingStep.vue';
+import OnboardingTour from '@/components/onboarding/OnboardingTour.vue';
 import type { HabitDraft, HabitFormSubmitPayload } from '@/types';
 
-const profileStore = useProfileStore();
 const habitStore = useHabitStore();
+const { triggerHaptic } = useHaptics();
 
 const route = useRoute();
 const router = useRouter();
@@ -44,44 +42,25 @@ const { isLoading, withLoading } = useLoading();
 let detailsLoaded: Promise<void> | null = null;
 
 onIonViewWillEnter(() => {
+  if (!habit.value.id) return;
   detailsLoaded = withLoading(async () => {
-    await profileStore.fetchProfile();
-    if (!habit.value.id) return;
-    const fetchedHabit = await habitStore.getHabitDetails(habit.value.id);
+    const fetchedHabit = await habitStore.getHabitDetails(habit.value.id!);
     habit.value = fetchedHabit;
   }, 'Erro ao carregar detalhes do hábito.');
 });
+
+const onboardingTourRef = ref<InstanceType<typeof OnboardingTour> | null>(null);
 
 onIonViewDidEnter(async () => {
   if (detailsLoaded) {
     try {
       await detailsLoaded;
-    } catch (err) {
+    } catch {
       // Ignora o erro
     }
   }
-  await maybeStartFormOnboarding();
+  await onboardingTourRef.value?.startIfNotSeen();
 });
-
-// --- Onboarding: tour do formulário de criação de hábito ---
-const { isStepSeen, markStepSeen } = useOnboarding();
-const onboardingWrapper = ref<InstanceType<typeof VOnboardingWrapper> | null>(null);
-const { start: startFormOnboarding, finish: finishFormOnboarding } = useVOnboarding(onboardingWrapper);
-
-const onFormOnboardingComplete = () => {
-  markStepSeen('form');
-};
-
-const onFormOnboardingExit = () => {
-  finishFormOnboarding();
-};
-
-const maybeStartFormOnboarding = async () => {
-  if (route.params.id) return;
-  if (await isStepSeen('form')) return;
-  await nextTick();
-  startFormOnboarding();
-};
 
 const habitFormRef = ref<InstanceType<typeof HabitForm> | null>(null);
 const dialogRef = ref<InstanceType<typeof ModalDialog> | null>(null);
@@ -93,6 +72,7 @@ const handleFormError = (message: string) => {
 const createHabit = async (formData: HabitFormSubmitPayload) => {
   await withLoading(async () => {
     await habitStore.createHabit(formData.title, formData.weekDays, formData.reminder_time);
+    await triggerHaptic('success');
     habitFormRef.value?.clearFormData();
     showToast('success', 'Hábito criado com sucesso!');
   }, 'Erro ao criar hábito.');
@@ -102,6 +82,7 @@ const updateHabit = async (formData: HabitFormSubmitPayload) => {
   if (!habit.value.id) return;
   await withLoading(async () => {
     await habitStore.updateHabit(habit.value.id!, formData.title, formData.weekDays, formData.reminder_time);
+    await triggerHaptic('success');
     showToast('success', 'Hábito atualizado com sucesso!');
     router.go(-1);
   }, 'Erro ao atualizar hábito.');
@@ -123,6 +104,7 @@ const deleteHabit = async () => {
   if (!habit.value.id) return;
   await withLoading(async () => {
     await habitStore.deleteHabit(habit.value.id!);
+    await triggerHaptic('medium');
     router.go(-1);
   }, 'Erro ao excluir hábito.');
 };
@@ -134,7 +116,7 @@ const deleteHabit = async () => {
       <BackButton />
     </Header>
 
-    <ion-content>      
+    <ion-content>
       <Container>
         <Heading :title="pageTitle" />
 
@@ -164,24 +146,11 @@ const deleteHabit = async () => {
       />
     </ion-content>
 
-    <VOnboardingWrapper
-      ref="onboardingWrapper"
+    <OnboardingTour
+      ref="onboardingTourRef"
+      step-key="form"
       :steps="formSteps"
-      @finish="onFormOnboardingComplete"
-      @exit="onFormOnboardingExit"
-    >
-      <template #default="{ step, isLast, next, exit }">
-        <VOnboardingStep>
-          <OnboardingStep
-            :step="step"
-            :index="formSteps.indexOf(step)"
-            :is-last="isLast"
-            :total="formSteps.length"
-            @next="isLast ? exit() : next()"
-            @skip="exit()"
-          />
-        </VOnboardingStep>
-      </template>
-    </VOnboardingWrapper>
+      :enabled="!route.params.id"
+    />
   </ion-page>
 </template>

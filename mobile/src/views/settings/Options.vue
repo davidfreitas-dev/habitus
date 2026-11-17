@@ -1,22 +1,20 @@
 <script setup lang="ts">
-import { ref, computed, nextTick } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { 
-  IonContent, 
-  IonPage, 
-  IonItem, 
-  IonLabel, 
-  IonList, 
-  IonListHeader, 
+import {
+  IonContent,
+  IonPage,
+  IonItem,
+  IonLabel,
+  IonList,
+  IonListHeader,
   IonIcon,
-  onIonViewDidEnter
+  onIonViewDidEnter,
 } from '@ionic/vue';
 import { personOutline, gridOutline, exitOutline } from 'ionicons/icons';
-import { useVOnboarding, VOnboardingStep, VOnboardingWrapper } from 'v-onboarding';
 import { useAuthStore } from '@/stores/authStore';
 import { useThemeStore } from '@/stores/themeStore';
 import { useLoading } from '@/composables/useLoading';
-import { useOnboarding } from '@/composables/useOnboarding';
 import { optionsSteps } from '@/onboarding/optionsSteps';
 import Header from '@/components/layout/Header.vue';
 import Heading from '@/components/layout/Heading.vue';
@@ -24,7 +22,7 @@ import Container from '@/components/layout/Container.vue';
 import Button from '@/components/ui/Button.vue';
 import ModalDialog from '@/components/layout/ModalDialog.vue';
 import Toggle from '@/components/ui/Toggle.vue';
-import OnboardingStep from '@/components/onboarding/OnboardingStep.vue';
+import OnboardingTour from '@/components/onboarding/OnboardingTour.vue';
 
 const router = useRouter();
 const { withLoading } = useLoading();
@@ -37,7 +35,8 @@ const isDarkMode = computed({
 });
 
 const modalRef = ref<InstanceType<typeof ModalDialog> | null>(null);
-    
+const onboardingTourRef = ref<InstanceType<typeof OnboardingTour> | null>(null);
+
 const handleLogOut = () => {
   modalRef.value?.setOpen(true);
 };
@@ -49,28 +48,13 @@ const logOut = async () => {
   }, 'Erro ao finalizar sessão.');
 };
 
-// --- Onboarding: tour da tela de Opções ---
-const { isStepSeen, markStepSeen } = useOnboarding();
-const onboardingWrapper = ref<InstanceType<typeof VOnboardingWrapper> | null>(null);
-const { start: startOptionsOnboarding, finish: finishOptionsOnboarding } = useVOnboarding(onboardingWrapper);
-
-const onOptionsOnboardingComplete = () => {
-  markStepSeen('options');
-};
-
-const onOptionsOnboardingExit = () => {
-  finishOptionsOnboarding();
-};
-
 onIonViewDidEnter(async () => {
-  if (await isStepSeen('options')) return;
-  await nextTick();
-  startOptionsOnboarding();
+  await onboardingTourRef.value?.startIfNotSeen();
 });
 </script>
 
 <template>
-  <ion-page ref="pageRef">
+  <ion-page>
     <Header>
       <Heading title="Opções" class="ion-padding-horizontal" />
     </Header>
@@ -114,7 +98,7 @@ onIonViewDidEnter(async () => {
         </ion-list>
 
         <br>
-        
+
         <ion-list lines="none" class="ion-no-padding">
           <ion-list-header class="ion-no-padding">
             <ion-label class="ion-no-margin ion-padding-bottom ion-padding-top">
@@ -158,25 +142,11 @@ onIonViewDidEnter(async () => {
       </Container>
     </ion-content>
 
-    <VOnboardingWrapper
-      ref="onboardingWrapper"
+    <OnboardingTour
+      ref="onboardingTourRef"
+      step-key="options"
       :steps="optionsSteps"
-      @finish="onOptionsOnboardingComplete"
-      @exit="onOptionsOnboardingExit"
-    >
-      <template #default="{ step, isLast, next, exit }">
-        <VOnboardingStep>
-          <OnboardingStep
-            :step="step"
-            :index="optionsSteps.indexOf(step)"
-            :is-last="isLast"
-            :total="optionsSteps.length"
-            @next="isLast ? exit() : next()"
-            @skip="exit()"
-          />
-        </VOnboardingStep>
-      </template>
-    </VOnboardingWrapper>
+    />
   </ion-page>
 </template>
 

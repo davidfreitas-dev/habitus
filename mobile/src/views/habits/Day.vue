@@ -1,14 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, nextTick } from 'vue';
+import { ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { IonPage, IonContent, IonText, onIonViewWillEnter, onIonViewDidEnter } from '@ionic/vue';
-import { useVOnboarding, VOnboardingStep, VOnboardingWrapper } from 'v-onboarding';
-import { useProfileStore } from '@/stores/profileStore';
 import { useHabitStore } from '@/stores/habitsStore';
 import { useParsedDate } from '@/composables/useParsedDate';
 import { useLoading } from '@/composables/useLoading';
 import { useToast } from '@/composables/useToast';
-import { useOnboarding } from '@/composables/useOnboarding';
+import { useHaptics } from '@/composables/useHaptics';
 import { daySteps } from '@/onboarding/daySteps';
 import { getErrorMessage, type DayInfo } from '@/types';
 
@@ -20,18 +18,17 @@ import ProgressBar from '@/components/ui/Progressbar.vue';
 import Checkbox from '@/components/ui/Checkbox.vue';
 import Button from '@/components/ui/Button.vue';
 import CongratsModal from '@/components/habits/CongratsModal.vue';
-import OnboardingStep from '@/components/onboarding/OnboardingStep.vue';
+import OnboardingTour from '@/components/onboarding/OnboardingTour.vue';
 
-const profileStore = useProfileStore();
 const habitStore = useHabitStore();
-
-const dayInfo = ref<DayInfo>({
-  possible_habits: [],
-  completed_habits: []
-});
+const { triggerHaptic } = useHaptics();
+const { showToast } = useToast();
+const { withLoading, isLoading } = useLoading();
 
 const route = useRoute();
+const router = useRouter();
 const date = ref(route.params.date as string);
+
 const {
   parsedDate,
   dayOfWeek,
@@ -39,13 +36,18 @@ const {
   isDateInPast
 } = useParsedDate(date.value);
 
-const { showToast } = useToast();
+const formattedDate = computed(() => parsedDate.value.format('YYYY-MM-DD'));
+
+const dayInfo = computed<DayInfo>(() => {
+  return habitStore.dayCache[formattedDate.value] ?? {
+    possible_habits: [],
+    completed_habits: [],
+  };
+});
 
 const getDayInfo = async () => {
-  const formattedDate = parsedDate.value.format('YYYY-MM-DD');
   try {
-    const response = await habitStore.getDayInfo(formattedDate);
-    dayInfo.value = response;
+    await habitStore.getDayInfo(formattedDate.value);
   } catch (err: unknown) {
     console.error('Error fetching day info:', err);
     showToast('error', getErrorMessage(err, 'Erro ao carregar hábitos do dia.'));
@@ -53,72 +55,32 @@ const getDayInfo = async () => {
   }
 };
 
-const { withLoading, isLoading } = useLoading();
-
 let dayDataLoaded: Promise<void> | null = null;
 
 onIonViewWillEnter(() => {
-  dayDataLoaded = withLoading(async () => {
-    await profileStore.fetchProfile();
-    await getDayInfo();
-  }, 'Erro ao carregar os dados do dia.');
+  const hasCachedDay = Boolean(habitStore.dayCache[formattedDate.value]);
+  if (hasCachedDay) {
+    dayDataLoaded = getDayInfo();
+  } else {
+    dayDataLoaded = withLoading(getDayInfo, 'Erro ao carregar os dados do dia.');
+  }
 });
+
+const onboardingTourRef = ref<InstanceType<typeof OnboardingTour> | null>(null);
 
 onIonViewDidEnter(async () => {
   if (dayDataLoaded) {
     try {
       await dayDataLoaded;
-    } catch (err) {
-      // Ignora o erro
+    } catch {
+      // Ignora erro já exibido
     }
   }
-  await maybeStartDayOnboarding();
+  await onboardingTourRef.value?.startIfNotSeen();
 });
 
-// --- Onboarding: tour da tela do dia ---
-const { isStepSeen, markStepSeen } = useOnboarding();
-const onboardingWrapper = ref<InstanceType<typeof VOnboardingWrapper> | null>(null);
-const { start: startDayOnboarding, finish: finishDayOnboarding } = useVOnboarding(onboardingWrapper);
-
-const onDayOnboardingComplete = () => {
-  markStepSeen('day');
-};
-
-const onDayOnboardingExit = () => {
-  finishDayOnboarding();
-};
-
-const maybeStartDayOnboarding = async () => {
-  if (isDateInPast.value) return;
-  if (!dayInfo.value.possible_habits?.length) return;
-  if (await isStepSeen('day')) return;
-  await nextTick();
-  startDayOnboarding();
-};
-
 const showCongrats = ref(false);
-
-const handleToggleHabit = async (habitId: number | string) => {
-  await withLoading(async () => {
-    const formattedDate = parsedDate.value.format('YYYY-MM-DD');
-    const wasCompleted = progressPercentage.value === 100;
-    
-    await habitStore.toggleHabit(habitId, formattedDate);
-    await getDayInfo();
-    
-    if (!wasCompleted && progressPercentage.value === 100) {
-      showCongrats.value = true;
-    }
-  }, 'Erro ao carregar os dados do dia.');
-};
-
-const isHabitChecked = (habitId: number | string) => {
-  if (!dayInfo.value.completed_habits) {
-    return false;
-  }
-  
-  return dayInfo.value.completed_habits.some(habit => String(habit.id) === String(habitId));
-};
+const isToggling = ref<Record<string, boolean>>({});
 
 const progressPercentage = computed(() => {
   const possibleCount = dayInfo.value.possible_habits?.length || 0;
@@ -128,7 +90,38 @@ const progressPercentage = computed(() => {
     : 0;
 });
 
-const router = useRouter();
+const handleToggleHabit = async (habitId: number | string) => {
+  const key = String(habitId);
+  if (isToggling.value[key]) return;
+
+  isToggling.value[key] = true;
+  const wasCompleted = progressPercentage.value === 100;
+
+  await triggerHaptic('light');
+
+  try {
+    await habitStore.toggleHabit(habitId, formattedDate.value);
+
+    if (!wasCompleted && progressPercentage.value === 100) {
+      await triggerHaptic('success');
+      showCongrats.value = true;
+    }
+  } catch (err: unknown) {
+    await triggerHaptic('error');
+    showToast('error', getErrorMessage(err, 'Erro ao atualizar status do hábito.'));
+  } finally {
+    isToggling.value[key] = false;
+  }
+};
+
+const isHabitChecked = (habitId: number | string) => {
+  if (!dayInfo.value.completed_habits) {
+    return false;
+  }
+  return dayInfo.value.completed_habits.some(habit => String(habit.id) === String(habitId));
+};
+
+const canStartTour = computed(() => !isDateInPast.value && Boolean(dayInfo.value.possible_habits?.length));
 </script>
 
 <template>
@@ -179,25 +172,12 @@ const router = useRouter();
     
     <CongratsModal v-model:is-open="showCongrats" />
 
-    <VOnboardingWrapper
-      ref="onboardingWrapper"
+    <OnboardingTour
+      ref="onboardingTourRef"
+      step-key="day"
       :steps="daySteps"
-      @finish="onDayOnboardingComplete"
-      @exit="onDayOnboardingExit"
-    >
-      <template #default="{ step, isLast, next, exit }">
-        <VOnboardingStep>
-          <OnboardingStep
-            :step="step"
-            :index="daySteps.indexOf(step)"
-            :is-last="isLast"
-            :total="daySteps.length"
-            @next="isLast ? exit() : next()"
-            @skip="exit()"
-          />
-        </VOnboardingStep>
-      </template>
-    </VOnboardingWrapper>
+      :enabled="canStartTour"
+    />
   </ion-page>
 </template>
 

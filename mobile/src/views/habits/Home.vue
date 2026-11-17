@@ -1,13 +1,22 @@
 <script setup lang="ts">
 import { ref, computed, nextTick } from 'vue';
-import { IonPage, IonContent, IonRow, onIonViewWillEnter, onIonViewDidEnter, IonText } from '@ionic/vue';
-import { useVOnboarding, VOnboardingStep, VOnboardingWrapper } from 'v-onboarding';
+import {
+  IonPage,
+  IonContent,
+  IonRow,
+  IonText,
+  IonRefresher,
+  IonRefresherContent,
+  IonSkeletonText,
+  onIonViewWillEnter,
+  onIonViewDidEnter,
+  type RefresherCustomEvent,
+} from '@ionic/vue';
 import { useGenerateRange } from '@/composables/useGenerateRange';
 import { useProfileStore } from '@/stores/profileStore';
 import { useHabitStore } from '@/stores/habitsStore';
-import { useLoading } from '@/composables/useLoading';
 import { useToast } from '@/composables/useToast';
-import { useOnboarding } from '@/composables/useOnboarding';
+import { useHaptics } from '@/composables/useHaptics';
 import { homeSteps } from '@/onboarding/homeSteps';
 import Header from '@/components/layout/Header.vue';
 import Avatar from '@/components/layout/Avatar.vue';
@@ -15,19 +24,19 @@ import ButtonNew from '@/components/habits/ButtonNew.vue';
 import WeekDays from '@/components/habits/WeekDays.vue';
 import Container from '@/components/layout/Container.vue';
 import Summary from '@/components/habits/Summary.vue';
-import OnboardingStep from '@/components/onboarding/OnboardingStep.vue';
+import OnboardingTour from '@/components/onboarding/OnboardingTour.vue';
 import dayjs from '@/lib/dayjs';
-import { getErrorMessage, type SummaryDay } from '@/types';
+import { getErrorMessage } from '@/types';
 
 const { generateDatesFromYearBeginning } = useGenerateRange();
-const { withLoading } = useLoading();
+const { triggerHaptic } = useHaptics();
+const { showToast } = useToast();
 
 const profileStore = useProfileStore();
 const habitStore = useHabitStore();
 
-const user = computed(() => {
-  return profileStore.user;
-});
+const user = computed(() => profileStore.user);
+const summary = computed(() => habitStore.summary);
 
 interface IonContentElement {
   $el?: {
@@ -35,28 +44,15 @@ interface IonContentElement {
   };
 }
 
-const summary = ref<SummaryDay[]>([]);
 const contentRef = ref<IonContentElement | null>(null);
-const { showToast } = useToast();
+const onboardingTourRef = ref<InstanceType<typeof OnboardingTour> | null>(null);
+const isLoadingSummary = ref(false);
 
 const scrollToBottom = async () => {
   await nextTick();
   if (contentRef.value?.$el) {
     await contentRef.value.$el.scrollToBottom(500);
   }
-};
-
-// --- Onboarding: tour da tela Início ---
-const { isStepSeen, markStepSeen } = useOnboarding();
-const onboardingWrapper = ref<InstanceType<typeof VOnboardingWrapper> | null>(null);
-const { start: startHomeOnboarding, finish: finishHomeOnboarding } = useVOnboarding(onboardingWrapper);
-
-const onHomeOnboardingComplete = () => {
-  markStepSeen('home');
-};
-
-const onHomeOnboardingExit = () => {
-  finishHomeOnboarding();
 };
 
 const activeHomeSteps = computed(() =>
@@ -68,24 +64,37 @@ const activeHomeSteps = computed(() =>
     })
 );
 
-const maybeStartHomeOnboarding = async () => {
-  if (await isStepSeen('home')) return;
-  await nextTick();
-  startHomeOnboarding();
-};
-
 let summaryLoaded: Promise<void> | null = null;
 
-const getSummary = async () => {
+const getSummary = async (shouldScroll = true) => {
+  const showSkeleton = summary.value.length === 0;
+  if (showSkeleton) {
+    isLoadingSummary.value = true;
+  }
+
   try {
     const today = dayjs().format('YYYY-MM-DD');
-    const response = await habitStore.getHabitsSummary(today);
-    summary.value = Array.isArray(response) ? response : [];
-    scrollToBottom();
+    await habitStore.getHabitsSummary(today);
+    if (shouldScroll) {
+      await scrollToBottom();
+    }
   } catch (err: unknown) {
     console.error('Error fetching habits summary:', err);
     showToast('error', getErrorMessage(err, 'Erro ao carregar resumo de hábitos.'));
     throw err;
+  } finally {
+    isLoadingSummary.value = false;
+  }
+};
+
+const handleRefresh = async (event: RefresherCustomEvent) => {
+  await triggerHaptic('light');
+  try {
+    await getSummary(false);
+  } catch {
+    // Erro tratado no getSummary
+  } finally {
+    await event.target.complete();
   }
 };
 
@@ -93,18 +102,18 @@ const datesFromYearStart = ref<Date[]>([]);
 
 onIonViewWillEnter(() => {
   datesFromYearStart.value = generateDatesFromYearBeginning();
-  summaryLoaded = withLoading(getSummary, 'Erro ao carregar o resumo de hábitos.');
+  summaryLoaded = getSummary(summary.value.length === 0);
 });
 
 onIonViewDidEnter(async () => {
   if (summaryLoaded) {
     try {
       await summaryLoaded;
-    } catch (err) {
+    } catch {
       // Ignora o erro
     }
   }
-  await maybeStartHomeOnboarding();
+  await onboardingTourRef.value?.startIfNotSeen();
 });
 </script>
 
@@ -118,15 +127,29 @@ onIonViewDidEnter(async () => {
       <WeekDays />
     </Header>
     <ion-content ref="contentRef">
+      <ion-refresher slot="fixed" @ion-refresh="handleRefresh">
+        <ion-refresher-content />
+      </ion-refresher>
+
       <Container class="ion-margin-bottom">
+        <div v-if="isLoadingSummary" class="skeleton-grid">
+          <ion-skeleton-text
+            v-for="n in 35"
+            :key="n"
+            :animated="true"
+            class="skeleton-day"
+          />
+        </div>
+
         <Summary
-          v-if="summary.length"
+          v-else-if="datesFromYearStart.length"
           id="onboarding-summary-grid"
           :dates-from-year-start="datesFromYearStart"
           :summary="summary"
         />
+
         <ion-text
-          v-if="!summary.length"
+          v-else
           color="medium"
           class="ion-text-center ion-padding"
         >
@@ -135,24 +158,26 @@ onIonViewDidEnter(async () => {
       </Container>
     </ion-content>
 
-    <VOnboardingWrapper
-      ref="onboardingWrapper"
+    <OnboardingTour
+      ref="onboardingTourRef"
+      step-key="home"
       :steps="activeHomeSteps"
-      @finish="onHomeOnboardingComplete"
-      @exit="onHomeOnboardingExit"
-    >
-      <template #default="{ step, isLast, next, exit }">
-        <VOnboardingStep>
-          <OnboardingStep
-            :step="step"
-            :index="activeHomeSteps.indexOf(step)"
-            :is-last="isLast"
-            :total="activeHomeSteps.length"
-            @next="isLast ? exit() : next()"
-            @skip="exit()"
-          />
-        </VOnboardingStep>
-      </template>
-    </VOnboardingWrapper>
+    />
   </ion-page>
 </template>
+
+<style scoped>
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  justify-items: center;
+  padding-top: 8px;
+}
+
+.skeleton-day {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+}
+</style>

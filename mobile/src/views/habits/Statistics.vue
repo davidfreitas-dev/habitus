@@ -1,19 +1,28 @@
 <script setup lang="ts">
-import { IonPage, IonContent, onIonViewWillEnter, onIonViewDidEnter, onIonViewDidLeave } from '@ionic/vue';
+import {
+  IonPage,
+  IonContent,
+  IonRefresher,
+  IonRefresherContent,
+  IonSkeletonText,
+  onIonViewWillEnter,
+  onIonViewDidEnter,
+  onIonViewDidLeave,
+  type RefresherCustomEvent,
+} from '@ionic/vue';
 import { ref, computed, watch } from 'vue';
-import { useVOnboarding, VOnboardingStep, VOnboardingWrapper } from 'v-onboarding';
 import { useHabitStore } from '@/stores/habitsStore';
-import { useLoading } from '@/composables/useLoading';
-import { useOnboarding } from '@/composables/useOnboarding';
+import { useToast } from '@/composables/useToast';
+import { useHaptics } from '@/composables/useHaptics';
 import { statsSteps } from '@/onboarding/statsSteps';
 import Header from '@/components/layout/Header.vue';
 import Heading from '@/components/layout/Heading.vue';
 import Container from '@/components/layout/Container.vue';
 import BarChart from '@/components/habits/BarChart.vue';
 import PeriodSelector from '@/components/habits/PeriodSelector.vue';
-import OnboardingStep from '@/components/onboarding/OnboardingStep.vue';
+import OnboardingTour from '@/components/onboarding/OnboardingTour.vue';
 import dayjs from '@/lib/dayjs';
-import type { DailyStat, StatsPeriod } from '@/types';
+import { getErrorMessage, type DailyStat, type StatsPeriod } from '@/types';
 
 const ERROR_MSG = 'Erro ao carregar estatísticas';
 const today = () => dayjs().format('YYYY-MM-DD');
@@ -22,18 +31,21 @@ const activePeriod = ref<StatsPeriod>('W');
 const statsData = ref<DailyStat[]>([]);
 const currentStreak = ref(0);
 const longestStreak = ref(0);
+const isLoadingStats = ref(false);
+
 const habitStore = useHabitStore();
-const { withLoading } = useLoading();
+const { showToast } = useToast();
+const { triggerHaptic } = useHaptics();
 
 const chartLabels = computed(() => statsData.value.map(item => item.label));
 const chartValues = computed(() => statsData.value.map(item => item.percentage || 0));
 
 const averagePercentage = computed(() => {
   if (statsData.value.length === 0) return 0;
-  
+
   const totalCompleted = statsData.value.reduce((acc, item) => acc + (item.completed || 0), 0);
   const totalHabits = statsData.value.reduce((acc, item) => acc + (item.total || 0), 0);
-  
+
   if (totalHabits === 0) return 0;
   return Math.round((totalCompleted / totalHabits) * 100);
 });
@@ -50,7 +62,7 @@ watch(averagePercentage, (newVal) => {
     const elapsed = Date.now() - startTime;
     const progress = Math.min(elapsed / duration, 1);
     const ease = 1 - Math.pow(1 - progress, 4);
-    
+
     displayedPercentage.value = Math.round(startValue + diff * ease);
 
     if (progress < 1) requestAnimationFrame(step);
@@ -60,48 +72,55 @@ watch(averagePercentage, (newVal) => {
 }, { immediate: true });
 
 const loadStats = async (period: StatsPeriod | string) => {
-  const result = await habitStore.getHabitStats(period, today());
-  statsData.value = result.daily_stats;
-  currentStreak.value = result.current_streak;
-  longestStreak.value = result.longest_streak;
+  isLoadingStats.value = true;
+  try {
+    const result = await habitStore.getHabitStats(period, today());
+    statsData.value = result.daily_stats;
+    currentStreak.value = result.current_streak;
+    longestStreak.value = result.longest_streak;
+  } catch (err: unknown) {
+    console.error('Error loading stats:', err);
+    showToast('error', getErrorMessage(err, ERROR_MSG));
+  } finally {
+    isLoadingStats.value = false;
+  }
 };
 
-watch(activePeriod, (period) =>
-  withLoading(() => loadStats(period), ERROR_MSG));
+watch(activePeriod, async (period) => {
+  await triggerHaptic('light');
+  await loadStats(period);
+});
+
+const handleRefresh = async (event: RefresherCustomEvent) => {
+  await triggerHaptic('light');
+  try {
+    await loadStats(activePeriod.value);
+  } finally {
+    await event.target.complete();
+  }
+};
 
 let statsLoaded: Promise<void> | null = null;
 
 onIonViewWillEnter(() => {
-  statsLoaded = withLoading(() => loadStats(activePeriod.value), ERROR_MSG);
+  statsLoaded = loadStats(activePeriod.value);
 });
 
 onIonViewDidLeave(() => {
   statsData.value = [];
 });
 
-// --- Onboarding: tour da tela de Estatísticas ---
-const { isStepSeen, markStepSeen } = useOnboarding();
-const onboardingWrapper = ref<InstanceType<typeof VOnboardingWrapper> | null>(null);
-const { start: startStatsOnboarding, finish: finishStatsOnboarding } = useVOnboarding(onboardingWrapper);
-
-const onStatsOnboardingComplete = () => {
-  markStepSeen('stats');
-};
-
-const onStatsOnboardingExit = () => {
-  finishStatsOnboarding();
-};
+const onboardingTourRef = ref<InstanceType<typeof OnboardingTour> | null>(null);
 
 onIonViewDidEnter(async () => {
   if (statsLoaded) {
     try {
       await statsLoaded;
-    } catch (err) {
+    } catch {
       // Ignora o erro
     }
   }
-  if (await isStepSeen('stats')) return;
-  startStatsOnboarding();
+  await onboardingTourRef.value?.startIfNotSeen();
 });
 </script>
 
@@ -111,6 +130,10 @@ onIonViewDidEnter(async () => {
       <Heading title="Estatísticas" class="ion-padding-horizontal" />
     </Header>
     <ion-content>
+      <ion-refresher slot="fixed" @ion-refresh="handleRefresh">
+        <ion-refresher-content />
+      </ion-refresher>
+
       <Container>
         <PeriodSelector id="onboarding-period-selector" v-model="activePeriod" />
 
@@ -125,11 +148,20 @@ onIonViewDidEnter(async () => {
                 {{ displayedPercentage }}%
               </h2>
             </div>
-            
-            <BarChart 
-              v-if="statsData.length > 0"
-              :data="chartValues" 
-              :labels="chartLabels" 
+
+            <div v-if="isLoadingStats && statsData.length === 0" class="chart-skeleton">
+              <ion-skeleton-text
+                v-for="bar in 7"
+                :key="bar"
+                :animated="true"
+                class="chart-skeleton-bar"
+              />
+            </div>
+
+            <BarChart
+              v-else-if="statsData.length > 0"
+              :data="chartValues"
+              :labels="chartLabels"
             />
           </div>
 
@@ -163,25 +195,11 @@ onIonViewDidEnter(async () => {
       </Container>
     </ion-content>
 
-    <VOnboardingWrapper
-      ref="onboardingWrapper"
+    <OnboardingTour
+      ref="onboardingTourRef"
+      step-key="stats"
       :steps="statsSteps"
-      @finish="onStatsOnboardingComplete"
-      @exit="onStatsOnboardingExit"
-    >
-      <template #default="{ step, isLast, next, exit }">
-        <VOnboardingStep>
-          <OnboardingStep
-            :step="step"
-            :index="statsSteps.indexOf(step)"
-            :is-last="isLast"
-            :total="statsSteps.length"
-            @next="isLast ? exit() : next()"
-            @skip="exit()"
-          />
-        </VOnboardingStep>
-      </template>
-    </VOnboardingWrapper>
+    />
   </ion-page>
 </template>
 
@@ -215,6 +233,21 @@ onIonViewDidEnter(async () => {
   font-weight: 800;
   margin: 4px 0 0 0;
   color: var(--color-text-primary);
+}
+
+.chart-skeleton {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 200px;
+  gap: 12px;
+  padding-top: 16px;
+}
+
+.chart-skeleton-bar {
+  flex: 1;
+  height: 140px;
+  border-radius: 8px;
 }
 
 .stats-container {

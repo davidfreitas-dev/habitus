@@ -1,0 +1,63 @@
+<script setup lang="ts">
+import { ref, nextTick } from 'vue';
+import { useVOnboarding, VOnboardingStep, VOnboardingWrapper, type StepEntity } from 'v-onboarding';
+import { useOnboarding, type OnboardingStepKey } from '@/composables/useOnboarding';
+import OnboardingStep from '@/components/onboarding/OnboardingStep.vue';
+
+const props = withDefaults(
+  defineProps<{
+    stepKey: OnboardingStepKey;
+    steps: StepEntity[];
+    enabled?: boolean;
+  }>(),
+  {
+    enabled: true,
+  }
+);
+
+const { isStepSeen, markStepSeen } = useOnboarding();
+const onboardingWrapper = ref<InstanceType<typeof VOnboardingWrapper> | null>(null);
+const { start, finish } = useVOnboarding(onboardingWrapper);
+
+const onComplete = () => {
+  markStepSeen(props.stepKey);
+};
+
+const onExit = () => {
+  finish();
+};
+
+const startIfNotSeen = async (): Promise<void> => {
+  if (!props.enabled || !props.steps.length) return;
+  if (await isStepSeen(props.stepKey)) return;
+  await nextTick();
+  start();
+};
+
+defineExpose({
+  startIfNotSeen,
+  finish,
+});
+</script>
+
+<template>
+  <VOnboardingWrapper
+    ref="onboardingWrapper"
+    :steps="steps"
+    @finish="onComplete"
+    @exit="onExit"
+  >
+    <template #default="{ step, isLast, next, exit }">
+      <VOnboardingStep>
+        <OnboardingStep
+          :step="step"
+          :index="steps.indexOf(step)"
+          :is-last="isLast"
+          :total="steps.length"
+          @next="isLast ? exit() : next()"
+          @skip="exit()"
+        />
+      </VOnboardingStep>
+    </template>
+  </VOnboardingWrapper>
+</template>
