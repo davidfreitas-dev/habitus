@@ -1,9 +1,9 @@
 <template>
-  <div>
+  <div :class="['week-days', `week-days--${direction}`]">
     <span
       v-for="(weekDay, index) in weekDays"
       :key="index"
-      :style="daySize"
+      :style="itemStyle"
     >
       {{ weekDay }}
     </span>
@@ -12,33 +12,71 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useDayDimensions } from '@/composables/useDayDimensions';
+
+const props = withDefaults(
+  defineProps<{
+    direction?: 'horizontal' | 'vertical';
+  }>(),
+  {
+    direction: 'horizontal',
+  }
+);
 
 const weekDays = ref(['D', 'S', 'T', 'Q', 'Q', 'S', 'S']);
 
 const WEEK_DAYS_COUNT = 7;
+const { daySize: squareSize } = useDayDimensions();
 
-const daySize = computed(() => {
+const itemStyle = computed(() => {
+  if (props.direction === 'vertical') {
+    return {
+      height: squareSize.value.height,
+    };
+  }
+
   const size = 100 / WEEK_DAYS_COUNT;  
   return { width: size + '%', height: size + '%' };
 });
 </script>
 
 <style scoped>
-div {
+.week-days {
   display: flex;
+  background: var(--color-background-primary);
+}
+
+.week-days--horizontal {
   position: sticky;
   top: 0;
   z-index: 1;
-  background: var(--color-background-primary);
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
   padding: 0 1rem;
   padding-bottom: .5rem;
 }
-div span {
+
+.week-days--vertical {
+  display: grid;
+  grid-template-rows: repeat(7, auto);
+  padding-right: .75rem;
+  flex-shrink: 0;
+}
+
+.week-days span {
   color: var(--color-text-secondary);
   font-size: 1.25rem;
   font-weight: 700;
   text-align: center;
   margin-left: .25rem;
   margin-right: .25rem;
+}
+
+.week-days--vertical span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: .25rem;
 }
 </style>
