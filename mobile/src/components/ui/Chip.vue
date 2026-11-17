@@ -41,12 +41,14 @@ defineEmits<{
     <slot name="start">
       <ion-icon v-if="icon" :icon="icon" />
       <ion-avatar v-if="avatar">
-        <img :src="avatar" alt="" />
+        <img :src="avatar" alt="">
       </ion-avatar>
     </slot>
 
     <slot>
-      <ion-label v-if="label">{{ label }}</ion-label>
+      <ion-label v-if="label">
+        {{ label }}
+      </ion-label>
     </slot>
 
     <slot name="end" />
@@ -57,22 +59,25 @@ defineEmits<{
 ion-chip {
   --background: var(--color-background-secondary);
   --color: var(--color-text-secondary);
-  padding: 6px 16px !important;
-  padding-inline-start: 16px !important;
-  padding-inline-end: 16px !important;
+  background: var(--color-background-secondary);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  padding: 6px 12px !important;
+  padding-inline-start: 12px !important;
+  padding-inline-end: 12px !important;
   margin: 0 !important;
   margin-inline-start: 0 !important;
   margin-inline-end: 0 !important;
-  height: 32px;
-  min-height: 32px;
-  min-width: 48px;
+  height: auto;
+  min-height: unset;
+  min-width: unset;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-full);
   font-size: 0.8125rem;
   font-weight: 700;
+  line-height: 1.15;
   white-space: nowrap;
   flex-shrink: 0;
   cursor: pointer;
@@ -82,7 +87,7 @@ ion-chip {
 ion-chip ion-label {
   font-weight: 700;
   font-size: 0.8125rem;
-  line-height: 1;
+  line-height: 1.15;
   margin: 0;
   padding: 0;
   white-space: nowrap;
@@ -94,6 +99,8 @@ ion-chip ion-label {
 ion-chip.active {
   --background: var(--color-primary);
   --color: var(--color-neutral-900);
+  background: var(--color-primary);
+  color: var(--color-neutral-900);
   border-color: var(--color-primary);
 }
 

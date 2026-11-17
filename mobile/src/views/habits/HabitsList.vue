@@ -14,8 +14,8 @@ import {
   type RefresherCustomEvent,
 } from '@ionic/vue';
 import {
-  notificationsOutline,
-  createOutline,
+  notifications,
+  notificationsOff,
   trashOutline,
   calendarOutline,
 } from 'ionicons/icons';
@@ -70,6 +70,21 @@ const parseWeekDays = (rawDays: number[] | string | undefined): number[] => {
 
 const isDayActive = (habit: Habit, dayIndex: number): boolean => {
   return parseWeekDays(habit.week_days).includes(dayIndex);
+};
+
+const getFrequencySummary = (habit: Habit): string => {
+  const days = Array.from(new Set(parseWeekDays(habit.week_days))).sort((a, b) => a - b);
+  const count = days.length;
+
+  if (count === 7) return 'Todos os dias';
+  if (count === 5 && [1, 2, 3, 4, 5].every((d) => days.includes(d))) {
+    return '5x na semana • Dias úteis';
+  }
+  if (count === 2 && [0, 6].every((d) => days.includes(d))) {
+    return '2x na semana • Fim de semana';
+  }
+  if (count === 1) return '1x na semana';
+  return `${count}x na semana`;
 };
 
 const formatReminderTime = (time: string | null): string | null => {
@@ -151,7 +166,7 @@ onIonViewWillEnter(() => {
 <template>
   <ion-page>
     <Header>
-      <ion-row class="ion-justify-content-between ion-align-items-center ion-padding-horizontal ion-padding-top">
+      <ion-row class="header-row ion-justify-content-between ion-align-items-center ion-padding-horizontal ion-padding-top">
         <Heading title="Meus Hábitos" />
         <ButtonNew />
       </ion-row>
@@ -166,9 +181,8 @@ onIonViewWillEnter(() => {
         <div class="search-input-wrapper">
           <Input
             v-model="searchQuery"
-            type="search"
+            type="text"
             placeholder="Buscar hábito..."
-            clear-input
           />
         </div>
 
@@ -197,18 +211,28 @@ onIonViewWillEnter(() => {
             @click="handleEditHabit(habit.id)"
           >
             <div class="habit-card__header">
-              <h3 class="habit-card__title">
-                {{ habit.title }}
-              </h3>
+              <div class="habit-card__info">
+                <h3 class="habit-card__title">
+                  {{ habit.title }}
+                </h3>
+                <span class="habit-card__subtitle">
+                  {{ getFrequencySummary(habit) }}
+                </span>
+              </div>
+
               <div class="habit-card__actions" @click.stop>
-                <button
-                  type="button"
-                  class="icon-btn"
-                  aria-label="Editar hábito"
-                  @click="handleEditHabit(habit.id)"
+                <div
+                  class="reminder-badge"
+                  :class="{ 'reminder-badge--off': !formatReminderTime(habit.reminder_time) }"
                 >
-                  <ion-icon :icon="createOutline" />
-                </button>
+                  <ion-icon
+                    :icon="formatReminderTime(habit.reminder_time) ? notifications : notificationsOff"
+                    class="reminder-badge__icon"
+                  />
+                  <span v-if="formatReminderTime(habit.reminder_time)">
+                    {{ formatReminderTime(habit.reminder_time) }}
+                  </span>
+                </div>
                 <button
                   type="button"
                   class="icon-btn icon-btn--danger"
@@ -220,22 +244,15 @@ onIonViewWillEnter(() => {
               </div>
             </div>
 
-            <div class="habit-card__footer">
-              <div class="week-badges">
-                <span
-                  v-for="(dayLetter, idx) in shortWeekDays"
-                  :key="idx"
-                  class="week-badge"
-                  :class="{ 'week-badge--active': isDayActive(habit, idx) }"
-                >
-                  {{ dayLetter }}
-                </span>
-              </div>
-
-              <div v-if="formatReminderTime(habit.reminder_time)" class="reminder-badge">
-                <ion-icon :icon="notificationsOutline" />
-                <span>{{ formatReminderTime(habit.reminder_time) }}</span>
-              </div>
+            <div class="week-badges">
+              <span
+                v-for="(dayLetter, idx) in shortWeekDays"
+                :key="idx"
+                class="week-badge"
+                :class="{ 'week-badge--active': isDayActive(habit, idx) }"
+              >
+                {{ dayLetter }}
+              </span>
             </div>
           </div>
         </div>
@@ -274,6 +291,18 @@ onIonViewWillEnter(() => {
 </template>
 
 <style scoped>
+.header-row {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .header-row {
+    max-width: 900px;
+  }
+}
+
 .search-input-wrapper {
   margin-bottom: 12px;
 }
@@ -293,6 +322,11 @@ onIonViewWillEnter(() => {
   flex-direction: column;
   gap: 14px;
   cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.habit-card:active {
+  border-color: var(--color-border-strong);
 }
 
 .habit-card__header {
@@ -302,31 +336,46 @@ onIonViewWillEnter(() => {
   gap: 12px;
 }
 
+.habit-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
 .habit-card__title {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 700;
   color: var(--color-text-primary);
-  line-height: 1.35;
+  line-height: 1.3;
+}
+
+.habit-card__subtitle {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
 }
 
 .habit-card__actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .icon-btn {
   background: var(--color-background-elevated);
-  border: none;
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
   color: var(--color-text-accent);
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   cursor: pointer;
 }
 
@@ -334,47 +383,56 @@ onIonViewWillEnter(() => {
   color: var(--color-danger);
 }
 
-.habit-card__footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
 .week-badges {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
   gap: 6px;
 }
 
 .week-badge {
-  width: 26px;
-  height: 26px;
+  height: 30px;
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.75rem;
   font-weight: 700;
-  background: var(--color-background-elevated);
+  background: var(--habit-bg-0);
+  border: 1.5px solid var(--habit-border-0);
   color: var(--color-text-secondary);
 }
 
 .week-badge--active {
   background: var(--color-primary);
+  border-color: var(--habit-border-100);
   color: var(--color-neutral-900);
 }
 
 .reminder-badge {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  gap: 5px;
   background: var(--color-background-elevated);
+  border: 1px solid var(--color-border-default);
   color: var(--color-text-accent);
-  padding: 4px 10px;
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  font-weight: 600;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: var(--radius-md);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.reminder-badge--off {
+  width: 32px;
+  padding: 0;
+  color: var(--color-text-secondary);
+}
+
+.reminder-badge__icon {
+  font-size: 1.05rem;
+  flex-shrink: 0;
 }
 
 .empty-state {

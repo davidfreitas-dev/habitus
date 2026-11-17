@@ -17,6 +17,7 @@ const props = withDefaults(
     wrap?: boolean;
   }>(),
   {
+    modelValue: undefined,
     items: () => [],
     ariaLabel: 'Filtros',
     wrap: false,
@@ -106,7 +107,11 @@ onMounted(() => {
       @click="selectChip(item.value, index, item.disabled)"
     >
       <template v-if="$slots.item" #default>
-        <slot name="item" :item="item" :active="modelValue === item.value" />
+        <slot
+          name="item"
+          :item="item"
+          :active="modelValue === item.value"
+        />
       </template>
     </Chip>
   </div>
@@ -117,7 +122,7 @@ onMounted(() => {
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding-bottom: 8px;
+  padding: 2px 0;
   margin-bottom: 16px;
   scrollbar-width: none;
   scroll-behavior: smooth;
