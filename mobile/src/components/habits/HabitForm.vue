@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { IonDatetime, IonDatetimeButton, IonModal, IonItem, IonLabel } from '@ionic/vue';
+import { useNotifications } from '@/composables/useNotifications';
+import { useHaptics } from '@/composables/useHaptics';
 import Input from '@/components/ui/Input.vue';
 import Checkbox from '@/components/ui/Checkbox.vue';
 import Button from '@/components/ui/Button.vue';
@@ -27,6 +29,9 @@ const props = withDefaults(
     isLoading: false,
   }
 );
+
+const { requestPermission } = useNotifications();
+const { triggerHaptic } = useHaptics();
 
 const getLocalISOString = () => {
   const now = new Date();
@@ -72,6 +77,18 @@ watch(
   { immediate: true }
 );
 
+watch(
+  () => formData.value.reminderEnabled,
+  async (enabled) => {
+    if (!enabled) return;
+    const granted = await requestPermission();
+    if (!granted) {
+      formData.value.reminderEnabled = false;
+      emit('onError', 'Permissão de notificações negada nas configurações do aparelho.');
+    }
+  }
+);
+
 const clearFormData = () => {
   formData.value.title = '';
   formData.value.weekDays = [];
@@ -85,7 +102,8 @@ const isDayChecked = (index: number) => {
   return formData.value.weekDays.includes(index);
 };
 
-const toggleWeekDay = (index: number) => {
+const toggleWeekDay = async (index: number) => {
+  await triggerHaptic('light');
   const days = formData.value.weekDays;
 
   if (days.includes(index)) {
@@ -96,6 +114,26 @@ const toggleWeekDay = (index: number) => {
   days.push(index);
 };
 
+const recurrencePresets = [
+  { label: 'Todos os dias', days: [0, 1, 2, 3, 4, 5, 6] },
+  { label: 'Dias úteis', days: [1, 2, 3, 4, 5] },
+  { label: 'Fim de semana', days: [0, 6] },
+] as const;
+
+const isPresetActive = (presetDays: readonly number[]): boolean => {
+  if (formData.value.weekDays.length !== presetDays.length) return false;
+  return presetDays.every((day) => formData.value.weekDays.includes(day));
+};
+
+const applyPreset = async (presetDays: readonly number[]) => {
+  await triggerHaptic('light');
+  if (isPresetActive(presetDays)) {
+    formData.value.weekDays = [];
+  } else {
+    formData.value.weekDays = [...presetDays];
+  }
+};
+
 const submitForm = () => {
   if (!formData.value.title || !formData.value.weekDays.length) {
     emit('onError', 'Informe um título para o hábito e selecione os dias.');
@@ -104,7 +142,6 @@ const submitForm = () => {
 
   let reminderTimeValue = formData.value.reminderTime;
 
-  // Extract only HH:mm if it's an ISO string
   if (reminderTimeValue && reminderTimeValue.includes('T')) {
     reminderTimeValue = reminderTimeValue.split('T')[1].substring(0, 5);
   } else if (reminderTimeValue && reminderTimeValue.length > 5) {
@@ -113,7 +150,7 @@ const submitForm = () => {
 
   emit('onSubmit', {
     ...formData.value,
-    reminder_time: formData.value.reminderEnabled ? reminderTimeValue : null
+    reminder_time: formData.value.reminderEnabled ? reminderTimeValue : null,
   });
 };
 
@@ -129,17 +166,31 @@ const availableWeekDays = [
 </script>
 
 <template>
-  <form @submit.prevent="submitForm">    
+  <form @submit.prevent="submitForm">
     <p>Qual seu comprometimento?</p>
     <Input
       id="onboarding-habit-name"
       v-model="formData.title"
       placeholder="Exercícios, dormir bem, etc..."
       @keyup.enter="submitForm"
-    /> 
+    />
 
     <div id="onboarding-recurrence">
       <p>Qual a recorrência?</p>
+
+      <div class="recurrence-presets">
+        <button
+          v-for="preset in recurrencePresets"
+          :key="preset.label"
+          type="button"
+          class="preset-chip"
+          :class="{ active: isPresetActive(preset.days) }"
+          @click="applyPreset(preset.days)"
+        >
+          {{ preset.label }}
+        </button>
+      </div>
+
       <Checkbox
         v-for="(weekDay, index) in availableWeekDays"
         :key="index"
@@ -192,6 +243,31 @@ p {
   color: var(--color-text-primary);
   font-weight: 700;
   margin-top: 1.5rem;
+}
+
+.recurrence-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.preset-chip {
+  border: 1px solid var(--color-border-default);
+  background: var(--color-background-secondary);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-full);
+  padding: 6px 12px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.preset-chip.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-neutral-900);
 }
 
 ion-item {

@@ -15,6 +15,9 @@ import { personOutline, gridOutline, exitOutline } from 'ionicons/icons';
 import { useAuthStore } from '@/stores/authStore';
 import { useThemeStore } from '@/stores/themeStore';
 import { useLoading } from '@/composables/useLoading';
+import { useOnboarding } from '@/composables/useOnboarding';
+import { useToast } from '@/composables/useToast';
+import { useHaptics } from '@/composables/useHaptics';
 import { optionsSteps } from '@/onboarding/optionsSteps';
 import Header from '@/components/layout/Header.vue';
 import Heading from '@/components/layout/Heading.vue';
@@ -26,6 +29,9 @@ import OnboardingTour from '@/components/onboarding/OnboardingTour.vue';
 
 const router = useRouter();
 const { withLoading } = useLoading();
+const { resetOnboarding } = useOnboarding();
+const { showToast } = useToast();
+const { triggerHaptic } = useHaptics();
 const authStore = useAuthStore();
 const themeStore = useThemeStore();
 
@@ -36,6 +42,13 @@ const isDarkMode = computed({
 
 const modalRef = ref<InstanceType<typeof ModalDialog> | null>(null);
 const onboardingTourRef = ref<InstanceType<typeof OnboardingTour> | null>(null);
+
+const handleReplayTutorial = async () => {
+  await triggerHaptic('light');
+  await resetOnboarding(['welcome', 'home', 'day', 'form', 'stats', 'options']);
+  showToast('success', 'Tutorial reiniciado!');
+  router.push('/onboarding/welcome');
+};
 
 const handleLogOut = () => {
   modalRef.value?.setOpen(true);
@@ -111,6 +124,16 @@ onIonViewDidEnter(async () => {
               Modo escuro
             </ion-label>
             <Toggle v-model:checked="isDarkMode" />
+          </ion-item>
+          <ion-item
+            class="ion-no-padding"
+            button
+            :detail="true"
+            @click="handleReplayTutorial"
+          >
+            <ion-label class="ion-no-margin ion-padding-top ion-padding-bottom">
+              Rever tutorial do app
+            </ion-label>
           </ion-item>
           <ion-item
             class="ion-no-padding"

@@ -62,6 +62,12 @@ const routes: Array<RouteRecordRaw> = [
         meta: { requiresAuth: true }
       },
       {
+        path: 'habits',
+        name: 'HabitsList',
+        component: () => import('@/views/habits/HabitsList.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
         path: 'statistics',
         name: 'Statistics',
         component: () => import('@/views/habits/Statistics.vue'),

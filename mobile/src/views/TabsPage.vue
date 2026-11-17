@@ -2,12 +2,13 @@
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { IonTabBar, IonTabButton, IonTabs, IonLabel, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
-import { homeOutline, home, statsChartOutline, statsChart, cogOutline, cog } from 'ionicons/icons';
+import { homeOutline, home, listOutline, list, statsChartOutline, statsChart, cogOutline, cog } from 'ionicons/icons';
 
 const route = useRoute();
 
 const activeTab = computed(() => {
   const path = route.path;
+  if (path.endsWith('/habits')) return 'habits';
   if (path.endsWith('/statistics')) return 'statistics';
   if (path.endsWith('/options')) return 'options';
   return 'home';
@@ -22,6 +23,11 @@ const activeTab = computed(() => {
         <ion-tab-button tab="home" href="/tabs/home">
           <ion-icon :icon="activeTab === 'home' ? home : homeOutline" />
           <ion-label>Início</ion-label>
+        </ion-tab-button>
+
+        <ion-tab-button tab="habits" href="/tabs/habits">
+          <ion-icon :icon="activeTab === 'habits' ? list : listOutline" />
+          <ion-label>Hábitos</ion-label>
         </ion-tab-button>
 
         <ion-tab-button tab="statistics" href="/tabs/statistics">
