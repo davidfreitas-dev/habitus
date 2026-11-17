@@ -2,23 +2,21 @@
 import { onMounted, watch } from 'vue';
 import { IonApp, IonRouterOutlet } from '@ionic/vue';
 import { Capacitor } from '@capacitor/core';
-import { App as CapApp } from '@capacitor/app';
-import { useRouter } from 'vue-router';
 import { ScreenOrientation } from '@capacitor/screen-orientation';
 import { useNetwork } from '@/composables/useNetwork';
 import { useStatusBar } from '@/composables/useStatusBar';
 import { useNotifications } from '@/composables/useNotifications';
+import { useDeepLinks } from '@/composables/useDeepLinks';
 import { useAuthStore } from '@/stores/authStore';
 import { useThemeStore } from '@/stores/themeStore';
 import { useHabitStore } from '@/stores/habitsStore';
 import { notificationService } from '@/services/notificationService';
-import { LocalNotifications } from '@capacitor/local-notifications';
-import dayjs from '@/lib/dayjs';
 
 const { isConnected } = useNetwork();
 const { setStatusBar, Style } = useStatusBar();
 const { checkPermission } = useNotifications();
-const router = useRouter();
+useDeepLinks();
+
 const authStore = useAuthStore();
 const themeStore = useThemeStore();
 const habitStore = useHabitStore();
@@ -42,31 +40,6 @@ onMounted(async () => {
 
   if (Capacitor.isNativePlatform()) {
     await ScreenOrientation.lock({ orientation: 'portrait' });
-
-    // Listener para capturar Universal/App Links e Deep Links
-    CapApp.addListener('appUrlOpen', (event) => {
-      try {
-        const url = new URL(event.url);
-        const path = url.pathname;
-        const search = url.search;
-        
-        if (path === '/verify-email') {
-          router.push(`${path}${search}`);
-        }
-      } catch (e) {
-        console.error('Falha ao processar URL de deep link:', e);
-      }
-    });
-
-    // Listener para redirecionar ao clicar em uma notificação
-    LocalNotifications.addListener('localNotificationActionPerformed', () => {
-      try {
-        const today = dayjs().format('YYYY-MM-DD');
-        router.push(`/day/${today}`);
-      } catch (e) {
-        console.error('Erro ao processar ação de notificação local:', e);
-      }
-    });
 
     const granted = await checkPermission();
     if (granted && authStore.isAuthenticated) {
@@ -95,7 +68,9 @@ onMounted(async () => {
   background: var(--ion-color-danger);
   color: white;
   text-align: center;
-  padding: 6px;
+  padding: calc(env(safe-area-inset-top) + 6px) 12px 6px;
   font-size: 0.85rem;
+  font-weight: 600;
+  z-index: 9999;
 }
 </style>

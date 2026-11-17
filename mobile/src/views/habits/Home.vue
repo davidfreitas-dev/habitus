@@ -17,7 +17,7 @@ import Container from '@/components/layout/Container.vue';
 import Summary from '@/components/habits/Summary.vue';
 import OnboardingStep from '@/components/onboarding/OnboardingStep.vue';
 import dayjs from '@/lib/dayjs';
-import type { SummaryDay } from '@/types';
+import { getErrorMessage, type SummaryDay } from '@/types';
 
 const { generateDatesFromYearBeginning } = useGenerateRange();
 const { withLoading } = useLoading();
@@ -29,20 +29,26 @@ const user = computed(() => {
   return profileStore.user;
 });
 
+interface IonContentElement {
+  $el?: {
+    scrollToBottom: (duration?: number) => Promise<void>;
+  };
+}
+
 const summary = ref<SummaryDay[]>([]);
-const contentRef = ref<any>(null);
+const contentRef = ref<IonContentElement | null>(null);
 const { showToast } = useToast();
 
 const scrollToBottom = async () => {
   await nextTick();
-  if (contentRef.value && contentRef.value.$el) {
+  if (contentRef.value?.$el) {
     await contentRef.value.$el.scrollToBottom(500);
   }
 };
 
 // --- Onboarding: tour da tela Início ---
 const { isStepSeen, markStepSeen } = useOnboarding();
-const onboardingWrapper = ref<any>(null);
+const onboardingWrapper = ref<InstanceType<typeof VOnboardingWrapper> | null>(null);
 const { start: startHomeOnboarding, finish: finishHomeOnboarding } = useVOnboarding(onboardingWrapper);
 
 const onHomeOnboardingComplete = () => {
@@ -56,7 +62,10 @@ const onHomeOnboardingExit = () => {
 const activeHomeSteps = computed(() =>
   summary.value.length
     ? homeSteps
-    : homeSteps.filter((step) => (step.attachTo as any)?.element !== '#onboarding-current-day')
+    : homeSteps.filter((step) => {
+      const attachElement = (step.attachTo as { element?: string } | undefined)?.element;
+      return attachElement !== '#onboarding-current-day';
+    })
 );
 
 const maybeStartHomeOnboarding = async () => {
@@ -73,9 +82,9 @@ const getSummary = async () => {
     const response = await habitStore.getHabitsSummary(today);
     summary.value = Array.isArray(response) ? response : [];
     scrollToBottom();
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error fetching habits summary:', err);
-    showToast('error', err.response?.data?.message || 'Erro ao carregar resumo de hábitos.');
+    showToast('error', getErrorMessage(err, 'Erro ao carregar resumo de hábitos.'));
     throw err;
   }
 };

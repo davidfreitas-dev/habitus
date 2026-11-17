@@ -19,7 +19,7 @@ const router = useRouter();
 
 const { isLoading, withLoading } = useLoading();
 
-const modalRef = ref<any>(null);
+const modalRef = ref<InstanceType<typeof ModalDialog> | null>(null);
 
 const handleDeleteClick = () => {
   modalRef.value?.setOpen(true);

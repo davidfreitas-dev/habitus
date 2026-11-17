@@ -10,7 +10,7 @@ import { useLoading } from '@/composables/useLoading';
 import { useToast } from '@/composables/useToast';
 import { useOnboarding } from '@/composables/useOnboarding';
 import { daySteps } from '@/onboarding/daySteps';
-import type { DayInfo } from '@/types';
+import { getErrorMessage, type DayInfo } from '@/types';
 
 import Header from '@/components/layout/Header.vue';
 import Container from '@/components/layout/Container.vue';
@@ -46,9 +46,9 @@ const getDayInfo = async () => {
   try {
     const response = await habitStore.getDayInfo(formattedDate);
     dayInfo.value = response;
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error fetching day info:', err);
-    showToast('error', err.response?.data?.message || 'Erro ao carregar hábitos do dia.');
+    showToast('error', getErrorMessage(err, 'Erro ao carregar hábitos do dia.'));
     throw err;
   }
 };
@@ -77,7 +77,7 @@ onIonViewDidEnter(async () => {
 
 // --- Onboarding: tour da tela do dia ---
 const { isStepSeen, markStepSeen } = useOnboarding();
-const onboardingWrapper = ref<any>(null);
+const onboardingWrapper = ref<InstanceType<typeof VOnboardingWrapper> | null>(null);
 const { start: startDayOnboarding, finish: finishDayOnboarding } = useVOnboarding(onboardingWrapper);
 
 const onDayOnboardingComplete = () => {

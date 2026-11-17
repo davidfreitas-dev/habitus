@@ -18,8 +18,11 @@ export function useDayDimensions() {
     window.removeEventListener('resize', updateScreenDimensions);
   });
 
+  const MAX_CONTAINER_WIDTH = 600;
+
   const daySize = computed(() => {
-    const size = Math.trunc((screenDimensions.value.width / WEEK_DAYS) - SCREEN_HORIZONTAL_PADDING);
+    const effectiveWidth = Math.min(screenDimensions.value.width, MAX_CONTAINER_WIDTH);
+    const size = Math.trunc((effectiveWidth / WEEK_DAYS) - SCREEN_HORIZONTAL_PADDING);
     return { width: size + 'px', height: size + 'px' };
   });
 

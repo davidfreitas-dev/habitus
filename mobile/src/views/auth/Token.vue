@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { IonPage, IonContent, IonInputOtp, onIonViewDidLeave, type InputCustomEvent } from '@ionic/vue';
+import { IonPage, IonContent, IonInputOtp, onIonViewDidLeave } from '@ionic/vue';
 import { useToast } from '@/composables/useToast';
 import { useAuthStore } from '@/stores/authStore';
 import { STORAGE_KEYS } from '@/constants/storage';
+import { getErrorMessage } from '@/types';
 
 import Container from '@/components/layout/Container.vue';
 import Button from '@/components/ui/Button.vue';
@@ -23,19 +24,19 @@ const handleContinue = async () => {
   try {
     await authStore.validateResetCode(otpValue.value);
     router.push({ name: 'Reset' });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Token validation failed:', err);
-    showToast('error', err.response?.data?.message || 'Código inválido.');
+    showToast('error', getErrorMessage(err, 'Código inválido.'));
   } finally {
     isLoading.value = false;
   }
 };
 
-const onOtpInput = (event: any) => {
+const onOtpInput = (event: CustomEvent<{ value?: string | number | null }>) => {
   otpValue.value = String(event.detail?.value ?? '');
 };
 
-const onOtpComplete = (event: any) => {
+const onOtpComplete = (event: CustomEvent<{ value?: string | number | null }>) => {
   otpValue.value = String(event.detail?.value ?? '');
 };
 

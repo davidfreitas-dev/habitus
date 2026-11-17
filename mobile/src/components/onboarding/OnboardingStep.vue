@@ -1,7 +1,13 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import type { StepEntity } from 'v-onboarding';
 
-withDefaults(
+interface StepContent {
+  title?: string;
+  description?: string;
+}
+
+const props = withDefaults(
   defineProps<{
     step: StepEntity;
     index: number;
@@ -13,6 +19,10 @@ withDefaults(
     total: 1,
   }
 );
+
+const stepContent = computed<StepContent>(() => {
+  return (props.step.content as StepContent | undefined) ?? {};
+});
 
 const emit = defineEmits<{
   (e: 'next'): void;
@@ -27,10 +37,10 @@ const handleNext = () => {
 <template>
   <div class="onboarding-step">
     <h4 class="onboarding-step__title">
-      {{ (step.content as any)?.title }}
+      {{ stepContent.title }}
     </h4>
     <p class="onboarding-step__description">
-      {{ (step.content as any)?.description }}
+      {{ stepContent.description }}
     </p>
     <div class="onboarding-step__footer">
       <button class="onboarding-step__skip" @click="emit('skip')">

@@ -1,4 +1,5 @@
 import { LocalNotifications, type LocalNotificationSchema } from '@capacitor/local-notifications';
+import { Capacitor } from '@capacitor/core';
 import type { Habit } from '@/types';
 
 const generateNotificationId = (habitId: number | string, weekday: number | string): number => {
@@ -29,6 +30,7 @@ const getRandomItem = <T>(array: T[]): T => array[Math.floor(Math.random() * arr
 
 export const notificationService = {
   async ensureNotificationChannel() {
+    if (!Capacitor.isNativePlatform()) return;
     try {
       await LocalNotifications.createChannel({
         id: CHANNEL_ID,
@@ -47,6 +49,8 @@ export const notificationService = {
   },
 
   async scheduleHabitNotifications(habit: Pick<Habit, 'id' | 'title' | 'week_days' | 'reminder_time'>) {
+    if (!Capacitor.isNativePlatform()) return;
+
     await this.cancelHabitNotifications(habit.id);
 
     if (!habit.reminder_time || !habit.week_days || habit.week_days.length === 0) {
@@ -81,6 +85,9 @@ export const notificationService = {
           repeats: true,
           allowWhileIdle: true,
         },
+        extra: {
+          habitId: habit.id,
+        },
         largeIcon: 'ic_stat_habitus',
         smallIcon: 'ic_stat_habitus',
         sound: 'default',
@@ -93,7 +100,7 @@ export const notificationService = {
   },
 
   async cancelHabitNotifications(habitId: number | string | null | undefined) {
-    if (!habitId) return;
+    if (!Capacitor.isNativePlatform() || !habitId) return;
     
     const notificationsToCancel: Array<{ id: number }> = [];
     for (let i = 0; i <= 6; i++) {
@@ -108,6 +115,7 @@ export const notificationService = {
   },
 
   async rescheduleAllNotifications(habits: Habit[]) {
+    if (!Capacitor.isNativePlatform()) return;
     try {
       const pending = await LocalNotifications.getPending();
       if (pending.notifications.length > 0) {

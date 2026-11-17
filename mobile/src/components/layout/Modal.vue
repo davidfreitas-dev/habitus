@@ -32,7 +32,7 @@ import { arrowBack } from 'ionicons/icons';
 
 withDefaults(
   defineProps<{
-    presentingElement?: any;
+    presentingElement?: HTMLElement;
     title?: string;
   }>(),
   {
@@ -41,7 +41,7 @@ withDefaults(
   }
 );
 
-const canDismiss = (_data?: any, role?: string) => {
+const canDismiss = (_data?: unknown, role?: string) => {
   return role !== 'gesture' && role !== 'backdrop';
 };
 

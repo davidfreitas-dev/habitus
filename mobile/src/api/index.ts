@@ -82,11 +82,13 @@ const queueRequest = async (originalRequest: CustomAxiosRequestConfig) => {
   return axiosInstance(originalRequest);
 };
 
-const isRefreshEndpointError = (error: any): boolean => {
+const isRefreshEndpointError = (error: unknown): boolean => {
+  if (!axios.isAxiosError(error)) return false;
   return error.config?.url?.endsWith(AUTH_ENDPOINTS.REFRESH) ?? false;
 };
 
-const isPublicAuthEndpoint = (error: any): boolean => {
+const isPublicAuthEndpoint = (error: unknown): boolean => {
+  if (!axios.isAxiosError(error)) return false;
   const publicAuthEndpoints: string[] = [
     AUTH_ENDPOINTS.LOGIN,
     AUTH_ENDPOINTS.REGISTER,
@@ -97,10 +99,12 @@ const isPublicAuthEndpoint = (error: any): boolean => {
   return publicAuthEndpoints.some(endpoint => error.config?.url?.endsWith(endpoint));
 };
 
-const shouldRetryWithRefresh = (error: any): boolean => {
+const shouldRetryWithRefresh = (error: unknown): boolean => {
+  if (!axios.isAxiosError(error)) return false;
+  const config = error.config as CustomAxiosRequestConfig | undefined;
   return (
     error.response?.status === HTTP_STATUS.UNAUTHORIZED &&
-    !error.config?._retry &&
+    !config?._retry &&
     !isRefreshEndpointError(error) &&
     !isPublicAuthEndpoint(error)
   );
@@ -152,12 +156,12 @@ axiosInstance.interceptors.response.use(
 );
 
 export interface CustomApiClient {
-  get<T = any>(url: string, config?: AxiosRequestConfig): Promise<T>;
-  post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
-  put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
-  patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
-  delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<T>;
-  <T = any>(config: AxiosRequestConfig): Promise<T>;
+  get<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T>;
+  post<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T>;
+  put<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T>;
+  patch<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T>;
+  delete<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T>;
+  <T = unknown>(config: AxiosRequestConfig): Promise<T>;
 }
 
 const api = axiosInstance as unknown as CustomApiClient;

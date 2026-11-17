@@ -6,6 +6,7 @@ import { required, email, minLength, helpers } from '@vuelidate/validators';
 import { IonPage, IonContent, IonFooter, onIonViewDidLeave } from '@ionic/vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/composables/useToast';
+import { getErrorMessage } from '@/types';
 import Container from '@/components/layout/Container.vue';
 import Input from '@/components/ui/Input.vue';
 import Button from '@/components/ui/Button.vue';
@@ -58,9 +59,9 @@ const signUp = async () => {
     formData.name = capitalizeName(formData.name);
     await authStore.register(formData);
     router.push('/');
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Registration failed:', err);
-    showToast('error', err.response?.data?.message || 'Erro ao criar conta.');
+    showToast('error', getErrorMessage(err, 'Erro ao criar conta.'));
   } finally {
     isLoadingEmail.value = false;
   }

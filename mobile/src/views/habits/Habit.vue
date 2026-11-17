@@ -65,7 +65,7 @@ onIonViewDidEnter(async () => {
 
 // --- Onboarding: tour do formulário de criação de hábito ---
 const { isStepSeen, markStepSeen } = useOnboarding();
-const onboardingWrapper = ref<any>(null);
+const onboardingWrapper = ref<InstanceType<typeof VOnboardingWrapper> | null>(null);
 const { start: startFormOnboarding, finish: finishFormOnboarding } = useVOnboarding(onboardingWrapper);
 
 const onFormOnboardingComplete = () => {
@@ -83,8 +83,8 @@ const maybeStartFormOnboarding = async () => {
   startFormOnboarding();
 };
 
-const habitFormRef = ref<any>(null);
-const dialogRef = ref<any>(null);
+const habitFormRef = ref<InstanceType<typeof HabitForm> | null>(null);
+const dialogRef = ref<InstanceType<typeof ModalDialog> | null>(null);
 
 const handleFormError = (message: string) => {
   showToast('info', message);

@@ -36,7 +36,7 @@ const isDarkMode = computed({
   set: (value: boolean) => themeStore.setDarkMode(value),
 });
 
-const modalRef = ref<any>(null);
+const modalRef = ref<InstanceType<typeof ModalDialog> | null>(null);
     
 const handleLogOut = () => {
   modalRef.value?.setOpen(true);
@@ -51,7 +51,7 @@ const logOut = async () => {
 
 // --- Onboarding: tour da tela de Opções ---
 const { isStepSeen, markStepSeen } = useOnboarding();
-const onboardingWrapper = ref<any>(null);
+const onboardingWrapper = ref<InstanceType<typeof VOnboardingWrapper> | null>(null);
 const { start: startOptionsOnboarding, finish: finishOptionsOnboarding } = useVOnboarding(onboardingWrapper);
 
 const onOptionsOnboardingComplete = () => {

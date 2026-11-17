@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { IonInput, IonLabel, IonIcon, type InputCustomEvent } from '@ionic/vue';
+import type { TextFieldTypes } from '@ionic/core';
 import { eyeOutline, eyeOffOutline } from 'ionicons/icons';
 
 const props = withDefaults(
   defineProps<{
-    type?: string;
+    type?: TextFieldTypes;
     label?: string;
     placeholder?: string;
     modelValue?: string | number | null;
@@ -22,7 +23,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string | number | null | undefined): void;
-  (e: 'blur', event: any): void;
+  (e: 'blur', event: CustomEvent<FocusEvent>): void;
   (e: 'keyup', event: KeyboardEvent): void;
 }>();
 
@@ -30,7 +31,7 @@ const updateValue = (event: InputCustomEvent) => {
   emit('update:modelValue', event.detail.value);
 };
 
-const handleBlur = (event: any) => {
+const handleBlur = (event: CustomEvent<FocusEvent>) => {
   emit('blur', event);
 };
 
@@ -40,7 +41,7 @@ const togglePasswordVisibility = () => {
   isPasswordVisible.value = !isPasswordVisible.value;
 };
 
-const inputType = computed<any>(() => {
+const inputType = computed<TextFieldTypes>(() => {
   if (props.type === 'password') {
     return isPasswordVisible.value ? 'text' : 'password';
   }

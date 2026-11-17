@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { IonPage, IonContent } from '@ionic/vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/composables/useToast';
+import { getErrorMessage } from '@/types';
 import Container from '@/components/layout/Container.vue';
 import Button from '@/components/ui/Button.vue';
 
@@ -35,12 +36,12 @@ const performVerification = async () => {
   try {
     const response = await authStore.verifyEmail(props.token);
     success.value = true;
-    message.value = (response as any).data?.message || 'E-mail verificado com sucesso!';
+    message.value = response.message || response.data?.message || 'E-mail verificado com sucesso!';
     showToast('success', message.value);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Email verification failed:', err);
     success.value = false;
-    message.value = err.response?.data?.message || 'Erro ao verificar e-mail. O link pode ter expirado ou é inválido.';
+    message.value = getErrorMessage(err, 'Erro ao verificar e-mail. O link pode ter expirado ou é inválido.');
     showToast('error', message.value);
   } finally {
     isLoading.value = false;

@@ -6,6 +6,7 @@ import { required, email, helpers } from '@vuelidate/validators';
 import { IonPage, IonContent, IonFooter, onIonViewDidLeave } from '@ionic/vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/composables/useToast';
+import { getErrorMessage } from '@/types';
 import Container from '@/components/layout/Container.vue';
 import Input from '@/components/ui/Input.vue';
 import Button from '@/components/ui/Button.vue';
@@ -27,9 +28,9 @@ const signIn = async () => {
   try {
     await authStore.login(formData);
     router.push('/');
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Login failed:', err);
-    showToast('error', err.response?.data?.message || 'Erro ao fazer login.');
+    showToast('error', getErrorMessage(err, 'Erro ao fazer login.'));
   } finally {
     isLoadingEmail.value = false;
   }

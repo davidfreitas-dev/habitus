@@ -6,6 +6,7 @@ import { required, email, helpers } from '@vuelidate/validators';
 import { IonPage, IonContent, onIonViewDidLeave } from '@ionic/vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/composables/useToast';
+import { getErrorMessage } from '@/types';
 
 import Container from '@/components/layout/Container.vue';
 import Input from '@/components/ui/Input.vue';
@@ -27,9 +28,9 @@ const handleContinue = async () => {
     const response = await authStore.forgotPassword(formData.email);
     showToast('success', response.message || 'E-mail de recuperação enviado!');
     router.push('/forgot/token');
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Forgot password failed:', err);
-    showToast('error', err.response?.data?.message || 'Erro ao solicitar recuperação de senha.');
+    showToast('error', getErrorMessage(err, 'Erro ao solicitar recuperação de senha.'));
   } finally {
     isLoading.value = false;
   }

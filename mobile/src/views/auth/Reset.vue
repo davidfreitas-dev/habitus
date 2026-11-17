@@ -6,6 +6,7 @@ import { required, sameAs, helpers } from '@vuelidate/validators';
 import { IonPage, IonContent, onIonViewDidLeave } from '@ionic/vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/composables/useToast';
+import { getErrorMessage } from '@/types';
 import Container from '@/components/layout/Container.vue';
 import Input from '@/components/ui/Input.vue';
 import Button from '@/components/ui/Button.vue';
@@ -27,10 +28,9 @@ const handleConfirm = async () => {
     const response = await authStore.resetPassword(formData.password, formData.confPassword);
     showToast('success', response.message || 'Senha redefinida com sucesso!');
     router.push('/signin');
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Password reset failed:', err);
-    const apiErrorMessage = err.response?.data?.data?.[0] || err.response?.data?.message;    
-    showToast('error', apiErrorMessage || 'Erro ao redefinir senha.');
+    showToast('error', getErrorMessage(err, 'Erro ao redefinir senha.'));
   } finally {
     isLoading.value = false;  
   }

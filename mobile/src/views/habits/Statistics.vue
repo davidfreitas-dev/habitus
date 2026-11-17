@@ -81,7 +81,7 @@ onIonViewDidLeave(() => {
 
 // --- Onboarding: tour da tela de Estatísticas ---
 const { isStepSeen, markStepSeen } = useOnboarding();
-const onboardingWrapper = ref<any>(null);
+const onboardingWrapper = ref<InstanceType<typeof VOnboardingWrapper> | null>(null);
 const { start: startStatsOnboarding, finish: finishStatsOnboarding } = useVOnboarding(onboardingWrapper);
 
 const onStatsOnboardingComplete = () => {

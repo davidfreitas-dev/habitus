@@ -12,7 +12,14 @@ withDefaults(
   }
 );
 
-const modal = ref<any>();
+interface IonModalElement {
+  $el?: {
+    present: () => Promise<void>;
+    dismiss: () => Promise<boolean>;
+  };
+}
+
+const modal = ref<IonModalElement | null>(null);
 
 const setOpen = (status: boolean) => {
   if (status) {
