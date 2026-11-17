@@ -34,11 +34,11 @@ A cor de fundo e o ícone animado são configurados em `android/app/src/main/res
 </style>
 ```
 
-Para aplicar modificações de estilo e manifesto:
+Para aplicar modificações de manifesto, estilo e otimização R8/ProGuard do Gradle:
 ```bash
 docker compose exec mobile npm run patch:android
 ```
-*(Executa os scripts `scripts/patch-android-manifest.js` e `scripts/patch-android-styles.js`).*
+*(Executa os scripts `scripts/patch-android-manifest.js`, `scripts/patch-android-styles.js` e `scripts/patch-android-gradle.js`, que também rodam automaticamente em `setup:android` e `prod:android`).*
 
 ---
 

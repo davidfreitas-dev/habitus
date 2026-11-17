@@ -1,6 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
 
 :root {
+  --ion-safe-area-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --ion-safe-area-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+  --ion-safe-area-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0px));
+  --ion-safe-area-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0px));
+
   /* Primary */
   --color-primary: #a3e635;
   --color-primary-hover: #84cc16;
@@ -115,8 +120,8 @@ body.dark {
 }
 
 .vertical-safe-area {
-  --padding-top: env(safe-area-inset-top);
-  --padding-bottom: env(safe-area-inset-bottom);
+  --padding-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --padding-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
 }
 
 ion-content, ion-toolbar, ion-modal, ion-list-header, ion-list, ion-item {

@@ -23,7 +23,7 @@ const habitStore = useHabitStore();
 
 const applyTheme = (isDark: boolean) => {
   document.body.classList.toggle('dark', isDark);
-  setStatusBar(isDark ? Style.Dark : Style.Light, isDark ? '#09090a' : '#ffffff');
+  setStatusBar(isDark ? Style.Dark : Style.Light);
 };
 
 watch(() => themeStore.isDarkMode, (isDark) => {
@@ -68,7 +68,7 @@ onMounted(async () => {
   background: var(--ion-color-danger);
   color: white;
   text-align: center;
-  padding: calc(env(safe-area-inset-top) + 6px) 12px 6px;
+  padding: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + 6px) 12px 6px;
   font-size: 0.85rem;
   font-weight: 600;
   z-index: 9999;

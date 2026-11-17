@@ -8,9 +8,22 @@
       "iconColor": "#C6FF34"      
     },
     "SplashScreen": {
-        "launchShowDuration": 2000,
-        "launchAutoHide": true,
-        "launchFadeOutDuration": 1000
+      "launchShowDuration": 2000,
+      "launchAutoHide": true,
+      "launchFadeOutDuration": 1000
+    },
+    "SystemBars": {
+      "insetsHandling": "css",
+      "style": "DEFAULT",
+      "hidden": false
+    },
+    "SocialLogin": {
+      "providers": {
+        "google": true,
+        "facebook": false,
+        "apple": false,
+        "twitter": false
+      }
     }
   }
 }

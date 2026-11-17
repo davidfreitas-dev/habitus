@@ -1,14 +1,12 @@
-import { StatusBar, Style } from '@capacitor/status-bar';
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, SystemBars, SystemBarsStyle as Style } from '@capacitor/core';
 
 export function useStatusBar() {
   const isNative = Capacitor.isNativePlatform();
 
-  const setStatusBar = async (style: Style = Style.Dark, color?: string) => {
+  const setStatusBar = async (style: Style = Style.Dark) => {
     if (!isNative) return;
 
-    if (color) await StatusBar.setBackgroundColor({ color });
-    await StatusBar.setStyle({ style });
+    await SystemBars.setStyle({ style });
   };
 
   return { setStatusBar, Style };

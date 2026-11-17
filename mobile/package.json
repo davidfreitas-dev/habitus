@@ -1,7 +1,7 @@
 {
   "name": "habitus",
   "private": true,
-  "version": "0.0.11",
+  "version": "0.0.16",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,12 +13,12 @@
     "test:coverage": "vitest run --coverage",
     "lint": "eslint",
     "setup:ios": "npm run build && npx cap add ios && npx cap sync ios",
-    "setup:android": "npm run build && npx cap add android && npx cap sync android",
+    "setup:android": "npm run build && npx cap add android && npx cap sync android && npm run patch:android",
     "live:ios": "ionic capacitor run ios -l --external",
     "live:android": "ionic capacitor run android -l --external",
     "prod:ios": "ionic build --prod && npx cap sync ios && npx cap open ios",
-    "prod:android": "ionic build --prod && npx cap sync android && npx cap open android",
-    "patch:android": "node scripts/patch-android-manifest.js && node scripts/patch-android-styles.js",
+    "prod:android": "ionic build --prod && npx cap sync android && npm run patch:android && npx cap open android",
+    "patch:android": "node scripts/patch-android-manifest.js && node scripts/patch-android-styles.js && node scripts/patch-android-gradle.js",
     "assets:generate": "cp assets/ic_stat_habitus.png android/app/src/main/res/drawable/ic_stat_habitus.png && npx capacitor-assets generate"
   },
   "dependencies": {
@@ -33,7 +33,6 @@
     "@capacitor/preferences": "^8.0.1",
     "@capacitor/screen-orientation": "^8.0.1",
     "@capacitor/splash-screen": "^8.0.0",
-    "@capacitor/status-bar": "^8.0.0",
     "@capgo/capacitor-social-login": "^8.3.40",
     "@ionic/vue": "8.7.17",
     "@ionic/vue-router": "8.7.17",

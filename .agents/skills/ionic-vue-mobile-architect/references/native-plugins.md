@@ -93,26 +93,19 @@ export function useNetwork() {
 
 ---
 
-## 4. Status Bar & Keyboard
+## 4. SystemBars (Status Bar / Navigation Bar Edge-to-Edge) & Keyboard
 
-### StatusBar:
-- No Android e iOS, sincronize o estilo da barra de status (`dark` vs `light`) com a preferência do `themeStore`:
+### SystemBars (`@capacitor/core`):
+- No Capacitor 8 (Android 15/16 Edge-to-Edge e iOS), utilize a API nativa `SystemBars` embutida no `@capacitor/core` (em vez do antigo `@capacitor/status-bar`, cujas APIs de cor de barra foram descontinuadas no Android 15):
 ```ts
-import { StatusBar, Style } from '@capacitor/status-bar';
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, SystemBars, SystemBarsStyle as Style } from '@capacitor/core';
 
 export async function setStatusBarStyle(isDark: boolean): Promise<void> {
   if (!Capacitor.isNativePlatform()) return;
 
-  await StatusBar.setStyle({
+  await SystemBars.setStyle({
     style: isDark ? Style.Dark : Style.Light,
   });
-
-  if (Capacitor.getPlatform() === 'android') {
-    await StatusBar.setBackgroundColor({
-      color: isDark ? '#121214' : '#FFFFFF',
-    });
-  }
 }
 ```
 
