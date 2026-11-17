@@ -15,21 +15,28 @@ if (!fs.existsSync(stylesPath)) {
 try {
   let stylesContent = fs.readFileSync(stylesPath, 'utf8');
 
-  if (stylesContent.includes('windowSplashScreenBackground')) {
+  const launchStylePattern = /<style name="AppTheme\.NoActionBarLaunch"[\s\S]*?<\/style>/;
+  const customLaunchStyle = `<style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="windowSplashScreenBackground">#C6FF34</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo</item>
+        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
+    </style>`;
+
+  if (
+    stylesContent.includes('windowSplashScreenBackground') &&
+    stylesContent.includes('@drawable/ic_splash_logo') &&
+    stylesContent.includes('<item name="windowActionBar">false</item>\n        <item name="windowNoTitle">true</item>\n        <item name="windowSplashScreenBackground">')
+  ) {
     console.log('✓ Splash Screen Android 12+ já configurada no styles.xml.');
     process.exit(0);
   }
 
-  const launchStylePattern = /<style name="AppTheme\.NoActionBarLaunch"[\s\S]*?<\/style>/;
-  const customLaunchStyle = `<style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">#C6FF34</item>
-        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
-    </style>`;
-
   if (launchStylePattern.test(stylesContent)) {
     stylesContent = stylesContent.replace(launchStylePattern, customLaunchStyle);
     fs.writeFileSync(stylesPath, stylesContent, 'utf8');
-    console.log('✓ styles.xml atualizado com tema da Splash Screen Android 12+.');
+    console.log('✓ styles.xml atualizado com tema e ícone de alta definição da Splash Screen Android 12+.');
   } else {
     console.error('Erro: Não foi possível localizar o estilo AppTheme.NoActionBarLaunch no styles.xml.');
   }

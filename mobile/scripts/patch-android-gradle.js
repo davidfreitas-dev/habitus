@@ -132,8 +132,7 @@ try {
   // 6. Habilita EdgeToEdge.enable(this) na MainActivity.java para compatibilidade ponta a ponta (Android 15+)
   if (fs.existsSync(mainActivityPath)) {
     let mainActivityContent = fs.readFileSync(mainActivityPath, 'utf8');
-    if (!mainActivityContent.includes('EdgeToEdge.enable')) {
-      const edgeToEdgeMainActivity = `package br.dev.davidfreitas.habitus;
+    const edgeToEdgeMainActivity = `package br.dev.davidfreitas.habitus;
 
 import android.os.Bundle;
 import androidx.activity.EdgeToEdge;
@@ -142,15 +141,16 @@ import com.getcapacitor.BridgeActivity;
 public class MainActivity extends BridgeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
     }
 }
 `;
+    if (mainActivityContent !== edgeToEdgeMainActivity) {
       fs.writeFileSync(mainActivityPath, edgeToEdgeMainActivity, 'utf8');
-      console.log('✓ MainActivity.java atualizada com EdgeToEdge.enable(this).');
+      console.log('✓ MainActivity.java atualizada com EdgeToEdge.enable(this) após super.onCreate.');
     } else {
-      console.log('✓ MainActivity.java já possui EdgeToEdge.enable(this).');
+      console.log('✓ MainActivity.java já possui EdgeToEdge.enable(this) configurado.');
     }
   }
 } catch (error) {

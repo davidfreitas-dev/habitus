@@ -12,14 +12,14 @@
     "test:unit": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint",
-    "setup:ios": "npm run build && npx cap add ios && npx cap sync ios",
-    "setup:android": "npm run build && npx cap add android && npx cap sync android && npm run patch:android",
+    "setup:ios": "npm run build && npx cap add ios && npm run assets:generate && npx cap sync ios",
+    "setup:android": "npm run build && npx cap add android && npm run assets:generate && npx cap sync android && npm run patch:android",
     "live:ios": "ionic capacitor run ios -l --external",
     "live:android": "ionic capacitor run android -l --external",
     "prod:ios": "ionic build --prod && npx cap sync ios && npx cap open ios",
     "prod:android": "ionic build --prod && npx cap sync android && npm run patch:android && npx cap open android",
-    "patch:android": "node scripts/patch-android-manifest.js && node scripts/patch-android-styles.js && node scripts/patch-android-gradle.js",
-    "assets:generate": "cp assets/ic_stat_habitus.png android/app/src/main/res/drawable/ic_stat_habitus.png && npx capacitor-assets generate"
+    "patch:android": "node scripts/patch-android-manifest.js && node scripts/patch-android-styles.js && node scripts/patch-android-gradle.js && node scripts/fix-android-icons.js",
+    "assets:generate": "cp assets/ic_stat_habitus.png android/app/src/main/res/drawable/ic_stat_habitus.png && npx capacitor-assets generate --android --ios && node scripts/fix-android-icons.js"
   },
   "dependencies": {
     "@capacitor/android": "8.0.0",
