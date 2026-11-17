@@ -28,6 +28,7 @@ import Container from '@/components/layout/Container.vue';
 import ButtonNew from '@/components/habits/ButtonNew.vue';
 import Button from '@/components/ui/Button.vue';
 import Input from '@/components/ui/Input.vue';
+import FilterChips, { type FilterChipItem } from '@/components/ui/FilterChips.vue';
 import ModalDialog from '@/components/layout/ModalDialog.vue';
 import { getErrorMessage, type Habit } from '@/types';
 
@@ -42,7 +43,7 @@ const isLoadingHabits = ref(false);
 const habitToDelete = ref<Habit | null>(null);
 const deleteDialogRef = ref<InstanceType<typeof ModalDialog> | null>(null);
 
-const weekDayFilters = [
+const weekDayFilters: FilterChipItem<number | null>[] = [
   { label: 'Todos', value: null },
   { label: 'Dom', value: 0 },
   { label: 'Seg', value: 1 },
@@ -51,7 +52,7 @@ const weekDayFilters = [
   { label: 'Qui', value: 4 },
   { label: 'Sex', value: 5 },
   { label: 'Sáb', value: 6 },
-] as const;
+];
 
 const shortWeekDays = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 
@@ -89,11 +90,6 @@ const filteredHabits = computed(() => {
     return matchesSearch && matchesDay;
   });
 });
-
-const selectDayFilter = async (day: number | null) => {
-  await triggerHaptic('light');
-  selectedWeekDay.value = day;
-};
 
 const loadHabits = async () => {
   if (habitStore.habits.length === 0) {
@@ -176,22 +172,11 @@ onIonViewWillEnter(() => {
           />
         </div>
 
-        <div
-          class="day-filters"
-          role="tablist"
+        <FilterChips
+          v-model="selectedWeekDay"
+          :items="weekDayFilters"
           aria-label="Filtrar por dia da semana"
-        >
-          <button
-            v-for="filter in weekDayFilters"
-            :key="String(filter.value)"
-            type="button"
-            class="day-filter-chip"
-            :class="{ active: selectedWeekDay === filter.value }"
-            @click="selectDayFilter(filter.value)"
-          >
-            {{ filter.label }}
-          </button>
-        </div>
+        />
 
         <div v-if="isLoadingHabits" class="habits-list">
           <div
@@ -291,38 +276,6 @@ onIonViewWillEnter(() => {
 <style scoped>
 .search-input-wrapper {
   margin-bottom: 12px;
-}
-
-.day-filters {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-  margin-bottom: 16px;
-  scrollbar-width: none;
-}
-
-.day-filters::-webkit-scrollbar {
-  display: none;
-}
-
-.day-filter-chip {
-  border: 1px solid var(--color-border-default);
-  background: var(--color-background-secondary);
-  color: var(--color-text-secondary);
-  border-radius: var(--radius-full);
-  padding: 6px 14px;
-  font-size: 0.8125rem;
-  font-weight: 700;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.day-filter-chip.active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--color-neutral-900);
 }
 
 .habits-list {
