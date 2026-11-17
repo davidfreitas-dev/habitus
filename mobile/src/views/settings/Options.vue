@@ -9,6 +9,7 @@ import {
   IonList,
   IonListHeader,
   IonIcon,
+  onIonViewWillEnter,
   onIonViewDidEnter,
 } from '@ionic/vue';
 import { personOutline, gridOutline, exitOutline } from 'ionicons/icons';
@@ -18,6 +19,7 @@ import { useLoading } from '@/composables/useLoading';
 import { useOnboarding } from '@/composables/useOnboarding';
 import { useToast } from '@/composables/useToast';
 import { useHaptics } from '@/composables/useHaptics';
+import { analyticsService } from '@/services/analyticsService';
 import { optionsSteps } from '@/onboarding/optionsSteps';
 import Header from '@/components/layout/Header.vue';
 import Heading from '@/components/layout/Heading.vue';
@@ -40,12 +42,21 @@ const isDarkMode = computed({
   set: (value: boolean) => themeStore.setDarkMode(value),
 });
 
+const analyticsConsent = ref(true);
+
+const handleAnalyticsConsentChange = async (enabled: boolean) => {
+  analyticsConsent.value = enabled;
+  await triggerHaptic('light');
+  await analyticsService.setConsent(enabled);
+};
+
 const modalRef = ref<InstanceType<typeof ModalDialog> | null>(null);
 const onboardingTourRef = ref<InstanceType<typeof OnboardingTour> | null>(null);
 
 const handleReplayTutorial = async () => {
   await triggerHaptic('light');
   await resetOnboarding(['welcome', 'home', 'day', 'form', 'stats', 'options']);
+  void analyticsService.logEvent({ name: 'onboarding_reset' });
   showToast('success', 'Tutorial reiniciado!');
   router.push('/onboarding/welcome');
 };
@@ -60,6 +71,10 @@ const logOut = async () => {
     router.push('/signin');
   }, 'Erro ao finalizar sessão.');
 };
+
+onIonViewWillEnter(async () => {
+  analyticsConsent.value = await analyticsService.getConsent();
+});
 
 onIonViewDidEnter(async () => {
   await onboardingTourRef.value?.startIfNotSeen();
@@ -124,6 +139,15 @@ onIonViewDidEnter(async () => {
               Modo escuro
             </ion-label>
             <Toggle v-model:checked="isDarkMode" />
+          </ion-item>
+          <ion-item class="ion-no-padding">
+            <ion-label class="ion-no-margin ion-padding-top ion-padding-bottom">
+              Telemetria de uso (LGPD)
+            </ion-label>
+            <Toggle
+              :checked="analyticsConsent"
+              @update:checked="handleAnalyticsConsentChange"
+            />
           </ion-item>
           <ion-item
             class="ion-no-padding"

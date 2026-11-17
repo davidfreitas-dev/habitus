@@ -2,6 +2,7 @@ import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import { habitService } from '@/services/habitService';
 import { notificationService } from '@/services/notificationService';
+import { analyticsService } from '@/services/analyticsService';
 import dayjs from '@/lib/dayjs';
 import type { DayInfo, Habit, StatsPeriod, SummaryDay } from '@/types';
 
@@ -29,6 +30,14 @@ export const useHabitStore = defineStore('habit', () => {
 
     habits.value = [...habits.value, data];
     invalidateCache();
+
+    void analyticsService.logEvent({
+      name: 'habit_created',
+      params: {
+        weekDaysCount: weekDays.length,
+        hasReminder: Boolean(reminderTime),
+      },
+    });
 
     return data;
   };
@@ -80,6 +89,14 @@ export const useHabitStore = defineStore('habit', () => {
     const updated = response.data;
     habits.value = habits.value.map(item => (String(item.id) === String(id) ? updated : item));
     invalidateCache();
+
+    void analyticsService.logEvent({
+      name: 'habit_updated',
+      params: {
+        habitId: id,
+        hasReminder: Boolean(reminder_time),
+      },
+    });
 
     return updated;
   };
@@ -148,6 +165,10 @@ export const useHabitStore = defineStore('habit', () => {
 
     try {
       const response = await habitService.toggle(habitId, targetDate);
+      void analyticsService.logEvent({
+        name: 'habit_toggled',
+        params: { habitId, date: targetDate },
+      });
       return response.data;
     } catch (error) {
       rollback();
@@ -160,6 +181,10 @@ export const useHabitStore = defineStore('habit', () => {
     const response = await habitService.delete(id);
     habits.value = habits.value.filter(item => String(item.id) !== String(id));
     invalidateCache();
+    void analyticsService.logEvent({
+      name: 'habit_deleted',
+      params: { habitId: id },
+    });
     return response;
   };
 
