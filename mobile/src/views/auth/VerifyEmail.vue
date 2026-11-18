@@ -6,8 +6,8 @@ import { checkmarkCircleOutline, closeCircleOutline } from 'ionicons/icons';
 import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/composables/useToast';
 import { getErrorMessage } from '@/types';
-import AuthLayout from '@/components/auth/AuthLayout.vue';
-import Button from '@/components/ui/Button.vue';
+import AuthLayout from '@/components/features/auth/AuthLayout.vue';
+import BaseButton from '@/components/base/BaseButton.vue';
 
 const props = withDefaults(
   defineProps<{
@@ -81,12 +81,12 @@ onMounted(() => {
         </p>
 
         <div class="actions">
-          <Button
+          <BaseButton
             color="primary"
             @click="router.push('/signin')"
           >
             Ir para o Login
-          </Button>
+          </BaseButton>
         </div>
       </div>
     </div>

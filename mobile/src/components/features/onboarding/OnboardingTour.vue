@@ -2,7 +2,7 @@
 import { ref, nextTick } from 'vue';
 import { useVOnboarding, VOnboardingStep, VOnboardingWrapper, type StepEntity } from 'v-onboarding';
 import { useOnboarding, type OnboardingStepKey } from '@/composables/useOnboarding';
-import OnboardingStep from '@/components/onboarding/OnboardingStep.vue';
+import OnboardingStep from '@/components/features/onboarding/OnboardingStep.vue';
 
 const props = withDefaults(
   defineProps<{

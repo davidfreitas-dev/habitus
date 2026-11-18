@@ -5,8 +5,8 @@ import { IonInputOtp, onIonViewDidLeave } from '@ionic/vue';
 import { useToast } from '@/composables/useToast';
 import { useAuthStore } from '@/stores/authStore';
 import { getErrorMessage } from '@/types';
-import AuthLayout from '@/components/auth/AuthLayout.vue';
-import Button from '@/components/ui/Button.vue';
+import AuthLayout from '@/components/features/auth/AuthLayout.vue';
+import BaseButton from '@/components/base/BaseButton.vue';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -65,22 +65,22 @@ onIonViewDidLeave(() => {
       </div>
 
       <div class="ion-margin-top ion-padding-top">
-        <Button
+        <BaseButton
           type="submit"
           color="primary"
           :is-loading="isLoading"
           :is-disabled="otpValue.length < 6"
         >
           Continuar
-        </Button>
+        </BaseButton>
 
         <div class="separator">
           <span>ou</span>
         </div>
 
-        <Button router-link="/signin">
+        <BaseButton router-link="/signin">
           Voltar ao login
-        </Button>
+        </BaseButton>
       </div>
     </form>
   </AuthLayout>

@@ -1,13 +1,13 @@
 import { mount } from '@vue/test-utils';
 import { describe, expect, it, vi } from 'vitest';
-import ProgressBar from '@/components/ui/Progressbar.vue';
-import Checkbox from '@/components/ui/Checkbox.vue';
-import Chip from '@/components/ui/Chip.vue';
-import FilterChips from '@/components/ui/FilterChips.vue';
+import BaseProgressBar from '@/components/base/BaseProgressBar.vue';
+import BaseCheckbox from '@/components/base/BaseCheckbox.vue';
+import BaseChip from '@/components/base/BaseChip.vue';
+import BaseFilterChips from '@/components/base/BaseFilterChips.vue';
 
-describe('ProgressBar.vue', () => {
+describe('BaseProgressBar.vue', () => {
   it('renders ion-progress-bar with normalized value corresponding to progress percentage', () => {
-    const wrapper = mount(ProgressBar, {
+    const wrapper = mount(BaseProgressBar, {
       props: {
         progress: 75,
       },
@@ -19,9 +19,9 @@ describe('ProgressBar.vue', () => {
   });
 });
 
-describe('Checkbox.vue', () => {
+describe('BaseCheckbox.vue', () => {
   it('emits handleItem on label click', async () => {
-    const wrapper = mount(Checkbox, {
+    const wrapper = mount(BaseCheckbox, {
       props: {
         label: 'Ler livro',
         isChecked: false,
@@ -35,9 +35,9 @@ describe('Checkbox.vue', () => {
   });
 });
 
-describe('Chip.vue', () => {
+describe('BaseChip.vue', () => {
   it('renders label in ion-label', () => {
-    const wrapper = mount(Chip, {
+    const wrapper = mount(BaseChip, {
       props: {
         label: 'Produtividade',
       },
@@ -49,7 +49,7 @@ describe('Chip.vue', () => {
   });
 
   it('applies active class when isActive is true', () => {
-    const wrapper = mount(Chip, {
+    const wrapper = mount(BaseChip, {
       props: {
         label: 'Ativo',
         isActive: true,
@@ -60,7 +60,7 @@ describe('Chip.vue', () => {
   });
 
   it('emits click event when clicked', async () => {
-    const wrapper = mount(Chip, {
+    const wrapper = mount(BaseChip, {
       props: {
         label: 'Clicável',
       },
@@ -71,7 +71,7 @@ describe('Chip.vue', () => {
   });
 });
 
-describe('FilterChips.vue', () => {
+describe('BaseFilterChips.vue', () => {
   const options = [
     { label: 'Todos', value: null },
     { label: 'Dom', value: 0 },
@@ -80,14 +80,14 @@ describe('FilterChips.vue', () => {
   ];
 
   it('renders all filter chip items and sets active state', () => {
-    const wrapper = mount(FilterChips, {
+    const wrapper = mount(BaseFilterChips, {
       props: {
         items: options,
         modelValue: 0,
       },
     });
 
-    const chips = wrapper.findAllComponents(Chip);
+    const chips = wrapper.findAllComponents(BaseChip);
     expect(chips).toHaveLength(4);
     expect(chips[0].text()).toBe('Todos');
     expect(chips[1].text()).toBe('Dom');
@@ -96,14 +96,14 @@ describe('FilterChips.vue', () => {
   });
 
   it('emits update:modelValue and change on item click', async () => {
-    const wrapper = mount(FilterChips, {
+    const wrapper = mount(BaseFilterChips, {
       props: {
         items: options,
         modelValue: null,
       },
     });
 
-    const chips = wrapper.findAllComponents(Chip);
+    const chips = wrapper.findAllComponents(BaseChip);
     await chips[2].trigger('click');
 
     expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([1]);
@@ -111,14 +111,14 @@ describe('FilterChips.vue', () => {
   });
 
   it('does not emit events when disabled chip is clicked', async () => {
-    const wrapper = mount(FilterChips, {
+    const wrapper = mount(BaseFilterChips, {
       props: {
         items: options,
         modelValue: null,
       },
     });
 
-    const chips = wrapper.findAllComponents(Chip);
+    const chips = wrapper.findAllComponents(BaseChip);
     await chips[3].trigger('click');
 
     expect(wrapper.emitted('update:modelValue')).toBeFalsy();
@@ -126,7 +126,7 @@ describe('FilterChips.vue', () => {
   });
 
   it('applies wrap class when wrap prop is true', () => {
-    const wrapper = mount(FilterChips, {
+    const wrapper = mount(BaseFilterChips, {
       props: {
         items: options,
         wrap: true,
@@ -138,7 +138,7 @@ describe('FilterChips.vue', () => {
 
   it('scrolls container to center chip when clicked', async () => {
     const scrollToMock = vi.fn();
-    const wrapper = mount(FilterChips, {
+    const wrapper = mount(BaseFilterChips, {
       props: {
         items: options,
         modelValue: null,
@@ -150,7 +150,7 @@ describe('FilterChips.vue', () => {
     container.scrollTo = scrollToMock;
     Object.defineProperty(container, 'offsetWidth', { value: 300, configurable: true });
 
-    const chips = wrapper.findAllComponents(Chip);
+    const chips = wrapper.findAllComponents(BaseChip);
     const targetElement = chips[2].element as HTMLElement;
     Object.defineProperty(targetElement, 'offsetLeft', { value: 200, configurable: true });
     Object.defineProperty(targetElement, 'offsetWidth', { value: 60, configurable: true });

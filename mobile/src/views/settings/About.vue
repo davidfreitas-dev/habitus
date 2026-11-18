@@ -1,12 +1,12 @@
 <template>
   <ion-page>
-    <Header>
-      <BackButton />
-    </Header>
+    <AppHeader>
+      <AppBackButton />
+    </AppHeader>
 
     <ion-content>
-      <Container>
-        <Segment v-model="selectedSegment" :segments="segments" />
+      <AppContainer>
+        <BaseSegment v-model="selectedSegment" :segments="segments" />
 
         <div v-if="selectedSegment === 'first'" class="ion-padding">
           <h1>Política de Privacidade</h1>
@@ -95,7 +95,7 @@
             <p>Para dúvidas ou sugestões sobre os Termos de Uso, envie um e-mail para <a href="mailto:davidfreitas.dev@outlook.com">davidfreitas.dev@outlook.com</a>.</p>
           </section>
         </div>
-      </Container>
+      </AppContainer>
     </ion-content>
   </ion-page>
 </template>
@@ -103,10 +103,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { IonPage, IonContent } from '@ionic/vue';
-import Header from '@/components/layout/Header.vue';
-import Container from '@/components/layout/Container.vue';
-import Segment, { type SegmentItem } from '@/components/ui/Segment.vue';
-import BackButton from '@/components/layout/BackButton.vue';
+import AppHeader from '@/components/app/AppHeader.vue';
+import AppContainer from '@/components/app/AppContainer.vue';
+import BaseSegment, { type SegmentItem } from '@/components/base/BaseSegment.vue';
+import AppBackButton from '@/components/app/AppBackButton.vue';
 
 const segments = ref<SegmentItem[]>([
   { 

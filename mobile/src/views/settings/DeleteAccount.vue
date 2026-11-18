@@ -5,12 +5,12 @@ import { IonContent, IonPage, IonItem, IonLabel } from '@ionic/vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useProfileStore } from '@/stores/profileStore';
 import { useLoading } from '@/composables/useLoading';
-import Header from '@/components/layout/Header.vue';
-import Heading from '@/components/layout/Heading.vue';
-import Container from '@/components/layout/Container.vue';
-import BackButton from '@/components/layout/BackButton.vue';
-import Button from '@/components/ui/Button.vue';
-import ModalDialog from '@/components/layout/ModalDialog.vue';
+import AppHeader from '@/components/app/AppHeader.vue';
+import AppHeading from '@/components/app/AppHeading.vue';
+import AppContainer from '@/components/app/AppContainer.vue';
+import AppBackButton from '@/components/app/AppBackButton.vue';
+import BaseButton from '@/components/base/BaseButton.vue';
+import AppConfirmModal from '@/components/app/AppConfirmModal.vue';
 
 const authStore = useAuthStore();
 const profileStore = useProfileStore();
@@ -19,7 +19,7 @@ const router = useRouter();
 
 const { isLoading, withLoading } = useLoading();
 
-const modalRef = ref<InstanceType<typeof ModalDialog> | null>(null);
+const modalRef = ref<InstanceType<typeof AppConfirmModal> | null>(null);
 
 const handleDeleteClick = () => {
   modalRef.value?.setOpen(true);
@@ -36,13 +36,13 @@ const confirmDelete = async () => {
 
 <template>
   <ion-page>
-    <Header>
-      <BackButton />
-    </Header>
+    <AppHeader>
+      <AppBackButton />
+    </AppHeader>
 
     <ion-content>
-      <Container>
-        <Heading title="Exclusão de Conta" />
+      <AppContainer>
+        <AppHeading title="Exclusão de Conta" />
 
         <div>
           <p><strong>Tem certeza de que deseja excluir sua conta?</strong></p>
@@ -78,17 +78,17 @@ const confirmDelete = async () => {
           <p>Caso tenha dúvidas ou precise de assistência, clique em <strong>Cancelar</strong> e entre em contato com nosso suporte.</p>
         </div>
 
-        <Button
+        <BaseButton
           color="danger"
           class="ion-margin-top ion-margin-bottom"
           :is-loading="isLoading"
           @click="handleDeleteClick"
         >
           Confirmar Exclusão
-        </Button>
-      </Container>
+        </BaseButton>
+      </AppContainer>
       
-      <ModalDialog
+      <AppConfirmModal
         ref="modalRef"
         message="Tem certeza que deseja excluir sua conta? Esta ação é irreversível!"
         @on-confirm="confirmDelete"

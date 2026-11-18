@@ -7,9 +7,9 @@ import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/composables/useToast';
 import { passwordRules, confirmPasswordRules, getFieldError } from '@/utils/validators';
 import { getErrorMessage } from '@/types';
-import AuthLayout from '@/components/auth/AuthLayout.vue';
-import Input from '@/components/ui/Input.vue';
-import Button from '@/components/ui/Button.vue';
+import AuthLayout from '@/components/features/auth/AuthLayout.vue';
+import BaseInput from '@/components/base/BaseInput.vue';
+import BaseButton from '@/components/base/BaseButton.vue';
 
 const authStore = useAuthStore();
 const isLoading = ref(false);
@@ -68,7 +68,7 @@ onIonViewDidLeave(() => {
 <template>
   <AuthLayout>
     <form @submit.prevent="submitForm">
-      <Input
+      <BaseInput
         v-model="formData.password"
         type="password"
         label="Digite a nova senha"
@@ -77,7 +77,7 @@ onIonViewDidLeave(() => {
         @blur="v$.password.$touch()"
       />
 
-      <Input
+      <BaseInput
         v-model="formData.confPassword"
         type="password"
         label="Confirme a nova senha"
@@ -87,22 +87,22 @@ onIonViewDidLeave(() => {
       />
 
       <div class="ion-margin-top ion-padding-top">
-        <Button
+        <BaseButton
           type="submit"
           color="primary"
           :is-loading="isLoading"
           :is-disabled="v$.$invalid"
         >
           Confirmar
-        </Button>
+        </BaseButton>
 
         <div class="separator">
           <span>ou</span>
         </div>
 
-        <Button router-link="/signin">
+        <BaseButton router-link="/signin">
           Voltar ao login
-        </Button>
+        </BaseButton>
       </div>
     </form>
   </AuthLayout>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { IonModal, IonContent } from '@ionic/vue';
-import Button from '@/components/ui/Button.vue';
+import BaseButton from '@/components/base/BaseButton.vue';
 
 withDefaults(
   defineProps<{
@@ -57,16 +57,16 @@ const confirmAction = () => {
       </div>
       
       <div class="ion-padding">
-        <Button
+        <BaseButton
           color="primary"
           class="ion-margin-bottom"
           @click="confirmAction"
         >
           Confirmar
-        </Button>
-        <Button @click="closeModal">
+        </BaseButton>
+        <BaseButton @click="closeModal">
           Cancelar
-        </Button>
+        </BaseButton>
       </div>
     </ion-content>
   </ion-modal>

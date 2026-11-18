@@ -7,12 +7,12 @@ import { useProfileStore } from '@/stores/profileStore';
 import { useToast } from '@/composables/useToast';
 import { useLoading } from '@/composables/useLoading';
 import { emailRules, getFieldError } from '@/utils/validators';
-import Header from '@/components/layout/Header.vue';
-import Heading from '@/components/layout/Heading.vue';
-import Container from '@/components/layout/Container.vue';
-import BackButton from '@/components/layout/BackButton.vue';
-import Input from '@/components/ui/Input.vue';
-import Button from '@/components/ui/Button.vue';
+import AppHeader from '@/components/app/AppHeader.vue';
+import AppHeading from '@/components/app/AppHeading.vue';
+import AppContainer from '@/components/app/AppContainer.vue';
+import AppBackButton from '@/components/app/AppBackButton.vue';
+import BaseInput from '@/components/base/BaseInput.vue';
+import BaseButton from '@/components/base/BaseButton.vue';
 
 const profileStore = useProfileStore();
 
@@ -78,17 +78,17 @@ const submitForm = async () => {
 
 <template>
   <ion-page>
-    <Header>
-      <BackButton />
-    </Header>
+    <AppHeader>
+      <AppBackButton />
+    </AppHeader>
 
     <ion-content>
-      <Container>
-        <Heading title="Edição de Perfil" />
+      <AppContainer>
+        <AppHeading title="Edição de Perfil" />
 
         <form @submit.prevent="submitForm">
           <div>
-            <Input
+            <BaseInput
               v-model="formData.name"
               type="text"
               label="Nome"
@@ -97,7 +97,7 @@ const submitForm = async () => {
               @blur="v$.name.$touch()"
             />
 
-            <Input
+            <BaseInput
               v-model="formData.email"
               type="email"
               label="E-mail"
@@ -107,16 +107,16 @@ const submitForm = async () => {
             />
           </div>
 
-          <Button
+          <BaseButton
             type="submit"
             color="primary"
             :is-disabled="v$.$invalid"
             :is-loading="isLoading"
           >
             Confirmar
-          </Button>
+          </BaseButton>
         </form>
-      </Container>
+      </AppContainer>
     </ion-content>
   </ion-page>
 </template>

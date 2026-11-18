@@ -7,10 +7,10 @@ import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/composables/useToast';
 import { emailRules, requiredPasswordRules, getFieldError } from '@/utils/validators';
 import { getErrorMessage } from '@/types';
-import AuthLayout from '@/components/auth/AuthLayout.vue';
-import Input from '@/components/ui/Input.vue';
-import Button from '@/components/ui/Button.vue';
-import ButtonGoogle from '@/components/auth/ButtonGoogle.vue';
+import AuthLayout from '@/components/features/auth/AuthLayout.vue';
+import BaseInput from '@/components/base/BaseInput.vue';
+import BaseButton from '@/components/base/BaseButton.vue';
+import AuthGoogleButton from '@/components/features/auth/AuthGoogleButton.vue';
 
 const authStore = useAuthStore();
 const isLoadingEmail = ref(false);
@@ -64,7 +64,7 @@ onIonViewDidLeave(() => {
 <template>
   <AuthLayout>
     <form @submit.prevent="submitForm">
-      <Input
+      <BaseInput
         v-model="formData.email"
         type="text"
         label="Seu e-mail"
@@ -73,7 +73,7 @@ onIonViewDidLeave(() => {
         @blur="v$.email.$touch()"
       />
 
-      <Input
+      <BaseInput
         v-model="formData.password"
         type="password"
         label="Sua senha"
@@ -86,20 +86,20 @@ onIonViewDidLeave(() => {
         Esqueci a senha
       </router-link>
 
-      <Button
+      <BaseButton
         type="submit"
         color="primary"
         :is-loading="isLoadingEmail"
         :is-disabled="v$.$invalid"
       >
         Entrar
-      </Button>
+      </BaseButton>
 
       <div class="separator">
         <span>ou</span>
       </div>
 
-      <ButtonGoogle :is-disabled="isLoadingEmail" label="Entrar com Google" />
+      <AuthGoogleButton :is-disabled="isLoadingEmail" label="Entrar com Google" />
     </form>
 
     <template #footer>

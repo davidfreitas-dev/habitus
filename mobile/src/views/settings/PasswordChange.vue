@@ -12,12 +12,12 @@ import {
   confirmPasswordRules,
   getFieldError,
 } from '@/utils/validators';
-import Header from '@/components/layout/Header.vue';
-import Heading from '@/components/layout/Heading.vue';
-import Container from '@/components/layout/Container.vue';
-import BackButton from '@/components/layout/BackButton.vue';
-import Input from '@/components/ui/Input.vue';
-import Button from '@/components/ui/Button.vue';
+import AppHeader from '@/components/app/AppHeader.vue';
+import AppHeading from '@/components/app/AppHeading.vue';
+import AppContainer from '@/components/app/AppContainer.vue';
+import AppBackButton from '@/components/app/AppBackButton.vue';
+import BaseInput from '@/components/base/BaseInput.vue';
+import BaseButton from '@/components/base/BaseButton.vue';
 
 const profileStore = useProfileStore();
 const router = useRouter();
@@ -80,17 +80,17 @@ const submitForm = async () => {
 
 <template>
   <ion-page>
-    <Header>
-      <BackButton />
-    </Header>
+    <AppHeader>
+      <AppBackButton />
+    </AppHeader>
 
     <ion-content>
-      <Container>
-        <Heading title="Alteração de Senha" />
+      <AppContainer>
+        <AppHeading title="Alteração de Senha" />
 
         <form @submit.prevent="submitForm">
           <div>
-            <Input
+            <BaseInput
               v-model="formData.currentPassword"
               type="password"
               label="Digite a senha atual"
@@ -99,7 +99,7 @@ const submitForm = async () => {
               @blur="v$.currentPassword.$touch()"
             />
 
-            <Input
+            <BaseInput
               v-model="formData.newPassword"
               type="password"
               label="Digite a nova senha"
@@ -108,7 +108,7 @@ const submitForm = async () => {
               @blur="v$.newPassword.$touch()"
             />
 
-            <Input
+            <BaseInput
               v-model="formData.confNewPassword"
               type="password"
               label="Confirme a nova senha"
@@ -118,16 +118,16 @@ const submitForm = async () => {
             />
           </div>
 
-          <Button
+          <BaseButton
             type="submit"
             color="primary"
             :is-disabled="v$.$invalid"
             :is-loading="isLoading"
           >
             Confirmar
-          </Button>
+          </BaseButton>
         </form>
-      </Container>
+      </AppContainer>
     </ion-content>
   </ion-page>
 </template>

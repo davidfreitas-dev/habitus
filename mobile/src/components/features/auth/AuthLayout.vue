@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import { IonPage, IonContent, IonFooter } from '@ionic/vue';
-import Container from '@/components/layout/Container.vue';
-import Logo from '@/components/layout/Logo.vue';
+import AppContainer from '@/components/app/AppContainer.vue';
+import AppLogo from '@/components/app/AppLogo.vue';
 </script>
 
 <template>
   <ion-page>
     <ion-content :fullscreen="true">
-      <Container>
+      <AppContainer>
         <div class="auth-layout-body">
-          <Logo />
+          <AppLogo />
           <slot />
         </div>
-      </Container>
+      </AppContainer>
     </ion-content>
 
     <ion-footer v-if="$slots.footer" class="ion-no-border ion-padding">

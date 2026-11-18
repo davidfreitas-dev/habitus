@@ -7,14 +7,14 @@ import { useLoading } from '@/composables/useLoading';
 import { useToast } from '@/composables/useToast';
 import { useHaptics } from '@/composables/useHaptics';
 import { formSteps } from '@/onboarding/formSteps';
-import Header from '@/components/layout/Header.vue';
-import Heading from '@/components/layout/Heading.vue';
-import Container from '@/components/layout/Container.vue';
-import Button from '@/components/ui/Button.vue';
-import BackButton from '@/components/layout/BackButton.vue';
-import HabitForm from '@/components/habits/HabitForm.vue';
-import ModalDialog from '@/components/layout/ModalDialog.vue';
-import OnboardingTour from '@/components/onboarding/OnboardingTour.vue';
+import AppHeader from '@/components/app/AppHeader.vue';
+import AppHeading from '@/components/app/AppHeading.vue';
+import AppContainer from '@/components/app/AppContainer.vue';
+import BaseButton from '@/components/base/BaseButton.vue';
+import AppBackButton from '@/components/app/AppBackButton.vue';
+import HabitForm from '@/components/features/habits/HabitForm.vue';
+import AppConfirmModal from '@/components/app/AppConfirmModal.vue';
+import OnboardingTour from '@/components/features/onboarding/OnboardingTour.vue';
 import type { HabitDraft, HabitFormSubmitPayload } from '@/types';
 
 const habitStore = useHabitStore();
@@ -63,7 +63,7 @@ onIonViewDidEnter(async () => {
 });
 
 const habitFormRef = ref<InstanceType<typeof HabitForm> | null>(null);
-const dialogRef = ref<InstanceType<typeof ModalDialog> | null>(null);
+const dialogRef = ref<InstanceType<typeof AppConfirmModal> | null>(null);
 
 const handleFormError = (message: string) => {
   showToast('info', message);
@@ -112,13 +112,13 @@ const deleteHabit = async () => {
 
 <template>
   <ion-page>
-    <Header>
-      <BackButton />
-    </Header>
+    <AppHeader>
+      <AppBackButton />
+    </AppHeader>
 
     <ion-content>
-      <Container>
-        <Heading :title="pageTitle" />
+      <AppContainer>
+        <AppHeading :title="pageTitle" />
 
         <HabitForm
           v-if="!route.params.id || habit.title"
@@ -129,17 +129,17 @@ const deleteHabit = async () => {
           @on-error="handleFormError"
         />
 
-        <Button
+        <BaseButton
           v-if="route.params.id && habit.title"
           color="danger"
           class="ion-margin-top"
           @click="handleDelete"
         >
           Excluir
-        </Button>
-      </Container>
+        </BaseButton>
+      </AppContainer>
 
-      <ModalDialog
+      <AppConfirmModal
         ref="dialogRef"
         message="Deseja realmente excluir este hábito?"
         @on-confirm="deleteHabit"

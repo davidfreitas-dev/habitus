@@ -1,7 +1,7 @@
 <script setup lang="ts" generic="T = string | number | null">
 import { ref, watch, onMounted, nextTick } from 'vue';
 import { useHaptics } from '@/composables/useHaptics';
-import Chip from '@/components/ui/Chip.vue';
+import BaseChip from '@/components/base/BaseChip.vue';
 
 export interface FilterChipItem<ValueType = string | number | null> {
   label: string;
@@ -96,7 +96,7 @@ onMounted(() => {
     role="tablist"
     :aria-label="ariaLabel"
   >
-    <Chip
+    <BaseChip
       v-for="(item, index) in items"
       :key="String(item.value)"
       :label="item.label"
@@ -113,7 +113,7 @@ onMounted(() => {
           :active="modelValue === item.value"
         />
       </template>
-    </Chip>
+    </BaseChip>
   </div>
 </template>
 

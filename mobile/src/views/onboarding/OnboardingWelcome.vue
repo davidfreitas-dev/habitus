@@ -8,8 +8,8 @@ import { useNotifications } from '@/composables/useNotifications';
 import { useToast } from '@/composables/useToast';
 import { useHabitStore } from '@/stores/habitsStore';
 import { notificationService } from '@/services/notificationService';
-import Container from '@/components/layout/Container.vue';
-import Button from '@/components/ui/Button.vue';
+import AppContainer from '@/components/app/AppContainer.vue';
+import BaseButton from '@/components/base/BaseButton.vue';
 
 const router = useRouter();
 const { markStepSeen } = useOnboarding();
@@ -56,7 +56,7 @@ const skipNotifications = () => {
 <template>
   <ion-page>
     <ion-content :fullscreen="true">
-      <Container>
+      <AppContainer>
         <div class="welcome-container">
           <div class="welcome-content">
             <div class="welcome-illustration">
@@ -79,13 +79,13 @@ const skipNotifications = () => {
           </div>
 
           <div class="welcome-actions">
-            <Button
+            <BaseButton
               color="primary"
               :is-loading="isRequesting"
               @click="requestNotificationPermission"
             >
               Ativar notificações
-            </Button>
+            </BaseButton>
 
             <ion-button
               fill="clear"
@@ -97,7 +97,7 @@ const skipNotifications = () => {
             </ion-button>
           </div>
         </div>
-      </Container>
+      </AppContainer>
     </ion-content>
   </ion-page>
 </template>

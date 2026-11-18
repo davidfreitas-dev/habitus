@@ -17,11 +17,11 @@ import { useCelebrationSound } from '@/composables/useCelebrationSound';
 import { useToast } from '@/composables/useToast';
 import { getErrorMessage, type DayInfo } from '@/types';
 import confetti from 'canvas-confetti';
-import Breadcrumb from '@/components/layout/Breadcrumb.vue';
-import ProgressBar from '@/components/ui/Progressbar.vue';
-import Checkbox from '@/components/ui/Checkbox.vue';
-import Button from '@/components/ui/Button.vue';
-import OnboardingTour from '@/components/onboarding/OnboardingTour.vue';
+import HabitDayHeader from '@/components/features/habits/HabitDayHeader.vue';
+import BaseProgressBar from '@/components/base/BaseProgressBar.vue';
+import BaseCheckbox from '@/components/base/BaseCheckbox.vue';
+import BaseButton from '@/components/base/BaseButton.vue';
+import OnboardingTour from '@/components/features/onboarding/OnboardingTour.vue';
 import { daySteps } from '@/onboarding/daySteps';
 
 const props = withDefaults(
@@ -172,7 +172,7 @@ const handleCreateHabit = () => {
   >
     <ion-content class="sheet-content ion-padding-horizontal">
       <div class="sheet-header-row">
-        <Breadcrumb
+        <HabitDayHeader
           :week-day="dayOfWeek"
           :date="dayAndMonth"
         />
@@ -188,7 +188,7 @@ const handleCreateHabit = () => {
       </div>
 
       <div class="sheet-body">
-        <ProgressBar
+        <BaseProgressBar
           id="onboarding-progress-bar"
           :progress="progressPercentage"
           class="sheet-progress"
@@ -199,7 +199,7 @@ const handleCreateHabit = () => {
         </div>
 
         <div v-else-if="dayInfo.possible_habits.length > 0" class="habits-checklist">
-          <Checkbox
+          <BaseCheckbox
             v-for="(habit, index) in dayInfo.possible_habits"
             :id="index === 0 ? 'onboarding-habit-checkbox' : undefined"
             :key="habit.id"
@@ -218,7 +218,7 @@ const handleCreateHabit = () => {
           <ion-text color="medium">
             <p>Você não possui hábitos cadastrados para este dia.</p>
           </ion-text>
-          <Button
+          <BaseButton
             color="primary"
             size="small"
             class="ion-margin-top"
@@ -226,7 +226,7 @@ const handleCreateHabit = () => {
           >
             <ion-icon slot="start" :icon="addOutline" />
             Criar Hábito
-          </Button>
+          </BaseButton>
         </div>
 
         <div v-if="!isDateEditable" class="sheet-locked-notice ion-text-center ion-padding-top">

@@ -20,16 +20,16 @@ import { useHabitStore } from '@/stores/habitsStore';
 import { useToast } from '@/composables/useToast';
 import { useHaptics } from '@/composables/useHaptics';
 import { isHabitDayActive } from '@/utils/habitUtils';
-import Header from '@/components/layout/Header.vue';
-import Heading from '@/components/layout/Heading.vue';
-import Container from '@/components/layout/Container.vue';
-import ButtonNew from '@/components/habits/ButtonNew.vue';
-import HabitListItem from '@/components/habits/HabitListItem.vue';
-import Button from '@/components/ui/Button.vue';
-import Input from '@/components/ui/Input.vue';
-import FilterChips, { type FilterChipItem } from '@/components/ui/FilterChips.vue';
-import ModalDialog from '@/components/layout/ModalDialog.vue';
-import OnboardingTour from '@/components/onboarding/OnboardingTour.vue';
+import AppHeader from '@/components/app/AppHeader.vue';
+import AppHeading from '@/components/app/AppHeading.vue';
+import AppContainer from '@/components/app/AppContainer.vue';
+import HabitNewButton from '@/components/features/habits/HabitNewButton.vue';
+import HabitListItem from '@/components/features/habits/HabitListItem.vue';
+import BaseButton from '@/components/base/BaseButton.vue';
+import BaseInput from '@/components/base/BaseInput.vue';
+import BaseFilterChips, { type FilterChipItem } from '@/components/base/BaseFilterChips.vue';
+import AppConfirmModal from '@/components/app/AppConfirmModal.vue';
+import OnboardingTour from '@/components/features/onboarding/OnboardingTour.vue';
 import { habitsSteps } from '@/onboarding/habitsSteps';
 import { getErrorMessage, type Habit } from '@/types';
 
@@ -42,7 +42,7 @@ const searchQuery = ref('');
 const selectedWeekDay = ref<number | null>(null);
 const isLoadingHabits = ref(false);
 const habitToDelete = ref<Habit | null>(null);
-const deleteDialogRef = ref<InstanceType<typeof ModalDialog> | null>(null);
+const deleteDialogRef = ref<InstanceType<typeof AppConfirmModal> | null>(null);
 const ionListRef = ref<InstanceType<typeof IonList> | null>(null);
 const onboardingTourRef = ref<InstanceType<typeof OnboardingTour> | null>(null);
 let habitsLoaded: Promise<void> | null = null;
@@ -160,29 +160,29 @@ onIonViewDidEnter(async () => {
 
 <template>
   <ion-page>
-    <Header>
+    <AppHeader>
       <ion-row class="header-row ion-justify-content-between ion-align-items-center ion-padding-horizontal ion-padding-top">
-        <Heading title="Meus Hábitos" />
-        <ButtonNew id="onboarding-habits-new" />
+        <AppHeading title="Meus Hábitos" />
+        <HabitNewButton id="onboarding-habits-new" />
       </ion-row>
-    </Header>
+    </AppHeader>
 
     <ion-content>
       <ion-refresher slot="fixed" @ion-refresh="handleRefresh">
         <ion-refresher-content />
       </ion-refresher>
 
-      <Container>
+      <AppContainer>
         <div class="content">
           <div id="onboarding-habits-search">
-            <Input
+            <BaseInput
               v-model="searchQuery"
               type="text"
               placeholder="Buscar hábito..."
             />
           </div>
 
-          <FilterChips
+          <BaseFilterChips
             id="onboarding-habits-chips"
             v-model="selectedWeekDay"
             :items="weekDayFilters"
@@ -228,7 +228,7 @@ onIonViewDidEnter(async () => {
                 Nenhum hábito encontrado para o filtro selecionado.
               </p>
             </ion-text>
-            <Button
+            <BaseButton
               v-if="habitStore.habits.length === 0"
               color="primary"
               size="small"
@@ -236,12 +236,12 @@ onIonViewDidEnter(async () => {
               @click="router.push('/habit')"
             >
               Criar Primeiro Hábito
-            </Button>
+            </BaseButton>
           </div>
         </div>
-      </Container>
+      </AppContainer>
 
-      <ModalDialog
+      <AppConfirmModal
         ref="deleteDialogRef"
         message="Deseja realmente excluir este hábito?"
         @on-confirm="confirmDeleteHabit"

@@ -2,8 +2,8 @@
 import { computed } from 'vue';
 import dayjs from '@/lib/dayjs';
 import { useDayDimensions } from '@/composables/useDayDimensions';
-import HabitDaysStartGap from '@/components/habits/HabitDaysStartGap.vue';
-import HabitDay from '@/components/habits/HabitDay.vue';
+import HabitDaysStartGap from '@/components/features/habits/HabitDaysStartGap.vue';
+import HabitDay from '@/components/features/habits/HabitDay.vue';
 import type { SummaryDay } from '@/types';
 
 const MINIMUM_SUMMARY_DATES_SIZE = 18 * 7;

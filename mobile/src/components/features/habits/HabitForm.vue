@@ -11,11 +11,11 @@ import {
   getLocalISOString,
   timeStringToLocalISO,
 } from '@/utils/habitUtils';
-import Input from '@/components/ui/Input.vue';
-import Checkbox from '@/components/ui/Checkbox.vue';
-import Button from '@/components/ui/Button.vue';
-import Toggle from '@/components/ui/Toggle.vue';
-import Chip from '@/components/ui/Chip.vue';
+import BaseInput from '@/components/base/BaseInput.vue';
+import BaseCheckbox from '@/components/base/BaseCheckbox.vue';
+import BaseButton from '@/components/base/BaseButton.vue';
+import BaseToggle from '@/components/base/BaseToggle.vue';
+import BaseChip from '@/components/base/BaseChip.vue';
 import type { HabitDraft, HabitFormSubmitPayload } from '@/types';
 
 const emit = defineEmits<{
@@ -196,7 +196,7 @@ const applyTemplate = async (template: HabitTemplate, event?: MouseEvent) => {
         Sugestões populares
       </p>
       <div ref="templatesScrollRef" class="templates-scroll">
-        <Chip
+        <BaseChip
           v-for="tpl in habitTemplates"
           :key="tpl.title"
           :outline="true"
@@ -205,12 +205,12 @@ const applyTemplate = async (template: HabitTemplate, event?: MouseEvent) => {
         >
           <span class="template-emoji">{{ tpl.emoji }}</span>
           <ion-label>{{ tpl.title }}</ion-label>
-        </Chip>
+        </BaseChip>
       </div>
     </div>
 
     <p>Qual seu comprometimento?</p>
-    <Input
+    <BaseInput
       id="onboarding-habit-name"
       v-model="formData.title"
       placeholder="Exercícios, dormir bem, etc..."
@@ -221,7 +221,7 @@ const applyTemplate = async (template: HabitTemplate, event?: MouseEvent) => {
       <p>Qual a recorrência?</p>
 
       <div ref="presetsScrollRef" class="recurrence-presets">
-        <Chip
+        <BaseChip
           v-for="preset in RECURRENCE_PRESETS"
           :key="preset.label"
           :label="preset.label"
@@ -232,7 +232,7 @@ const applyTemplate = async (template: HabitTemplate, event?: MouseEvent) => {
         />
       </div>
 
-      <Checkbox
+      <BaseCheckbox
         v-for="(weekDay, index) in FULL_WEEK_DAYS"
         :key="index"
         :label="weekDay"
@@ -246,7 +246,7 @@ const applyTemplate = async (template: HabitTemplate, event?: MouseEvent) => {
         <ion-label class="ion-no-margin">
           <b>Ativar lembrete</b>
         </ion-label>
-        <Toggle v-model:checked="formData.reminderEnabled" />
+        <BaseToggle v-model:checked="formData.reminderEnabled" />
       </ion-item>
       <ion-item
         v-if="formData.reminderEnabled"
@@ -268,14 +268,14 @@ const applyTemplate = async (template: HabitTemplate, event?: MouseEvent) => {
       </ion-item>
     </div>
 
-    <Button
+    <BaseButton
       type="submit"
       color="primary"
       class="ion-margin-top"
       :is-loading="isLoading"
     >
       Confirmar
-    </Button>
+    </BaseButton>
   </form>
 </template>
 

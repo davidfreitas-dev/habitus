@@ -13,11 +13,11 @@ import {
   getFieldError,
 } from '@/utils/validators';
 import { getErrorMessage } from '@/types';
-import AuthLayout from '@/components/auth/AuthLayout.vue';
-import Input from '@/components/ui/Input.vue';
-import Button from '@/components/ui/Button.vue';
-import Checkbox from '@/components/ui/Checkbox.vue';
-import ButtonGoogle from '@/components/auth/ButtonGoogle.vue';
+import AuthLayout from '@/components/features/auth/AuthLayout.vue';
+import BaseInput from '@/components/base/BaseInput.vue';
+import BaseButton from '@/components/base/BaseButton.vue';
+import BaseCheckbox from '@/components/base/BaseCheckbox.vue';
+import AuthGoogleButton from '@/components/features/auth/AuthGoogleButton.vue';
 
 const authStore = useAuthStore();
 const isLoadingEmail = ref(false);
@@ -82,7 +82,7 @@ onIonViewDidLeave(() => {
 <template>
   <AuthLayout>
     <form @submit.prevent="submitForm">
-      <Input
+      <BaseInput
         v-model="formData.name"
         type="text"
         label="Seu nome e sobrenome"
@@ -91,7 +91,7 @@ onIonViewDidLeave(() => {
         @blur="v$.name.$touch()"
       />
 
-      <Input
+      <BaseInput
         v-model="formData.email"
         type="text"
         label="Seu melhor e-mail"
@@ -100,7 +100,7 @@ onIonViewDidLeave(() => {
         @blur="v$.email.$touch()"
       />
 
-      <Input
+      <BaseInput
         v-model="formData.password"
         type="password"
         label="Sua senha"
@@ -110,7 +110,7 @@ onIonViewDidLeave(() => {
       />
 
       <div class="hp-field">
-        <Input
+        <BaseInput
           v-model="formData.website"
           type="text"
           label="Website"
@@ -120,7 +120,7 @@ onIonViewDidLeave(() => {
       </div>
 
       <div class="terms-checkbox">
-        <Checkbox
+        <BaseCheckbox
           size="small"
           :is-checked="formData.agreeToTerms"
           @handle-checkbox-change="formData.agreeToTerms = !formData.agreeToTerms"
@@ -135,24 +135,24 @@ onIonViewDidLeave(() => {
               Política de Privacidade
             </router-link>
           </span>
-        </Checkbox>
+        </BaseCheckbox>
       </div>
 
       <div class="ion-margin-top">
-        <Button
+        <BaseButton
           type="submit"
           color="primary"
           :is-loading="isLoadingEmail"
           :is-disabled="v$.$invalid || !formData.agreeToTerms"
         >
           Criar conta
-        </Button>
+        </BaseButton>
 
         <div class="separator">
           <span>ou</span>
         </div>
 
-        <ButtonGoogle :is-disabled="isLoadingEmail" label="Entrar com Google" />
+        <AuthGoogleButton :is-disabled="isLoadingEmail" label="Entrar com Google" />
       </div>
     </form>
 

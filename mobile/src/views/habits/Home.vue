@@ -20,14 +20,14 @@ import { useHabitStore } from '@/stores/habitsStore';
 import { useToast } from '@/composables/useToast';
 import { useHaptics } from '@/composables/useHaptics';
 import { homeSteps } from '@/onboarding/homeSteps';
-import Header from '@/components/layout/Header.vue';
-import Avatar from '@/components/layout/Avatar.vue';
-import ButtonNew from '@/components/habits/ButtonNew.vue';
-import WeekDays from '@/components/habits/WeekDays.vue';
-import Container from '@/components/layout/Container.vue';
-import Summary from '@/components/habits/Summary.vue';
-import DaySheetModal from '@/components/habits/DaySheetModal.vue';
-import OnboardingTour from '@/components/onboarding/OnboardingTour.vue';
+import AppHeader from '@/components/app/AppHeader.vue';
+import HabitUserGreeting from '@/components/features/habits/HabitUserGreeting.vue';
+import HabitNewButton from '@/components/features/habits/HabitNewButton.vue';
+import HabitWeekDays from '@/components/features/habits/HabitWeekDays.vue';
+import AppContainer from '@/components/app/AppContainer.vue';
+import HabitSummary from '@/components/features/habits/HabitSummary.vue';
+import HabitDaySheetModal from '@/components/features/habits/HabitDaySheetModal.vue';
+import OnboardingTour from '@/components/features/onboarding/OnboardingTour.vue';
 import dayjs from '@/lib/dayjs';
 import { getErrorMessage } from '@/types';
 
@@ -185,24 +185,24 @@ onIonViewDidEnter(async () => {
 
 <template>
   <ion-page>
-    <Header>
+    <AppHeader>
       <ion-row class="header-row ion-justify-content-between ion-align-items-center ion-padding">
-        <Avatar :name="user?.name || 'Convidado'" />
-        <ButtonNew id="onboarding-btn-new" />
+        <HabitUserGreeting :name="user?.name || 'Convidado'" />
+        <HabitNewButton id="onboarding-btn-new" />
       </ion-row>
-      <WeekDays v-if="!isHorizontalLayout" />
-    </Header>
+      <HabitWeekDays v-if="!isHorizontalLayout" />
+    </AppHeader>
     <ion-content ref="contentRef">
       <ion-refresher slot="fixed" @ion-refresh="handleRefresh">
         <ion-refresher-content />
       </ion-refresher>
 
-      <Container class="ion-margin-bottom">
+      <AppContainer class="ion-margin-bottom">
         <div
           v-if="isLoadingSummary || datesFromYearStart.length"
           :class="['summary-wrapper', { 'summary-wrapper--horizontal': isHorizontalLayout }]"
         >
-          <WeekDays v-if="isHorizontalLayout" direction="vertical" />
+          <HabitWeekDays v-if="isHorizontalLayout" direction="vertical" />
 
           <div
             ref="summaryScrollRef"
@@ -220,7 +220,7 @@ onIonViewDidEnter(async () => {
               />
             </div>
 
-            <Summary
+            <HabitSummary
               v-else
               id="onboarding-summary-grid"
               :dates-from-year-start="datesFromYearStart"
@@ -237,10 +237,10 @@ onIonViewDidEnter(async () => {
         >
           Nenhum dado encontrado.
         </ion-text>
-      </Container>
+      </AppContainer>
     </ion-content>
 
-    <DaySheetModal
+    <HabitDaySheetModal
       v-model:is-open="isDaySheetOpen"
       :date="selectedDate"
     />

@@ -1,10 +1,10 @@
 import { mount } from '@vue/test-utils';
-import Heading from '@/components/layout/Heading.vue';
+import AppHeading from '@/components/app/AppHeading.vue';
 import { describe, expect, test } from 'vitest';
 
-describe('Heading.vue', () => {
+describe('AppHeading.vue', () => {
   test('renders title properly', () => {
-    const wrapper = mount(Heading, {
+    const wrapper = mount(AppHeading, {
       props: {
         title: 'Meus Hábitos'
       }

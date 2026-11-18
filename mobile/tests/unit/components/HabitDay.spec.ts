@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
-import HabitDay from '@/components/habits/HabitDay.vue';
+import HabitDay from '@/components/features/habits/HabitDay.vue';
 
 describe('HabitDay.vue', () => {
   it('renders habit-day-0 when there are no completed habits', () => {

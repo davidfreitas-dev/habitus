@@ -15,12 +15,12 @@ import { useHabitStore } from '@/stores/habitsStore';
 import { useToast } from '@/composables/useToast';
 import { useHaptics } from '@/composables/useHaptics';
 import { statsSteps } from '@/onboarding/statsSteps';
-import Header from '@/components/layout/Header.vue';
-import Heading from '@/components/layout/Heading.vue';
-import Container from '@/components/layout/Container.vue';
-import BarChart from '@/components/habits/BarChart.vue';
-import PeriodSelector from '@/components/habits/PeriodSelector.vue';
-import OnboardingTour from '@/components/onboarding/OnboardingTour.vue';
+import AppHeader from '@/components/app/AppHeader.vue';
+import AppHeading from '@/components/app/AppHeading.vue';
+import AppContainer from '@/components/app/AppContainer.vue';
+import HabitBarChart from '@/components/features/habits/HabitBarChart.vue';
+import HabitPeriodSelector from '@/components/features/habits/HabitPeriodSelector.vue';
+import OnboardingTour from '@/components/features/onboarding/OnboardingTour.vue';
 import dayjs from '@/lib/dayjs';
 import { getErrorMessage, type DailyStat, type StatsPeriod } from '@/types';
 
@@ -126,16 +126,16 @@ onIonViewDidEnter(async () => {
 
 <template>
   <ion-page>
-    <Header>
-      <Heading title="Estatísticas" class="ion-padding-horizontal" />
-    </Header>
+    <AppHeader>
+      <AppHeading title="Estatísticas" class="ion-padding-horizontal" />
+    </AppHeader>
     <ion-content>
       <ion-refresher slot="fixed" @ion-refresh="handleRefresh">
         <ion-refresher-content />
       </ion-refresher>
 
-      <Container>
-        <PeriodSelector id="onboarding-period-selector" v-model="activePeriod" />
+      <AppContainer>
+        <HabitPeriodSelector id="onboarding-period-selector" v-model="activePeriod" />
 
         <div class="stats-container">
           <p class="chart-description">
@@ -158,7 +158,7 @@ onIonViewDidEnter(async () => {
               />
             </div>
 
-            <BarChart
+            <HabitBarChart
               v-else-if="statsData.length > 0"
               :data="chartValues"
               :labels="chartLabels"
@@ -192,7 +192,7 @@ onIonViewDidEnter(async () => {
             </div>
           </div>
         </div>
-      </Container>
+      </AppContainer>
     </ion-content>
 
     <OnboardingTour

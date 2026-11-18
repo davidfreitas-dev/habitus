@@ -21,13 +21,13 @@ import { useToast } from '@/composables/useToast';
 import { useHaptics } from '@/composables/useHaptics';
 import { analyticsService } from '@/services/analyticsService';
 import { optionsSteps } from '@/onboarding/optionsSteps';
-import Header from '@/components/layout/Header.vue';
-import Heading from '@/components/layout/Heading.vue';
-import Container from '@/components/layout/Container.vue';
-import Button from '@/components/ui/Button.vue';
-import ModalDialog from '@/components/layout/ModalDialog.vue';
-import Toggle from '@/components/ui/Toggle.vue';
-import OnboardingTour from '@/components/onboarding/OnboardingTour.vue';
+import AppHeader from '@/components/app/AppHeader.vue';
+import AppHeading from '@/components/app/AppHeading.vue';
+import AppContainer from '@/components/app/AppContainer.vue';
+import BaseButton from '@/components/base/BaseButton.vue';
+import AppConfirmModal from '@/components/app/AppConfirmModal.vue';
+import BaseToggle from '@/components/base/BaseToggle.vue';
+import OnboardingTour from '@/components/features/onboarding/OnboardingTour.vue';
 
 const router = useRouter();
 const { withLoading } = useLoading();
@@ -50,7 +50,7 @@ const handleAnalyticsConsentChange = async (enabled: boolean) => {
   await analyticsService.setConsent(enabled);
 };
 
-const modalRef = ref<InstanceType<typeof ModalDialog> | null>(null);
+const modalRef = ref<InstanceType<typeof AppConfirmModal> | null>(null);
 const onboardingTourRef = ref<InstanceType<typeof OnboardingTour> | null>(null);
 
 const handleReplayTutorial = async () => {
@@ -83,11 +83,11 @@ onIonViewDidEnter(async () => {
 
 <template>
   <ion-page>
-    <Header>
-      <Heading title="Opções" class="ion-padding-horizontal" />
-    </Header>
+    <AppHeader>
+      <AppHeading title="Opções" class="ion-padding-horizontal" />
+    </AppHeader>
     <ion-content>
-      <Container>
+      <AppContainer>
         <ion-list lines="none" class="ion-no-padding">
           <ion-list-header class="ion-no-padding">
             <ion-label class="ion-no-margin ion-padding-bottom ion-padding-top">
@@ -138,13 +138,13 @@ onIonViewDidEnter(async () => {
             <ion-label class="ion-no-margin ion-padding-top ion-padding-bottom">
               Modo escuro
             </ion-label>
-            <Toggle v-model:checked="isDarkMode" />
+            <BaseToggle v-model:checked="isDarkMode" />
           </ion-item>
           <ion-item class="ion-no-padding">
             <ion-label class="ion-no-margin ion-padding-top ion-padding-bottom">
               Telemetria de uso (LGPD)
             </ion-label>
-            <Toggle
+            <BaseToggle
               :checked="analyticsConsent"
               @update:checked="handleAnalyticsConsentChange"
             />
@@ -172,21 +172,21 @@ onIonViewDidEnter(async () => {
 
         <br>
 
-        <Button
+        <BaseButton
           color="primary"
           class="ion-margin-top"
           @click="handleLogOut"
         >
           <ion-icon slot="start" :icon="exitOutline" />
           Finalizar Sessão
-        </Button>
+        </BaseButton>
 
-        <ModalDialog
+        <AppConfirmModal
           ref="modalRef"
           message="Deseja realmente finalizar a sessão?"
           @on-confirm="logOut"
         />
-      </Container>
+      </AppContainer>
     </ion-content>
 
     <OnboardingTour
