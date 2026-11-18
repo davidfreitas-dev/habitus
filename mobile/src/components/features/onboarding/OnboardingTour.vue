@@ -9,9 +9,11 @@ const props = withDefaults(
     stepKey: OnboardingStepKey;
     steps: StepEntity[];
     enabled?: boolean;
+    options?: Record<string, unknown>;
   }>(),
   {
     enabled: true,
+    options: () => ({}),
   }
 );
 
@@ -31,7 +33,11 @@ const startIfNotSeen = async (): Promise<void> => {
   if (!props.enabled || !props.steps.length) return;
   if (await isStepSeen(props.stepKey)) return;
   await nextTick();
-  start();
+  try {
+    start();
+  } catch (err) {
+    console.warn(`[OnboardingTour] Failed to start step '${props.stepKey}':`, err);
+  }
 };
 
 defineExpose({
@@ -44,6 +50,7 @@ defineExpose({
   <VOnboardingWrapper
     ref="onboardingWrapper"
     :steps="steps"
+    :options="options"
     @finish="onComplete"
     @exit="onExit"
   >

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { IonButton } from '@ionic/vue';
 import type { StepEntity } from 'v-onboarding';
 
 interface StepContent {
@@ -36,7 +35,7 @@ const handleNext = () => {
 </script>
 
 <template>
-  <div class="onboarding-step">
+  <div class="onboarding-step" tabindex="-1">
     <h4 class="onboarding-step__title">
       {{ stepContent.title }}
     </h4>
@@ -44,25 +43,26 @@ const handleNext = () => {
       {{ stepContent.description }}
     </p>
     <div class="onboarding-step__footer">
-      <ion-button
-        fill="clear"
-        size="small"
+      <button
+        type="button"
+        tabindex="0"
         class="onboarding-step__skip"
         @click="emit('skip')"
       >
         Pular
-      </ion-button>
+      </button>
       <div class="onboarding-step__right">
         <span v-if="total > 1" class="onboarding-step__counter">
           {{ index + 1 }} de {{ total }}
         </span>
-        <ion-button
-          size="small"
+        <button
+          type="button"
+          tabindex="0"
           class="onboarding-step__next"
           @click="handleNext"
         >
           {{ isLast ? 'Entendi' : 'Próximo' }}
-        </ion-button>
+        </button>
       </div>
     </div>
   </div>
@@ -77,6 +77,7 @@ const handleNext = () => {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   max-width: 320px;
   border: 1px solid var(--color-primary);
+  outline: none;
 }
 
 .onboarding-step__title {
@@ -100,13 +101,28 @@ const handleNext = () => {
 }
 
 .onboarding-step__skip {
-  --color: var(--color-text-secondary);
-  --padding-start: 0;
-  --padding-end: 0;
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  padding: 6px 8px;
   font-size: 13px;
   font-weight: 600;
+  font-family: inherit;
   text-transform: none;
   margin: 0;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: color 0.15s ease, background-color 0.15s ease;
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.onboarding-step__skip:hover,
+.onboarding-step__skip:focus-visible {
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .onboarding-step__right {
@@ -122,16 +138,30 @@ const handleNext = () => {
 }
 
 .onboarding-step__next {
-  --background: var(--color-primary);
-  --background-hover: var(--color-primary-hover);
-  --background-activated: var(--color-primary-focus);
-  --color: var(--color-neutral-900);
-  --border-radius: var(--radius-md);
-  --padding-start: 16px;
-  --padding-end: 16px;
+  background: var(--color-primary);
+  border: none;
+  color: var(--color-neutral-900);
+  border-radius: var(--radius-md);
+  padding: 6px 16px;
   font-size: 13px;
   font-weight: 700;
+  font-family: inherit;
   text-transform: none;
   margin: 0;
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.onboarding-step__next:hover,
+.onboarding-step__next:focus-visible {
+  background: var(--color-primary-hover);
+}
+
+.onboarding-step__next:active {
+  background: var(--color-primary-focus);
 }
 </style>

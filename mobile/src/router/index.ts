@@ -162,6 +162,10 @@ const showSessionExpiredAlertAndRedirect = async () => {
 };
 
 router.beforeEach(async (to) => {
+  if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
+    document.activeElement.blur();
+  }
+
   const authStore = useAuthStore();
 
   if (!to.meta.requiresAuth) {
@@ -209,6 +213,18 @@ router.beforeEach(async (to) => {
   }
   
   return { name: 'Signin' };
+});
+
+router.afterEach(() => {
+  if (
+    typeof document !== 'undefined' &&
+    document.activeElement instanceof HTMLElement &&
+    document.activeElement !== document.body
+  ) {
+    if (document.activeElement.closest('[aria-hidden="true"]')) {
+      document.activeElement.blur();
+    }
+  }
 });
 
 export default router;

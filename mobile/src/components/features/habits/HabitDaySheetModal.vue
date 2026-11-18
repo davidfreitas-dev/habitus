@@ -106,6 +106,9 @@ watch(
 );
 
 const closeModal = () => {
+  if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
+    document.activeElement.blur();
+  }
   onboardingTourRef.value?.finish();
   emit('update:isOpen', false);
 };

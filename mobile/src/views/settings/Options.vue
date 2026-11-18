@@ -69,7 +69,7 @@ const logOut = async () => {
   await withLoading(async () => {
     await authStore.logout();
     router.push('/signin');
-  }, 'Erro ao finalizar sessão.');
+  }, 'Erro ao encerrar sessão.');
 };
 
 onIonViewWillEnter(async () => {
@@ -178,12 +178,12 @@ onIonViewDidEnter(async () => {
           @click="handleLogOut"
         >
           <ion-icon slot="start" :icon="exitOutline" />
-          Finalizar Sessão
+          Encerrar Sessão
         </BaseButton>
 
         <AppConfirmModal
           ref="modalRef"
-          message="Deseja realmente finalizar a sessão?"
+          message="Deseja realmente encerrar a sessão?"
           @on-confirm="logOut"
         />
       </AppContainer>
