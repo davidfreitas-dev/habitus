@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { IonPage, IonContent, IonIcon } from '@ionic/vue';
+import { IonPage, IonContent, IonIcon, IonButton } from '@ionic/vue';
 import { notificationsOutline } from 'ionicons/icons';
 import { useOnboarding } from '@/composables/useOnboarding';
 import { useNotifications } from '@/composables/useNotifications';
@@ -87,13 +87,14 @@ const skipNotifications = () => {
               Ativar notificações
             </Button>
 
-            <button
+            <ion-button
+              fill="clear"
               class="skip-button"
               :disabled="isRequesting"
               @click="skipNotifications"
             >
               Agora não
-            </button>
+            </ion-button>
           </div>
         </div>
       </Container>
@@ -236,16 +237,9 @@ const skipNotifications = () => {
 }
 
 .skip-button {
-  background: none;
-  border: none;
-  color: var(--color-text-secondary);
+  --color: var(--color-text-secondary);
   font-size: 15px;
   font-weight: 600;
-  cursor: pointer;
-  padding: 12px;
-}
-
-.skip-button:disabled {
-  opacity: 0.5;
+  text-transform: none;
 }
 </style>

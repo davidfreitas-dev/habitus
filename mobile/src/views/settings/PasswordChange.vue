@@ -1,12 +1,17 @@
 <script setup lang="ts">
-import { reactive, unref } from 'vue';
+import { reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useVuelidate } from '@vuelidate/core';
-import { required, minLength, sameAs, helpers } from '@vuelidate/validators';
 import { IonContent, IonPage, onIonViewDidLeave } from '@ionic/vue';
 import { useProfileStore } from '@/stores/profileStore';
 import { useToast } from '@/composables/useToast';
 import { useLoading } from '@/composables/useLoading';
+import {
+  requiredPasswordRules,
+  passwordRules,
+  confirmPasswordRules,
+  getFieldError,
+} from '@/utils/validators';
 import Header from '@/components/layout/Header.vue';
 import Heading from '@/components/layout/Heading.vue';
 import Container from '@/components/layout/Container.vue';
@@ -37,19 +42,15 @@ onIonViewDidLeave(() => {
   resetData();
 });
 
-const rules = {
-  currentPassword: {
-    required: helpers.withMessage('Informe sua senha atual', required)
-  },
-  newPassword: {
-    required: helpers.withMessage('Informe a nova senha', required),
-    minLength: helpers.withMessage('A senha deve ter no mínimo 6 caracteres', minLength(6))
-  },
-  confNewPassword: {
-    required: helpers.withMessage('Confirme a nova senha', required),
-    sameAsPassword: helpers.withMessage('A confirmação não coincide com a nova senha', sameAs(() => formData.newPassword))
-  }
-};
+const rules = computed(() => ({
+  currentPassword: requiredPasswordRules('Informe sua senha atual'),
+  newPassword: passwordRules('Informe a nova senha'),
+  confNewPassword: confirmPasswordRules(
+    computed(() => formData.newPassword),
+    'Confirme a nova senha',
+    'A confirmação não coincide com a nova senha'
+  ),
+}));
 
 const v$ = useVuelidate(rules, formData);
 
@@ -94,7 +95,7 @@ const submitForm = async () => {
               type="password"
               label="Digite a senha atual"
               placeholder="Senha atual"
-              :error-text="String(unref(v$.currentPassword.$errors[0]?.$message) || '')"
+              :error-text="getFieldError(v$.currentPassword)"
               @blur="v$.currentPassword.$touch()"
             />
 
@@ -103,7 +104,7 @@ const submitForm = async () => {
               type="password"
               label="Digite a nova senha"
               placeholder="Nova senha"
-              :error-text="String(unref(v$.newPassword.$errors[0]?.$message) || '')"
+              :error-text="getFieldError(v$.newPassword)"
               @blur="v$.newPassword.$touch()"
             />
 
@@ -112,7 +113,7 @@ const submitForm = async () => {
               type="password"
               label="Confirme a nova senha"
               placeholder="Repita a nova senha"
-              :error-text="String(unref(v$.confNewPassword.$errors[0]?.$message) || '')"
+              :error-text="getFieldError(v$.confNewPassword)"
               @blur="v$.confNewPassword.$touch()"
             />
           </div>
@@ -136,13 +137,5 @@ form div {
   display: flex;
   flex-direction: column;
   margin-bottom: 2rem;
-}
-
-a {
-  font-size: .85rem;
-  text-align: center;
-  text-decoration: none;
-  letter-spacing: .25px;
-  color: var(--color-secondary);
 }
 </style>

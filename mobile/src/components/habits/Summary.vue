@@ -32,44 +32,51 @@ const placeholderCount = computed(() => {
   return Math.max(0, MINIMUM_SUMMARY_DATES_SIZE - occupiedSlots);
 });
 
+const summaryMap = computed(() => {
+  const map = new Map<string, SummaryDay>();
+  for (const item of props.summary) {
+    const key = item.date.length === 10 ? item.date : dayjs(item.date).format('YYYY-MM-DD');
+    map.set(key, item);
+  }
+  return map;
+});
+
+const todayKey = computed(() => dayjs().format('YYYY-MM-DD'));
+
+const enrichedDays = computed(() => {
+  const map = summaryMap.value;
+  const today = todayKey.value;
+
+  return props.datesFromYearStart.map((date) => {
+    const key = dayjs(date).format('YYYY-MM-DD');
+    const summaryItem = map.get(key);
+    return {
+      date,
+      key,
+      isCurrentDay: key === today,
+      amountOfHabits: summaryItem ? summaryItem.total : 0,
+      amountCompleted: summaryItem ? summaryItem.completed : 0,
+    };
+  });
+});
+
 const handleNavigate = (date: Date) => {
   emit('selectDay', date);
-};
-
-const isCurrentDay = (date: Date) => {
-  const today = dayjs().startOf('day');
-  return dayjs(date).isSame(today, 'day');
-};
-
-const findDayInSummary = (date: Date) => {
-  return props.summary.find(day => {
-    return dayjs(date).isSame(day.date, 'day');
-  });
-};
-
-const getAmount = (date: Date) => {
-  const dayWithHabits = findDayInSummary(date);
-  return dayWithHabits ? dayWithHabits.total : 0;
-};
-
-const getCompleted = (date: Date) => {
-  const dayWithHabits = findDayInSummary(date);
-  return dayWithHabits ? dayWithHabits.completed : 0;
 };
 </script>
 
 <template>
   <div :class="['summary-grid', { 'summary-grid--horizontal': isHorizontalLayout }]">
-    <HabitDaysStartGap />    
+    <HabitDaysStartGap />
     <HabitDay
-      v-for="(date, index) in datesFromYearStart"
-      :key="index"
-      :id="isCurrentDay(date) ? 'onboarding-current-day' : undefined"
-      :is-current-day="isCurrentDay(date)"
-      :date="date"
-      :amount-of-habits="getAmount(date)"
-      :amount-completed="getCompleted(date)"
-      @click="handleNavigate(date)"
+      v-for="item in enrichedDays"
+      :id="item.isCurrentDay ? 'onboarding-current-day' : undefined"
+      :key="item.key"
+      :is-current-day="item.isCurrentDay"
+      :date="item.date"
+      :amount-of-habits="item.amountOfHabits"
+      :amount-completed="item.amountCompleted"
+      @click="handleNavigate(item.date)"
     />
     <template v-if="isHorizontalLayout && placeholderCount > 0">
       <div

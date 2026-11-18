@@ -1,18 +1,12 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
-import { useAuthStore } from './authStore';
 import { profileService } from '@/services/profileService';
 import type { UpdateProfilePayload, UserProfile } from '@/types';
 
 export const useProfileStore = defineStore('profile', () => {
   const user = ref<UserProfile | null>(null);
-  const authStore = useAuthStore();
 
   const fetchProfile = async () => {
-    if (!authStore.isAuthenticated) {
-      user.value = null;
-      return;
-    }
     const data = await profileService.getProfile();
     user.value = data.data;
     return true;

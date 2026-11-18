@@ -1,14 +1,6 @@
-<template>
-  <ion-icon 
-    slot="start"
-    :icon="arrowBack" 
-    @click="handleBack" 
-  />
-</template>
-
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { IonIcon } from '@ionic/vue';
+import { IonButtons, IonButton, IonIcon } from '@ionic/vue';
 import { arrowBack } from 'ionicons/icons';
 
 const props = withDefaults(
@@ -32,10 +24,27 @@ const handleBack = () => {
 };
 </script>
 
+<template>
+  <ion-buttons slot="start">
+    <ion-button
+      fill="clear"
+      aria-label="Voltar"
+      class="back-button"
+      @click="handleBack"
+    >
+      <ion-icon slot="icon-only" :icon="arrowBack" />
+    </ion-button>
+  </ion-buttons>
+</template>
+
 <style scoped>
-ion-icon {
+.back-button {
+  --color: var(--color-text-secondary);
+  --padding-start: 0.5rem;
+  --padding-end: 0.5rem;
+}
+
+.back-button ion-icon {
   font-size: 2rem;
-  color: var(--color-text-secondary);
-  padding: 0 .5rem;
 }
 </style>

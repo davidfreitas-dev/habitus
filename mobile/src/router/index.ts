@@ -178,7 +178,7 @@ router.beforeEach(async (to) => {
       } else {
         authStore.sessionExpired = false;
       }
-    } catch (error) {
+    } catch {
       // Erro ao renovar token, prossegue para o redirecionamento
       authStore.sessionExpired = false;
     }

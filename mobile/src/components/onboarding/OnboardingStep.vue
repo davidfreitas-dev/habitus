@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { IonButton } from '@ionic/vue';
 import type { StepEntity } from 'v-onboarding';
 
 interface StepContent {
@@ -43,16 +44,25 @@ const handleNext = () => {
       {{ stepContent.description }}
     </p>
     <div class="onboarding-step__footer">
-      <button class="onboarding-step__skip" @click="emit('skip')">
+      <ion-button
+        fill="clear"
+        size="small"
+        class="onboarding-step__skip"
+        @click="emit('skip')"
+      >
         Pular
-      </button>
+      </ion-button>
       <div class="onboarding-step__right">
         <span v-if="total > 1" class="onboarding-step__counter">
           {{ index + 1 }} de {{ total }}
         </span>
-        <button class="onboarding-step__next" @click="handleNext">
+        <ion-button
+          size="small"
+          class="onboarding-step__next"
+          @click="handleNext"
+        >
           {{ isLast ? 'Entendi' : 'Próximo' }}
-        </button>
+        </ion-button>
       </div>
     </div>
   </div>
@@ -90,13 +100,13 @@ const handleNext = () => {
 }
 
 .onboarding-step__skip {
-  background: none;
-  border: none;
-  color: var(--color-text-secondary);
+  --color: var(--color-text-secondary);
+  --padding-start: 0;
+  --padding-end: 0;
   font-size: 13px;
   font-weight: 600;
-  cursor: pointer;
-  padding: 6px 0;
+  text-transform: none;
+  margin: 0;
 }
 
 .onboarding-step__right {
@@ -112,13 +122,16 @@ const handleNext = () => {
 }
 
 .onboarding-step__next {
-  background: var(--color-primary);
-  color: var(--color-neutral-900);
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 8px 16px;
+  --background: var(--color-primary);
+  --background-hover: var(--color-primary-hover);
+  --background-activated: var(--color-primary-focus);
+  --color: var(--color-neutral-900);
+  --border-radius: var(--radius-md);
+  --padding-start: 16px;
+  --padding-end: 16px;
   font-size: 13px;
   font-weight: 700;
-  cursor: pointer;
+  text-transform: none;
+  margin: 0;
 }
 </style>

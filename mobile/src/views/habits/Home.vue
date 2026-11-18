@@ -46,6 +46,7 @@ interface IonContentElement {
   $el?: {
     scrollToBottom: (duration?: number) => Promise<void>;
   };
+  scrollToBottom?: (duration?: number) => Promise<void>;
 }
 
 const contentRef = ref<IonContentElement | null>(null);
@@ -82,8 +83,18 @@ const handleSelectDay = async (date: Date) => {
 
 const skeletonCount = computed(() => (isHorizontalLayout.value ? 126 : 35));
 
-const scrollToCurrentDay = async () => {
+const getContentElement = () => {
+  if (!contentRef.value) return null;
+  if ('$el' in contentRef.value && contentRef.value.$el) {
+    return contentRef.value.$el;
+  }
+  return contentRef.value;
+};
+
+const scrollToCurrentDay = async (duration = 500) => {
   await nextTick();
+  await new Promise((resolve) => requestAnimationFrame(resolve));
+
   if (isHorizontalLayout.value) {
     if (summaryScrollRef.value) {
       summaryScrollRef.value.scrollTo({
@@ -94,8 +105,9 @@ const scrollToCurrentDay = async () => {
     return;
   }
 
-  if (contentRef.value?.$el) {
-    await contentRef.value.$el.scrollToBottom(500);
+  const contentEl = getContentElement();
+  if (contentEl && typeof contentEl.scrollToBottom === 'function') {
+    await contentEl.scrollToBottom(duration);
   }
 };
 
@@ -114,7 +126,7 @@ const activeHomeSteps = computed(() =>
 
 let summaryLoaded: Promise<void> | null = null;
 
-const getSummary = async (shouldScroll = true) => {
+const getSummary = async (shouldScroll = false) => {
   const showSkeleton = summary.value.length === 0;
   if (showSkeleton) {
     isLoadingSummary.value = true;
@@ -151,13 +163,18 @@ const datesFromYearStart = ref<Date[]>([]);
 
 onIonViewWillEnter(() => {
   datesFromYearStart.value = generateDatesFromYearBeginning();
-  summaryLoaded = getSummary(summary.value.length === 0);
+  summaryLoaded = getSummary(false);
 });
 
 onIonViewDidEnter(async () => {
+  if (datesFromYearStart.value.length > 0) {
+    await scrollToCurrentDay();
+  }
+
   if (summaryLoaded) {
     try {
       await summaryLoaded;
+      await scrollToCurrentDay();
     } catch {
       // Ignora o erro
     }

@@ -8,10 +8,6 @@ import {
   IonIcon,
   IonText,
   IonList,
-  IonItemSliding,
-  IonItem,
-  IonItemOptions,
-  IonItemOption,
   IonRefresher,
   IonRefresherContent,
   IonSkeletonText,
@@ -19,20 +15,16 @@ import {
   onIonViewDidEnter,
   type RefresherCustomEvent,
 } from '@ionic/vue';
-import {
-  notifications,
-  notificationsOff,
-  trashOutline,
-  createOutline,
-  calendarOutline,
-} from 'ionicons/icons';
+import { calendarOutline } from 'ionicons/icons';
 import { useHabitStore } from '@/stores/habitsStore';
 import { useToast } from '@/composables/useToast';
 import { useHaptics } from '@/composables/useHaptics';
+import { isHabitDayActive } from '@/utils/habitUtils';
 import Header from '@/components/layout/Header.vue';
 import Heading from '@/components/layout/Heading.vue';
 import Container from '@/components/layout/Container.vue';
 import ButtonNew from '@/components/habits/ButtonNew.vue';
+import HabitListItem from '@/components/habits/HabitListItem.vue';
 import Button from '@/components/ui/Button.vue';
 import Input from '@/components/ui/Input.vue';
 import FilterChips, { type FilterChipItem } from '@/components/ui/FilterChips.vue';
@@ -74,54 +66,13 @@ const weekDayFilters: FilterChipItem<number | null>[] = [
   { label: 'Sáb', value: 6 },
 ];
 
-const shortWeekDays = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
-
-const parseWeekDays = (rawDays: number[] | string | undefined): number[] => {
-  if (!rawDays) return [];
-  if (Array.isArray(rawDays)) return rawDays.map(Number);
-  if (typeof rawDays === 'string') {
-    return rawDays
-      .split(',')
-      .filter(Boolean)
-      .map(Number);
-  }
-  return [];
-};
-
-const isDayActive = (habit: Habit, dayIndex: number): boolean => {
-  return parseWeekDays(habit.week_days).includes(dayIndex);
-};
-
-const getFrequencySummary = (habit: Habit): string => {
-  const days = Array.from(new Set(parseWeekDays(habit.week_days))).sort((a, b) => a - b);
-  const count = days.length;
-
-  if (count === 7) return 'Todos os dias';
-  if (count === 5 && [1, 2, 3, 4, 5].every((d) => days.includes(d))) {
-    return '5x na semana • Dias úteis';
-  }
-  if (count === 2 && [0, 6].every((d) => days.includes(d))) {
-    return '2x na semana • Fim de semana';
-  }
-  if (count === 1) return '1x na semana';
-  return `${count}x na semana`;
-};
-
-const formatReminderTime = (time: string | null): string | null => {
-  if (!time) return null;
-  if (time.includes('T')) {
-    return time.split('T')[1].substring(0, 5);
-  }
-  return time.substring(0, 5);
-};
-
 const filteredHabits = computed(() => {
   const query = searchQuery.value.trim().toLowerCase();
 
   return habitStore.habits.filter((habit) => {
     const matchesSearch = !query || habit.title.toLowerCase().includes(query);
     const matchesDay =
-      selectedWeekDay.value === null || isDayActive(habit, selectedWeekDay.value);
+      selectedWeekDay.value === null || isHabitDayActive(habit, selectedWeekDay.value);
     return matchesSearch && matchesDay;
   });
 });
@@ -242,7 +193,7 @@ onIonViewDidEnter(async () => {
             <div
               v-for="n in 4"
               :key="n"
-              class="habit-card"
+              class="habit-skeleton-card"
             >
               <ion-skeleton-text :animated="true" style="width: 65%; height: 20px; border-radius: 6px;" />
               <ion-skeleton-text :animated="true" style="width: 90%; height: 28px; border-radius: 6px; margin-top: 12px;" />
@@ -255,85 +206,14 @@ onIonViewDidEnter(async () => {
             lines="none"
             class="habits-list ion-no-padding"
           >
-            <ion-item-sliding
+            <HabitListItem
               v-for="(habit, index) in filteredHabits"
               :key="habit.id"
-              class="habit-sliding-item"
-            >
-              <ion-item-options side="start" class="sliding-options-container">
-                <ion-item-option
-                  class="sliding-option-round"
-                  aria-label="Editar hábito"
-                  @click="handleEditHabit(habit.id)"
-                >
-                  <div class="action-circle-group">
-                    <div class="action-circle action-circle--edit">
-                      <ion-icon :icon="createOutline" />
-                    </div>
-                    <span class="action-circle-label">Editar</span>
-                  </div>
-                </ion-item-option>
-              </ion-item-options>
-
-              <ion-item class="habit-card-item ion-no-padding" lines="none">
-                <div
-                  :id="index === 0 ? 'onboarding-habit-card' : undefined"
-                  class="habit-card"
-                >
-                  <div class="habit-card__header">
-                    <div class="habit-card__info">
-                      <h3 class="habit-card__title">
-                        {{ habit.title }}
-                      </h3>
-                      <span class="habit-card__subtitle">
-                        {{ getFrequencySummary(habit) }}
-                      </span>
-                    </div>
-
-                    <div class="habit-card__actions" @click.stop>
-                      <div
-                        class="reminder-badge"
-                        :class="{ 'reminder-badge--off': !formatReminderTime(habit.reminder_time) }"
-                      >
-                        <ion-icon
-                          :icon="formatReminderTime(habit.reminder_time) ? notifications : notificationsOff"
-                          class="reminder-badge__icon"
-                        />
-                        <span v-if="formatReminderTime(habit.reminder_time)">
-                          {{ formatReminderTime(habit.reminder_time) }}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="week-badges-stack">
-                    <span
-                      v-for="(dayLetter, idx) in shortWeekDays"
-                      :key="idx"
-                      class="week-badge-circle"
-                      :class="{ 'week-badge-circle--active': isDayActive(habit, idx) }"
-                    >
-                      {{ dayLetter }}
-                    </span>
-                  </div>
-                </div>
-              </ion-item>
-
-              <ion-item-options side="end" class="sliding-options-container">
-                <ion-item-option
-                  class="sliding-option-round"
-                  aria-label="Excluir hábito"
-                  @click="promptDeleteHabit(habit)"
-                >
-                  <div class="action-circle-group">
-                    <div class="action-circle action-circle--delete">
-                      <ion-icon :icon="trashOutline" />
-                    </div>
-                    <span class="action-circle-label">Excluir</span>
-                  </div>
-                </ion-item-option>
-              </ion-item-options>
-            </ion-item-sliding>
+              :habit="habit"
+              :card-id="index === 0 ? 'onboarding-habit-card' : undefined"
+              @edit="handleEditHabit"
+              @delete="promptDeleteHabit"
+            />
           </ion-list>
 
           <div v-else class="empty-state ion-text-center ion-padding">
@@ -378,10 +258,11 @@ onIonViewDidEnter(async () => {
 
 <style scoped>
 div.content {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
+
 .header-row {
   width: 100%;
   max-width: 600px;
@@ -394,10 +275,6 @@ div.content {
   }
 }
 
-.search-input-wrapper {
-  margin-bottom: 12px;
-}
-
 .habits-list {
   background: transparent;
   display: flex;
@@ -405,198 +282,12 @@ div.content {
   gap: 12px;
 }
 
-.habit-sliding-item {
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-  background: transparent;
-}
-
-.habit-card-item {
-  --background: transparent;
-  --inner-padding-end: 0;
-  --padding-start: 0;
-  width: 100%;
-  position: relative;
-  z-index: 2;
-}
-
-.sliding-options-container {
-  background: transparent;
-  border: none;
-}
-
-.sliding-option-round {
-  --background: transparent;
-  --background-hover: transparent;
-  --background-activated: transparent;
-  --background-focused: transparent;
-  --color: inherit;
-  --padding-start: 12px;
-  --padding-end: 12px;
-  --padding-top: 0;
-  --padding-bottom: 0;
-  background: transparent;
-  min-width: 76px;
-  height: 100%;
-}
-
-.action-circle-group {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  user-select: none;
-  height: 100%;
-}
-
-.action-circle {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  transition: transform 0.15s ease, filter 0.15s ease;
-}
-
-.action-circle ion-icon {
-  font-size: 1.35rem;
-}
-
-.sliding-option-round:active .action-circle {
-  transform: scale(0.92);
-  filter: brightness(0.9);
-}
-
-.action-circle--edit {
-  background: var(--color-background-elevated);
-  border: 1px solid var(--color-border-strong);
-  color: var(--color-text-primary);
-}
-
-.action-circle--delete {
-  background: var(--color-danger);
-  color: #ffffff;
-}
-
-.action-circle-label {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  text-align: center;
-  line-height: 1;
-}
-
-.habit-card {
+.habit-skeleton-card {
   width: 100%;
   background: var(--color-background-secondary);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-xl);
   padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.habit-card__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.habit-card__info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-  flex: 1;
-}
-
-.habit-card__title {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  line-height: 1.3;
-}
-
-.habit-card__subtitle {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-}
-
-.habit-card__actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.week-badges-stack {
-  display: flex;
-  align-items: center;
-  padding-left: 2px;
-}
-
-.week-badge-circle {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.7rem;
-  font-weight: 700;
-  background: var(--color-background-elevated);
-  border: 1.5px solid var(--color-border-strong);
-  box-shadow: 0 0 0 2px var(--color-background-secondary);
-  color: var(--color-text-secondary);
-  margin-left: -6px;
-  position: relative;
-  transition: transform 0.15s ease, background-color 0.15s ease;
-}
-
-.week-badge-circle:first-child {
-  margin-left: 0;
-}
-
-.week-badge-circle--active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px var(--color-background-secondary);
-  color: var(--color-neutral-900);
-  font-weight: 800;
-}
-
-.reminder-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  background: var(--color-background-elevated);
-  border: 1px solid var(--color-border-default);
-  color: var(--color-text-accent);
-  height: 32px;
-  padding: 0 10px;
-  border-radius: var(--radius-md);
-  font-size: 0.8125rem;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.reminder-badge--off {
-  width: 32px;
-  padding: 0;
-  color: var(--color-text-secondary);
-}
-
-.reminder-badge__icon {
-  font-size: 1.05rem;
-  flex-shrink: 0;
 }
 
 .empty-state {

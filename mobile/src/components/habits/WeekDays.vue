@@ -1,7 +1,7 @@
 <template>
   <div :class="['week-days', `week-days--${direction}`]">
     <span
-      v-for="(weekDay, index) in weekDays"
+      v-for="(weekDay, index) in SHORT_WEEK_DAYS"
       :key="index"
       :style="itemStyle"
     >
@@ -11,8 +11,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { useDayDimensions } from '@/composables/useDayDimensions';
+import { SHORT_WEEK_DAYS } from '@/utils/habitUtils';
 
 const props = withDefaults(
   defineProps<{
@@ -23,9 +24,7 @@ const props = withDefaults(
   }
 );
 
-const weekDays = ref(['D', 'S', 'T', 'Q', 'Q', 'S', 'S']);
-
-const WEEK_DAYS_COUNT = 7;
+const WEEK_DAYS_COUNT = SHORT_WEEK_DAYS.length;
 const { daySize: squareSize } = useDayDimensions();
 
 const itemStyle = computed(() => {
@@ -35,7 +34,7 @@ const itemStyle = computed(() => {
     };
   }
 
-  const size = 100 / WEEK_DAYS_COUNT;  
+  const size = 100 / WEEK_DAYS_COUNT;
   return { width: size + '%', height: size + '%' };
 });
 </script>

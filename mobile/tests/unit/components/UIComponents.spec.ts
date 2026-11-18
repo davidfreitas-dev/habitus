@@ -6,15 +6,16 @@ import Chip from '@/components/ui/Chip.vue';
 import FilterChips from '@/components/ui/FilterChips.vue';
 
 describe('ProgressBar.vue', () => {
-  it('renders dynamic width corresponding to progress percentage', () => {
+  it('renders ion-progress-bar with normalized value corresponding to progress percentage', () => {
     const wrapper = mount(ProgressBar, {
       props: {
         progress: 75,
       },
     });
 
-    const bar = wrapper.find('.progress');
-    expect(bar.attributes('style')).toContain('width: 75%;');
+    const bar = wrapper.find('ion-progress-bar');
+    expect(bar.exists()).toBe(true);
+    expect(bar.attributes('style')).toContain('--progress-width: 75%');
   });
 });
 

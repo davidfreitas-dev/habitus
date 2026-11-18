@@ -22,9 +22,6 @@ import '@ionic/vue/css/text-transformation.css';
 import '@ionic/vue/css/flex-utils.css';
 import '@ionic/vue/css/display.css';
 
-/* Onboarding coachmarks theme */
-import 'v-onboarding/dist/style.css';
-
 /* Theme variables */
 import './theme/global.css';
 

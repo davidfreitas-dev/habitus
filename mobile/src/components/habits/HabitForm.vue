@@ -1,12 +1,21 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { IonDatetime, IonDatetimeButton, IonModal, IonItem, IonLabel, IonChip } from '@ionic/vue';
+import { IonDatetime, IonDatetimeButton, IonModal, IonItem, IonLabel } from '@ionic/vue';
 import { useNotifications } from '@/composables/useNotifications';
 import { useHaptics } from '@/composables/useHaptics';
+import {
+  FULL_WEEK_DAYS,
+  RECURRENCE_PRESETS,
+  parseWeekDays,
+  formatReminderTime,
+  getLocalISOString,
+  timeStringToLocalISO,
+} from '@/utils/habitUtils';
 import Input from '@/components/ui/Input.vue';
 import Checkbox from '@/components/ui/Checkbox.vue';
 import Button from '@/components/ui/Button.vue';
 import Toggle from '@/components/ui/Toggle.vue';
+import Chip from '@/components/ui/Chip.vue';
 import type { HabitDraft, HabitFormSubmitPayload } from '@/types';
 
 const emit = defineEmits<{
@@ -33,12 +42,6 @@ const props = withDefaults(
 const { requestPermission } = useNotifications();
 const { triggerHaptic } = useHaptics();
 
-const getLocalISOString = () => {
-  const now = new Date();
-  const offset = now.getTimezoneOffset() * 60000;
-  return new Date(now.getTime() - offset).toISOString();
-};
-
 const formData = ref<{
   title: string;
   weekDays: number[];
@@ -56,14 +59,7 @@ watch(
   (newHabit) => {
     if (newHabit) {
       formData.value.title = newHabit.title || '';
-      formData.value.weekDays = [];
-      if (newHabit.week_days) {
-        if (Array.isArray(newHabit.week_days)) {
-          formData.value.weekDays = newHabit.week_days.map(Number);
-        } else if (typeof newHabit.week_days === 'string' && newHabit.week_days.length > 0) {
-          formData.value.weekDays = newHabit.week_days.split(',').map(Number);
-        }
-      }
+      formData.value.weekDays = parseWeekDays(newHabit.week_days);
 
       if (newHabit.reminder_time) {
         formData.value.reminderEnabled = true;
@@ -136,12 +132,6 @@ const centerChip = (container: HTMLElement | null, event?: MouseEvent) => {
   }
 };
 
-const recurrencePresets = [
-  { label: 'Todos os dias', days: [0, 1, 2, 3, 4, 5, 6] },
-  { label: 'Dias úteis', days: [1, 2, 3, 4, 5] },
-  { label: 'Fim de semana', days: [0, 6] },
-] as const;
-
 const isPresetActive = (presetDays: readonly number[]): boolean => {
   if (formData.value.weekDays.length !== presetDays.length) return false;
   return presetDays.every((day) => formData.value.weekDays.includes(day));
@@ -163,29 +153,13 @@ const submitForm = () => {
     return;
   }
 
-  let reminderTimeValue = formData.value.reminderTime;
-
-  if (reminderTimeValue && reminderTimeValue.includes('T')) {
-    reminderTimeValue = reminderTimeValue.split('T')[1].substring(0, 5);
-  } else if (reminderTimeValue && reminderTimeValue.length > 5) {
-    reminderTimeValue = reminderTimeValue.substring(0, 5);
-  }
+  const reminderTimeValue = formatReminderTime(formData.value.reminderTime);
 
   emit('onSubmit', {
     ...formData.value,
     reminder_time: formData.value.reminderEnabled ? reminderTimeValue : null,
   });
 };
-
-const availableWeekDays = [
-  'Domingo',
-  'Segunda-feira',
-  'Terça-feira',
-  'Quarta-feira',
-  'Quinta-feira',
-  'Sexta-feira',
-  'Sábado',
-];
 
 interface HabitTemplate {
   title: string;
@@ -210,11 +184,7 @@ const applyTemplate = async (template: HabitTemplate, event?: MouseEvent) => {
   formData.value.weekDays = [...template.weekDays];
   if (template.reminderTime) {
     formData.value.reminderEnabled = true;
-    const today = new Date();
-    const [hh, mm] = template.reminderTime.split(':');
-    today.setHours(Number(hh), Number(mm), 0, 0);
-    const offset = today.getTimezoneOffset() * 60000;
-    formData.value.reminderTime = new Date(today.getTime() - offset).toISOString();
+    formData.value.reminderTime = timeStringToLocalISO(template.reminderTime);
   }
 };
 </script>
@@ -226,7 +196,7 @@ const applyTemplate = async (template: HabitTemplate, event?: MouseEvent) => {
         Sugestões populares
       </p>
       <div ref="templatesScrollRef" class="templates-scroll">
-        <ion-chip
+        <Chip
           v-for="tpl in habitTemplates"
           :key="tpl.title"
           :outline="true"
@@ -235,7 +205,7 @@ const applyTemplate = async (template: HabitTemplate, event?: MouseEvent) => {
         >
           <span class="template-emoji">{{ tpl.emoji }}</span>
           <ion-label>{{ tpl.title }}</ion-label>
-        </ion-chip>
+        </Chip>
       </div>
     </div>
 
@@ -251,20 +221,19 @@ const applyTemplate = async (template: HabitTemplate, event?: MouseEvent) => {
       <p>Qual a recorrência?</p>
 
       <div ref="presetsScrollRef" class="recurrence-presets">
-        <ion-chip
-          v-for="preset in recurrencePresets"
+        <Chip
+          v-for="preset in RECURRENCE_PRESETS"
           :key="preset.label"
+          :label="preset.label"
           :outline="!isPresetActive(preset.days)"
+          :is-active="isPresetActive(preset.days)"
           class="preset-chip"
-          :class="{ active: isPresetActive(preset.days) }"
           @click="applyPreset(preset.days, $event)"
-        >
-          <ion-label>{{ preset.label }}</ion-label>
-        </ion-chip>
+        />
       </div>
 
       <Checkbox
-        v-for="(weekDay, index) in availableWeekDays"
+        v-for="(weekDay, index) in FULL_WEEK_DAYS"
         :key="index"
         :label="weekDay"
         :is-checked="isDayChecked(index)"
@@ -329,70 +298,28 @@ p {
   color: var(--color-text-secondary);
 }
 
-.templates-scroll {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 6px;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.templates-scroll::-webkit-scrollbar {
-  display: none;
-}
-
-.template-chip {
-  --background: var(--color-background-secondary);
-  --color: var(--color-text-secondary);
-  border: 1px solid var(--color-border-default);
-  margin: 0;
-  flex-shrink: 0;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.template-chip:active {
-  --background: var(--color-background-elevated);
-}
-
-.template-emoji {
-  margin-right: 6px;
-  font-size: 0.95rem;
-}
-
+.templates-scroll,
 .recurrence-presets {
   display: flex;
   gap: 8px;
   overflow-x: auto;
   padding-bottom: 6px;
-  margin-bottom: 12px;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
 
+.recurrence-presets {
+  margin-bottom: 12px;
+}
+
+.templates-scroll::-webkit-scrollbar,
 .recurrence-presets::-webkit-scrollbar {
   display: none;
 }
 
-.preset-chip {
-  --background: var(--color-background-secondary);
-  --color: var(--color-text-secondary);
-  border: 1px solid var(--color-border-default);
-  font-size: 0.8125rem;
-  font-weight: 700;
-  margin: 0;
-  flex-shrink: 0;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.preset-chip.active {
-  --background: var(--color-primary);
-  --color: var(--color-neutral-900);
-  border-color: var(--color-primary);
+.template-emoji {
+  margin-right: 6px;
+  font-size: 0.95rem;
 }
 
 ion-item {

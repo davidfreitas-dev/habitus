@@ -114,13 +114,22 @@ export const notificationService = {
     }
   },
 
-  async rescheduleAllNotifications(habits: Habit[]) {
+  async cancelAllNotifications() {
     if (!Capacitor.isNativePlatform()) return;
     try {
       const pending = await LocalNotifications.getPending();
       if (pending.notifications.length > 0) {
         await LocalNotifications.cancel(pending);
       }
+    } catch (error) {
+      console.error('Erro ao cancelar todas as notificações:', error);
+    }
+  },
+
+  async rescheduleAllNotifications(habits: Habit[]) {
+    if (!Capacitor.isNativePlatform()) return;
+    try {
+      await this.cancelAllNotifications();
 
       for (const habit of habits) {
         await this.scheduleHabitNotifications(habit);

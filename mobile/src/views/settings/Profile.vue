@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { reactive, watch, unref } from 'vue';
+import { reactive, watch } from 'vue';
 import { IonPage, IonContent, onIonViewWillEnter } from '@ionic/vue';
 import { useVuelidate } from '@vuelidate/core';
-import { required, email, helpers } from '@vuelidate/validators';
+import { required, helpers } from '@vuelidate/validators';
 import { useProfileStore } from '@/stores/profileStore';
 import { useToast } from '@/composables/useToast';
-import { useLoading } from '@/composables/useLoading'; 
+import { useLoading } from '@/composables/useLoading';
+import { emailRules, getFieldError } from '@/utils/validators';
 import Header from '@/components/layout/Header.vue';
 import Heading from '@/components/layout/Heading.vue';
 import Container from '@/components/layout/Container.vue';
@@ -25,12 +26,9 @@ const { isLoading, withLoading } = useLoading();
 
 const rules = {
   name: {
-    required: helpers.withMessage('Informe seu nome', required)
+    required: helpers.withMessage('Informe seu nome', required),
   },
-  email: {
-    required: helpers.withMessage('Informe seu e-mail', required),
-    email: helpers.withMessage('Informe um e-mail válido', email)
-  }
+  email: emailRules(),
 };
 
 const v$ = useVuelidate(rules, formData);
@@ -50,7 +48,6 @@ onIonViewWillEnter(async () => {
   }, 'Erro ao carregar dados do perfil.');
 });
 
-// Watch for changes in profileStore.user to update formData
 watch(() => profileStore.user, (newUser) => {
   if (newUser) {
     loadProfileData();
@@ -96,7 +93,7 @@ const submitForm = async () => {
               type="text"
               label="Nome"
               placeholder="Digite seu nome"
-              :error-text="String(unref(v$.name.$errors[0]?.$message) || '')"
+              :error-text="getFieldError(v$.name)"
               @blur="v$.name.$touch()"
             />
 
@@ -105,7 +102,7 @@ const submitForm = async () => {
               type="email"
               label="E-mail"
               placeholder="Digite seu e-mail"
-              :error-text="String(unref(v$.email.$errors[0]?.$message) || '')"
+              :error-text="getFieldError(v$.email)"
               @blur="v$.email.$touch()"
             />
           </div>
@@ -129,13 +126,5 @@ form div {
   display: flex;
   flex-direction: column;
   margin-bottom: 2rem;
-}
-
-a {
-  font-size: .85rem;
-  text-align: center;
-  text-decoration: none;
-  letter-spacing: .25px;
-  color: var(--color-secondary);
 }
 </style>

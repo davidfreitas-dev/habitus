@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { IonPage, IonContent } from '@ionic/vue';
+import { IonSpinner, IonIcon } from '@ionic/vue';
+import { checkmarkCircleOutline, closeCircleOutline } from 'ionicons/icons';
 import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/composables/useToast';
 import { getErrorMessage } from '@/types';
-import Container from '@/components/layout/Container.vue';
+import AuthLayout from '@/components/auth/AuthLayout.vue';
 import Button from '@/components/ui/Button.vue';
 
 const props = withDefaults(
@@ -54,51 +55,42 @@ onMounted(() => {
 </script>
 
 <template>
-  <ion-page>
-    <ion-content :fullscreen="true">
-      <Container class="ion-text-center">
-        <div class="verification-wrapper">
-          <div class="logo-wrapper">
-            <img
-              src="../../../assets/logo.png"
-              alt="Habitus"
-              class="logo"
-            >
-          </div>
+  <AuthLayout>
+    <div class="verification-wrapper ion-text-center">
+      <div v-if="isLoading" class="loading-state">
+        <ion-spinner
+          name="crescent"
+          color="primary"
+          class="verification-spinner"
+        />
+        <p class="loading-text">
+          Verificando seu e-mail, por favor aguarde...
+        </p>
+      </div>
 
-          <div v-if="isLoading" class="loading-state">
-            <div class="spinner" />
-            <p class="loading-text">
-              Verificando seu e-mail, por favor aguarde...
-            </p>
-          </div>
-
-          <div v-else class="result-state">
-            <div :class="['status-icon', success ? 'success' : 'error']">
-              <span v-if="success">✓</span>
-              <span v-else>✗</span>
-            </div>
-
-            <h2 class="title">
-              {{ success ? 'Sucesso!' : 'Ops!' }}
-            </h2>
-            <p class="description">
-              {{ message }}
-            </p>
-
-            <div class="actions">
-              <Button
-                color="primary"
-                @click="router.push('/signin')"
-              >
-                Ir para o Login
-              </Button>
-            </div>
-          </div>
+      <div v-else class="result-state">
+        <div :class="['status-icon', success ? 'success' : 'error']">
+          <ion-icon :icon="success ? checkmarkCircleOutline : closeCircleOutline" />
         </div>
-      </Container>
-    </ion-content>
-  </ion-page>
+
+        <h2 class="title">
+          {{ success ? 'Sucesso!' : 'Ops!' }}
+        </h2>
+        <p class="description">
+          {{ message }}
+        </p>
+
+        <div class="actions">
+          <Button
+            color="primary"
+            @click="router.push('/signin')"
+          >
+            Ir para o Login
+          </Button>
+        </div>
+      </div>
+    </div>
+  </AuthLayout>
 </template>
 
 <style scoped>
@@ -107,21 +99,8 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 70vh;
+  min-height: 55vh;
   padding: 2rem 1rem;
-}
-
-.logo-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: calc(env(safe-area-inset-top) + 1rem);
-}
-
-.logo {
-  height: 70px;
-  width: auto;
-  object-fit: contain;
 }
 
 .loading-state {
@@ -130,24 +109,16 @@ onMounted(() => {
   align-items: center;
 }
 
+.verification-spinner {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 1.5rem;
+}
+
 .loading-text {
   color: var(--color-text-primary);
   opacity: 0.7;
   font-size: 1rem;
-}
-
-.spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid rgba(163, 230, 53, 0.1);
-  border-top-color: var(--color-primary, #a3e635);
-  border-radius: 50%;
-  animation: spin 1s infinite linear;
-  margin-bottom: 1.5rem;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 
 .status-icon {
@@ -157,8 +128,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.5rem;
-  font-weight: bold;
+  font-size: 2.75rem;
   margin: 0 auto 1.5rem;
 }
 
@@ -170,7 +140,7 @@ onMounted(() => {
 
 .status-icon.error {
   background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  color: var(--color-danger, #ef4444);
   border: 2px solid rgba(239, 68, 68, 0.2);
 }
 
@@ -193,5 +163,6 @@ onMounted(() => {
 .actions {
   width: 100%;
   max-width: 280px;
+  margin: 0 auto;
 }
 </style>

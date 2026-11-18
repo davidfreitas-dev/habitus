@@ -1,37 +1,37 @@
 <script setup lang="ts">
-defineProps<{
+import { computed } from 'vue';
+import { IonProgressBar } from '@ionic/vue';
+
+const props = defineProps<{
   progress: string | number;
 }>();
+
+const numericProgress = computed(() => {
+  const val = Number(props.progress);
+  if (Number.isNaN(val)) return 0;
+  return Math.min(100, Math.max(0, val));
+});
+
+const normalizedValue = computed(() => numericProgress.value / 100);
 </script>
 
 <template>
-  <div class="progress-container">
-    <div
-      :style="{ width: progress + '%' }"
-      class="progress"
-    />
-  </div>
+  <ion-progress-bar
+    :value="normalizedValue"
+    :style="{ '--progress-width': `${numericProgress}%` }"
+    class="habit-progress-bar"
+  />
 </template>
 
 <style scoped>
-div.progress-container {
-  position: relative;
-  background: var(--color-background-elevated);
+ion-progress-bar.habit-progress-bar {
+  --background: var(--color-background-elevated);
+  --progress-background: var(--color-primary);
   border-radius: var(--radius-lg);
   margin-top: 1rem;
   margin-bottom: 1.25rem;
   height: .75rem;
   width: 100%;
-}
-
-div.progress {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: .75rem;
-  border-radius: var(--radius-lg);
-  background: var(--color-primary);
-  transition-property: width;
-  transition-duration: 500ms;
+  overflow: hidden;
 }
 </style>

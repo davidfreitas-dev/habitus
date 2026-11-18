@@ -1,12 +1,47 @@
+<script setup lang="ts">
+import logoImg from '../../../assets/logo.png';
+
+withDefaults(
+  defineProps<{
+    to?: string;
+    alt?: string;
+  }>(),
+  {
+    to: '',
+    alt: 'Habitus',
+  }
+);
+</script>
+
 <template>
-  <router-link to="/tabs/options">
+  <div class="logo-wrapper">
+    <router-link v-if="to" :to="to">
+      <img
+        :src="logoImg"
+        :alt="alt"
+        class="logo"
+      >
+    </router-link>
     <img
-      src="../../../assets/logo.png"
-      alt="Logo do aplicativo"
-      class="ion-padding"
+      v-else
+      :src="logoImg"
+      :alt="alt"
+      class="logo"
     >
-  </router-link>
+  </div>
 </template>
 
-<script setup lang="ts">
-</script>
+<style scoped>
+.logo-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: calc(env(safe-area-inset-top, 0px) + 1rem);
+}
+
+.logo {
+  width: auto;
+  height: 70px;
+  object-fit: contain;
+}
+</style>

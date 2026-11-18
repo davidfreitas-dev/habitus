@@ -3,6 +3,9 @@ import { setActivePinia, createPinia } from 'pinia';
 import { useAuthStore } from '@/stores/authStore';
 import { authService } from '@/services/authService';
 import { useProfileStore } from '@/stores/profileStore';
+import { useHabitStore } from '@/stores/habitsStore';
+import { syncQueueService } from '@/services/syncQueueService';
+import { notificationService } from '@/services/notificationService';
 import { STORAGE_KEYS } from '@/constants/storage';
 
 vi.mock('@/services/authService', () => ({
@@ -30,6 +33,27 @@ vi.mock('@/stores/profileStore', () => {
   };
 });
 
+vi.mock('@/stores/habitsStore', () => {
+  const clearHabitsState = vi.fn();
+  return {
+    useHabitStore: () => ({
+      clearHabitsState,
+    }),
+  };
+});
+
+vi.mock('@/services/syncQueueService', () => ({
+  syncQueueService: {
+    clear: vi.fn().mockResolvedValue(undefined),
+  },
+}));
+
+vi.mock('@/services/notificationService', () => ({
+  notificationService: {
+    cancelAllNotifications: vi.fn().mockResolvedValue(undefined),
+  },
+}));
+
 describe('useAuthStore', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
@@ -56,7 +80,7 @@ describe('useAuthStore', () => {
     expect(useProfileStore().fetchProfile).toHaveBeenCalled();
   });
 
-  it('clears tokens and profile on logout', async () => {
+  it('clears tokens, profile, habits cache, sync queue and notifications on logout', async () => {
     const store = useAuthStore();
     store.setTokens('acc_123', 'ref_456');
 
@@ -69,6 +93,9 @@ describe('useAuthStore', () => {
     expect(store.isAuthenticated).toBe(false);
     expect(localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)).toBeNull();
     expect(useProfileStore().clearProfile).toHaveBeenCalled();
+    expect(useHabitStore().clearHabitsState).toHaveBeenCalled();
+    expect(syncQueueService.clear).toHaveBeenCalled();
+    expect(notificationService.cancelAllNotifications).toHaveBeenCalled();
   });
 
   it('handles expired session by setting sessionExpired flag and clearing tokens', () => {
@@ -100,22 +127,21 @@ describe('useAuthStore', () => {
     expect(store.refreshToken).toBe('new_ref');
   });
 
-  it('manages password reset flow steps in localStorage', async () => {
+  it('manages password reset flow steps in reactive memory without persisting to localStorage', async () => {
     const store = useAuthStore();
 
     vi.mocked(authService.forgotPassword).mockResolvedValue({ message: 'OK', data: {} });
     await store.forgotPassword('user@habits.dev');
-    expect(localStorage.getItem(STORAGE_KEYS.FORGOT_EMAIL)).toBe('user@habits.dev');
+    expect(store.resetFlowEmail).toBe('user@habits.dev');
 
     vi.mocked(authService.validateResetCode).mockResolvedValue({ message: 'Valid', data: {} });
     await store.validateResetCode('123456');
-    expect(localStorage.getItem(STORAGE_KEYS.RESET_EMAIL)).toBe('user@habits.dev');
-    expect(localStorage.getItem(STORAGE_KEYS.RESET_CODE)).toBe('123456');
+    expect(store.resetFlowEmail).toBe('user@habits.dev');
+    expect(store.resetFlowCode).toBe('123456');
 
     vi.mocked(authService.resetPassword).mockResolvedValue({ message: 'Changed', data: {} });
     await store.resetPassword('newPass123', 'newPass123');
-    expect(localStorage.getItem(STORAGE_KEYS.FORGOT_EMAIL)).toBeNull();
-    expect(localStorage.getItem(STORAGE_KEYS.RESET_EMAIL)).toBeNull();
-    expect(localStorage.getItem(STORAGE_KEYS.RESET_CODE)).toBeNull();
+    expect(store.resetFlowEmail).toBeNull();
+    expect(store.resetFlowCode).toBeNull();
   });
 });

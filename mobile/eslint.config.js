@@ -39,8 +39,8 @@ export default [
     },
     
     rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-empty-object-type': 'off',
       'no-unused-vars': 'off',
       'vue/multi-word-component-names': 'off',

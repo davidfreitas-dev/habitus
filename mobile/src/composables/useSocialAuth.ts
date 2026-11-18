@@ -2,15 +2,16 @@ import { SocialLogin } from '@capgo/capacitor-social-login';
 
 export async function initSocialLogin(): Promise<void> {
   const webClientId = import.meta.env.VITE_GOOGLE_WEB_CLIENT_ID;
-  
+
   if (!webClientId) {
     console.warn('VITE_GOOGLE_WEB_CLIENT_ID não está definido nas variáveis de ambiente.');
+    return;
   }
 
   await SocialLogin.initialize({
     google: {
-      webClientId: webClientId || 'SEU_WEB_CLIENT_ID.apps.googleusercontent.com',
-    }
+      webClientId,
+    },
   });
 }
 

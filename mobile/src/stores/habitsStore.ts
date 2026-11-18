@@ -30,6 +30,13 @@ export const useHabitStore = defineStore(
       dayCache.value = {};
     };
 
+    const clearHabitsState = () => {
+      habits.value = [];
+      summary.value = [];
+      dayCache.value = {};
+      pendingSyncCount.value = 0;
+    };
+
     const createHabit = async (title: string, weekDays: number[], reminderTime: string | null) => {
       const response = await habitService.create(title, weekDays, reminderTime);
       const data = response.data;
@@ -330,6 +337,7 @@ export const useHabitStore = defineStore(
       isSyncing,
       pendingSyncCount,
       initPendingSyncCount,
+      clearHabitsState,
       syncPendingHabits,
       createHabit,
       getDayInfo,

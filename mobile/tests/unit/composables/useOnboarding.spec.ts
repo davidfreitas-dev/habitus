@@ -13,6 +13,8 @@ vi.mock('@capacitor/preferences', () => ({
 describe('useOnboarding', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    const { clearOnboardingCache } = useOnboarding();
+    clearOnboardingCache();
   });
 
   it('checks if an onboarding step has been seen', async () => {

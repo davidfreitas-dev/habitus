@@ -41,6 +41,8 @@ export const authService = {
   },
   
   verifyEmail(token: string) {
-    return api.get<ApiResponse<{ message?: string }>>(`${AUTH_ENDPOINTS.VERIFY_EMAIL}?token=${token}`);
+    return api.get<ApiResponse<{ message?: string }>>(AUTH_ENDPOINTS.VERIFY_EMAIL, {
+      params: { token },
+    });
   }
 };
