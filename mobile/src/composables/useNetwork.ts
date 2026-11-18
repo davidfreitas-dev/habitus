@@ -3,10 +3,12 @@ import { Network, type ConnectionStatus } from '@capacitor/network';
 import type { PluginListenerHandle } from '@capacitor/core';
 import { useToast } from '@/composables/useToast';
 
+const isConnected = ref(true);
+let listenerHandle: PluginListenerHandle | null = null;
+let activeSubscribers = 0;
+
 export function useNetwork() {
-  const isConnected = ref(true);
   const { showToast } = useToast();
-  let listenerHandle: PluginListenerHandle | null = null;
 
   const handleNetworkChange = ({ connected }: ConnectionStatus) => {
     const wasDisconnected = isConnected.value === false;
@@ -20,13 +22,31 @@ export function useNetwork() {
   };
 
   onMounted(async () => {
-    const status = await Network.getStatus();
-    isConnected.value = status.connected;
-    listenerHandle = await Network.addListener('networkStatusChange', handleNetworkChange);
+    activeSubscribers++;
+
+    try {
+      const status = await Network.getStatus();
+      isConnected.value = status.connected;
+    } catch {
+      isConnected.value = typeof navigator !== 'undefined' ? navigator.onLine : true;
+    }
+
+    if (!listenerHandle) {
+      try {
+        listenerHandle = await Network.addListener('networkStatusChange', handleNetworkChange);
+      } catch {
+        // Fallback for environments where Network plugin listener is unsupported
+      }
+    }
   });
 
   onUnmounted(async () => {
-    await listenerHandle?.remove();
+    activeSubscribers--;
+    if (activeSubscribers <= 0 && listenerHandle) {
+      await listenerHandle.remove();
+      listenerHandle = null;
+      activeSubscribers = 0;
+    }
   });
 
   return { isConnected };

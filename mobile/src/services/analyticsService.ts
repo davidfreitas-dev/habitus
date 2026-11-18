@@ -7,6 +7,9 @@ export type AnalyticsEvent =
   | { name: 'habit_updated'; params: { habitId: number | string; hasReminder: boolean } }
   | { name: 'habit_deleted'; params: { habitId: number | string } }
   | { name: 'habit_toggled'; params: { habitId: number | string; date: string } }
+  | { name: 'habit_toggled_offline'; params: { habitId: number | string; date: string } }
+  | { name: 'habit_toggled_offline_fallback'; params: { habitId: number | string; date: string } }
+  | { name: 'offline_sync_completed'; params: { syncedCount: number; failedCount: number } }
   | { name: 'streak_achieved'; params: { count: number } }
   | { name: 'screen_view'; params: { screenName: string } }
   | { name: 'onboarding_reset' };

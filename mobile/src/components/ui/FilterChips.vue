@@ -122,8 +122,6 @@ onMounted(() => {
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding: 2px 0;
-  margin-bottom: 16px;
   scrollbar-width: none;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;

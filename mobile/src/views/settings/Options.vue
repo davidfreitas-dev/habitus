@@ -55,7 +55,7 @@ const onboardingTourRef = ref<InstanceType<typeof OnboardingTour> | null>(null);
 
 const handleReplayTutorial = async () => {
   await triggerHaptic('light');
-  await resetOnboarding(['welcome', 'home', 'day', 'form', 'stats', 'options']);
+  await resetOnboarding(['welcome', 'home', 'day', 'form', 'stats', 'options', 'habits']);
   void analyticsService.logEvent({ name: 'onboarding_reset' });
   showToast('success', 'Tutorial reiniciado!');
   router.push('/onboarding/welcome');

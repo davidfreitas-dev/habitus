@@ -16,6 +16,7 @@ import {
   IonRefresherContent,
   IonSkeletonText,
   onIonViewWillEnter,
+  onIonViewDidEnter,
   type RefresherCustomEvent,
 } from '@ionic/vue';
 import {
@@ -36,6 +37,8 @@ import Button from '@/components/ui/Button.vue';
 import Input from '@/components/ui/Input.vue';
 import FilterChips, { type FilterChipItem } from '@/components/ui/FilterChips.vue';
 import ModalDialog from '@/components/layout/ModalDialog.vue';
+import OnboardingTour from '@/components/onboarding/OnboardingTour.vue';
+import { habitsSteps } from '@/onboarding/habitsSteps';
 import { getErrorMessage, type Habit } from '@/types';
 
 const router = useRouter();
@@ -49,6 +52,8 @@ const isLoadingHabits = ref(false);
 const habitToDelete = ref<Habit | null>(null);
 const deleteDialogRef = ref<InstanceType<typeof ModalDialog> | null>(null);
 const ionListRef = ref<InstanceType<typeof IonList> | null>(null);
+const onboardingTourRef = ref<InstanceType<typeof OnboardingTour> | null>(null);
+let habitsLoaded: Promise<void> | null = null;
 
 const closeSlidingItems = async () => {
   try {
@@ -175,9 +180,30 @@ const confirmDeleteHabit = async () => {
   }
 };
 
+const activeHabitsSteps = computed(() => {
+  return habitsSteps.filter((step) => {
+    const attachElement = step.attachTo?.element;
+    if (attachElement === '#onboarding-habit-card') {
+      return filteredHabits.value.length > 0;
+    }
+    return true;
+  });
+});
+
 onIonViewWillEnter(() => {
   closeSlidingItems();
-  loadHabits();
+  habitsLoaded = loadHabits();
+});
+
+onIonViewDidEnter(async () => {
+  if (habitsLoaded) {
+    try {
+      await habitsLoaded;
+    } catch {
+      // Ignora erro
+    }
+  }
+  await onboardingTourRef.value?.startIfNotSeen();
 });
 </script>
 
@@ -186,7 +212,7 @@ onIonViewWillEnter(() => {
     <Header>
       <ion-row class="header-row ion-justify-content-between ion-align-items-center ion-padding-horizontal ion-padding-top">
         <Heading title="Meus Hábitos" />
-        <ButtonNew />
+        <ButtonNew id="onboarding-habits-new" />
       </ion-row>
     </Header>
 
@@ -196,131 +222,142 @@ onIonViewWillEnter(() => {
       </ion-refresher>
 
       <Container>
-        <div class="search-input-wrapper">
-          <Input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Buscar hábito..."
-          />
-        </div>
-
-        <FilterChips
-          v-model="selectedWeekDay"
-          :items="weekDayFilters"
-          aria-label="Filtrar por dia da semana"
-        />
-
-        <div v-if="isLoadingHabits" class="habits-list">
-          <div
-            v-for="n in 4"
-            :key="n"
-            class="habit-card"
-          >
-            <ion-skeleton-text :animated="true" style="width: 65%; height: 20px; border-radius: 6px;" />
-            <ion-skeleton-text :animated="true" style="width: 90%; height: 28px; border-radius: 6px; margin-top: 12px;" />
+        <div class="content">
+          <div id="onboarding-habits-search">
+            <Input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Buscar hábito..."
+            />
           </div>
-        </div>
 
-        <ion-list
-          v-else-if="filteredHabits.length > 0"
-          ref="ionListRef"
-          lines="none"
-          class="habits-list ion-no-padding"
-        >
-          <ion-item-sliding
-            v-for="habit in filteredHabits"
-            :key="habit.id"
-            class="habit-sliding-item"
+          <FilterChips
+            id="onboarding-habits-chips"
+            v-model="selectedWeekDay"
+            :items="weekDayFilters"
+            aria-label="Filtrar por dia da semana"
+          />
+
+          <div v-if="isLoadingHabits" class="habits-list">
+            <div
+              v-for="n in 4"
+              :key="n"
+              class="habit-card"
+            >
+              <ion-skeleton-text :animated="true" style="width: 65%; height: 20px; border-radius: 6px;" />
+              <ion-skeleton-text :animated="true" style="width: 90%; height: 28px; border-radius: 6px; margin-top: 12px;" />
+            </div>
+          </div>
+
+          <ion-list
+            v-else-if="filteredHabits.length > 0"
+            ref="ionListRef"
+            lines="none"
+            class="habits-list ion-no-padding"
           >
-            <ion-item-options side="start" class="sliding-options-start">
-              <ion-item-option
-                class="sliding-option-btn sliding-option-edit"
-                aria-label="Editar hábito"
-                @click="handleEditHabit(habit.id)"
-              >
-                <ion-icon slot="top" :icon="createOutline" />
-                <span class="sliding-option-label">Editar</span>
-              </ion-item-option>
-            </ion-item-options>
-
-            <ion-item class="habit-card-item ion-no-padding" lines="none">
-              <div
-                class="habit-card"
-                @click="handleEditHabit(habit.id)"
-              >
-                <div class="habit-card__header">
-                  <div class="habit-card__info">
-                    <h3 class="habit-card__title">
-                      {{ habit.title }}
-                    </h3>
-                    <span class="habit-card__subtitle">
-                      {{ getFrequencySummary(habit) }}
-                    </span>
+            <ion-item-sliding
+              v-for="(habit, index) in filteredHabits"
+              :key="habit.id"
+              class="habit-sliding-item"
+            >
+              <ion-item-options side="start" class="sliding-options-container">
+                <ion-item-option
+                  class="sliding-option-round"
+                  aria-label="Editar hábito"
+                  @click="handleEditHabit(habit.id)"
+                >
+                  <div class="action-circle-group">
+                    <div class="action-circle action-circle--edit">
+                      <ion-icon :icon="createOutline" />
+                    </div>
+                    <span class="action-circle-label">Editar</span>
                   </div>
+                </ion-item-option>
+              </ion-item-options>
 
-                  <div class="habit-card__actions" @click.stop>
-                    <div
-                      class="reminder-badge"
-                      :class="{ 'reminder-badge--off': !formatReminderTime(habit.reminder_time) }"
-                    >
-                      <ion-icon
-                        :icon="formatReminderTime(habit.reminder_time) ? notifications : notificationsOff"
-                        class="reminder-badge__icon"
-                      />
-                      <span v-if="formatReminderTime(habit.reminder_time)">
-                        {{ formatReminderTime(habit.reminder_time) }}
+              <ion-item class="habit-card-item ion-no-padding" lines="none">
+                <div
+                  :id="index === 0 ? 'onboarding-habit-card' : undefined"
+                  class="habit-card"
+                >
+                  <div class="habit-card__header">
+                    <div class="habit-card__info">
+                      <h3 class="habit-card__title">
+                        {{ habit.title }}
+                      </h3>
+                      <span class="habit-card__subtitle">
+                        {{ getFrequencySummary(habit) }}
                       </span>
                     </div>
+
+                    <div class="habit-card__actions" @click.stop>
+                      <div
+                        class="reminder-badge"
+                        :class="{ 'reminder-badge--off': !formatReminderTime(habit.reminder_time) }"
+                      >
+                        <ion-icon
+                          :icon="formatReminderTime(habit.reminder_time) ? notifications : notificationsOff"
+                          class="reminder-badge__icon"
+                        />
+                        <span v-if="formatReminderTime(habit.reminder_time)">
+                          {{ formatReminderTime(habit.reminder_time) }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="week-badges-stack">
+                    <span
+                      v-for="(dayLetter, idx) in shortWeekDays"
+                      :key="idx"
+                      class="week-badge-circle"
+                      :class="{ 'week-badge-circle--active': isDayActive(habit, idx) }"
+                    >
+                      {{ dayLetter }}
+                    </span>
                   </div>
                 </div>
+              </ion-item>
 
-                <div class="week-badges">
-                  <span
-                    v-for="(dayLetter, idx) in shortWeekDays"
-                    :key="idx"
-                    class="week-badge"
-                    :class="{ 'week-badge--active': isDayActive(habit, idx) }"
-                  >
-                    {{ dayLetter }}
-                  </span>
-                </div>
-              </div>
-            </ion-item>
+              <ion-item-options side="end" class="sliding-options-container">
+                <ion-item-option
+                  class="sliding-option-round"
+                  aria-label="Excluir hábito"
+                  @click="promptDeleteHabit(habit)"
+                >
+                  <div class="action-circle-group">
+                    <div class="action-circle action-circle--delete">
+                      <ion-icon :icon="trashOutline" />
+                    </div>
+                    <span class="action-circle-label">Excluir</span>
+                  </div>
+                </ion-item-option>
+              </ion-item-options>
+            </ion-item-sliding>
+          </ion-list>
 
-            <ion-item-options side="end" class="sliding-options-end">
-              <ion-item-option
-                class="sliding-option-btn sliding-option-delete"
-                aria-label="Excluir hábito"
-                @click="promptDeleteHabit(habit)"
-              >
-                <ion-icon slot="top" :icon="trashOutline" />
-                <span class="sliding-option-label">Excluir</span>
-              </ion-item-option>
-            </ion-item-options>
-          </ion-item-sliding>
-        </ion-list>
-
-        <div v-else class="empty-state ion-text-center ion-padding">
-          <div class="empty-state__icon">
-            <ion-icon :icon="calendarOutline" />
+          <div v-else class="empty-state ion-text-center ion-padding">
+            <div class="empty-state__icon">
+              <ion-icon :icon="calendarOutline" />
+            </div>
+            <ion-text>
+              <p v-if="habitStore.habits.length === 0">
+                Você ainda não cadastrou nenhum hábito.
+              </p>
+              <p v-else>
+                Nenhum hábito encontrado para o filtro selecionado.
+              </p>
+            </ion-text>
+            <Button
+              v-if="habitStore.habits.length === 0"
+              color="primary"
+              size="small"
+              class="ion-margin-top"
+              @click="router.push('/habit')"
+            >
+              Criar Primeiro Hábito
+            </Button>
           </div>
-          <ion-text>
-            <p v-if="habitStore.habits.length === 0">
-              Você ainda não cadastrou nenhum hábito.
-            </p>
-            <p v-else>
-              Nenhum hábito encontrado para o filtro selecionado.
-            </p>
-          </ion-text>
-          <Button
-            v-if="habitStore.habits.length === 0"
-            color="primary"
-            size="small"
-            class="ion-margin-top"
-            @click="router.push('/habit')"
-          >
-            Criar Primeiro Hábito
-          </Button>
         </div>
       </Container>
 
@@ -330,10 +367,21 @@ onIonViewWillEnter(() => {
         @on-confirm="confirmDeleteHabit"
       />
     </ion-content>
+
+    <OnboardingTour
+      ref="onboardingTourRef"
+      step-key="habits"
+      :steps="activeHabitsSteps"
+    />
   </ion-page>
 </template>
 
 <style scoped>
+div.content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
 .header-row {
   width: 100%;
   max-width: 600px;
@@ -368,68 +416,77 @@ onIonViewWillEnter(() => {
   --inner-padding-end: 0;
   --padding-start: 0;
   width: 100%;
+  position: relative;
+  z-index: 2;
 }
 
-.sliding-options-start {
-  border-top-left-radius: var(--radius-xl);
-  border-bottom-left-radius: var(--radius-xl);
-  overflow: hidden;
-  background: var(--color-background-elevated);
+.sliding-options-container {
+  background: transparent;
+  border: none;
 }
 
-.sliding-options-end {
-  border-top-right-radius: var(--radius-xl);
-  border-bottom-right-radius: var(--radius-xl);
-  overflow: hidden;
-  background: var(--color-background-elevated);
-}
-
-.sliding-option-btn {
-  padding: 0 20px;
+.sliding-option-round {
+  --background: transparent;
+  --background-hover: transparent;
+  --background-activated: transparent;
+  --background-focused: transparent;
+  --color: inherit;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  background: transparent;
   min-width: 76px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  height: 100%;
 }
 
-.sliding-option-btn ion-icon {
-  font-size: 1.45rem;
-  margin-bottom: 2px;
+.action-circle-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  user-select: none;
+  height: 100%;
 }
 
-.sliding-option-label {
+.action-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.action-circle ion-icon {
+  font-size: 1.35rem;
+}
+
+.sliding-option-round:active .action-circle {
+  transform: scale(0.92);
+  filter: brightness(0.9);
+}
+
+.action-circle--edit {
+  background: var(--color-background-elevated);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-primary);
+}
+
+.action-circle--delete {
+  background: var(--color-danger);
+  color: #ffffff;
+}
+
+.action-circle-label {
   font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: capitalize;
-}
-
-.sliding-option-edit {
-  --background: var(--color-background-elevated);
-  --color: var(--color-text-primary);
-  color: var(--color-text-primary);
-}
-
-.sliding-option-edit ion-icon,
-.sliding-option-edit .sliding-option-label {
-  color: var(--color-text-primary);
-}
-
-.sliding-option-edit:active {
-  --background: var(--color-background-primary);
-}
-
-.sliding-option-delete {
-  --background: var(--color-background-elevated);
-  --color: var(--color-danger);
-  color: var(--color-danger);
-}
-
-.sliding-option-delete ion-icon,
-.sliding-option-delete .sliding-option-label {
-  color: var(--color-danger);
-}
-
-.sliding-option-delete:active {
-  --background: var(--color-background-primary);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-align: center;
+  line-height: 1;
 }
 
 .habit-card {
@@ -441,12 +498,6 @@ onIonViewWillEnter(() => {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  cursor: pointer;
-  transition: transform 0.15s ease, border-color 0.15s ease;
-}
-
-.habit-card:active {
-  border-color: var(--color-border-strong);
 }
 
 .habit-card__header {
@@ -485,29 +536,40 @@ onIonViewWillEnter(() => {
   flex-shrink: 0;
 }
 
-.week-badges {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
-}
-
-.week-badge {
-  height: 30px;
-  border-radius: var(--radius-md);
+.week-badges-stack {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 700;
-  background: var(--habit-bg-0);
-  border: 1.5px solid var(--habit-border-0);
-  color: var(--color-text-secondary);
+  padding-left: 2px;
 }
 
-.week-badge--active {
+.week-badge-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: var(--color-background-elevated);
+  border: 1.5px solid var(--color-border-strong);
+  box-shadow: 0 0 0 2px var(--color-background-secondary);
+  color: var(--color-text-secondary);
+  margin-left: -6px;
+  position: relative;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.week-badge-circle:first-child {
+  margin-left: 0;
+}
+
+.week-badge-circle--active {
   background: var(--color-primary);
-  border-color: var(--habit-border-100);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-background-secondary);
   color: var(--color-neutral-900);
+  font-weight: 800;
 }
 
 .reminder-badge {

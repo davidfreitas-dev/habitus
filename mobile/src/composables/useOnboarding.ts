@@ -2,7 +2,7 @@ import { Preferences } from '@capacitor/preferences';
 
 const PREFIX = 'onboarding:';
 
-export type OnboardingStepKey = 'welcome' | 'home' | 'day' | 'form' | 'stats' | 'options';
+export type OnboardingStepKey = 'welcome' | 'home' | 'day' | 'form' | 'stats' | 'options' | 'habits';
 
 /**
  * Composable for managing onboarding step progress.

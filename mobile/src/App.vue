@@ -5,6 +5,7 @@ import { IonApp, IonRouterOutlet } from '@ionic/vue';
 import { Capacitor } from '@capacitor/core';
 import { ScreenOrientation } from '@capacitor/screen-orientation';
 import { useNetwork } from '@/composables/useNetwork';
+import { useOfflineSync } from '@/composables/useOfflineSync';
 import { useStatusBar } from '@/composables/useStatusBar';
 import { useNotifications } from '@/composables/useNotifications';
 import { useDeepLinks } from '@/composables/useDeepLinks';
@@ -15,6 +16,7 @@ import { notificationService } from '@/services/notificationService';
 
 const router = useRouter();
 const { isConnected } = useNetwork();
+useOfflineSync();
 const { setStatusBar, Style } = useStatusBar();
 const { checkPermission, listenNotificationActionPerformed } = useNotifications();
 useDeepLinks();
@@ -69,7 +71,10 @@ onMounted(async () => {
 <template>
   <ion-app>
     <div v-if="!isConnected" class="offline-banner">
-      Você está offline
+      Você está offline{{ habitStore.pendingSyncCount > 0 ? ` • ${habitStore.pendingSyncCount} pendente(s)` : '' }}
+    </div>
+    <div v-else-if="habitStore.isSyncing" class="syncing-banner">
+      Sincronizando hábitos...
     </div>
     <ion-router-outlet />
   </ion-app>
@@ -84,5 +89,25 @@ onMounted(async () => {
   font-size: 0.85rem;
   font-weight: 600;
   z-index: 9999;
+}
+
+.syncing-banner {
+  background: var(--ion-color-primary, #7c3aed);
+  color: white;
+  text-align: center;
+  padding: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + 6px) 12px 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  z-index: 9999;
+  animation: pulse-sync 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-sync {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.75;
+  }
 }
 </style>
