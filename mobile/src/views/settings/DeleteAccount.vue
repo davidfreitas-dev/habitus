@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { IonContent, IonPage, IonItem, IonLabel } from '@ionic/vue';
+import { IonContent, IonPage, IonItem, IonLabel, useIonRouter } from '@ionic/vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useProfileStore } from '@/stores/profileStore';
 import { useLoading } from '@/composables/useLoading';
@@ -15,7 +14,7 @@ import AppConfirmModal from '@/components/app/AppConfirmModal.vue';
 const authStore = useAuthStore();
 const profileStore = useProfileStore();
 
-const router = useRouter();
+const ionRouter = useIonRouter();
 
 const { isLoading, withLoading } = useLoading();
 
@@ -29,7 +28,7 @@ const confirmDelete = async () => {
   await withLoading(async () => {
     await profileStore.deleteAccount();
     authStore.clearTokens();
-    router.push('/signin');
+    ionRouter.navigate('/signin', 'root', 'replace');
   });
 };
 </script>

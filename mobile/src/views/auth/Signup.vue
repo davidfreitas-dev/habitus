@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
 import { ref, reactive, computed } from 'vue';
 import { useVuelidate } from '@vuelidate/core';
-import { onIonViewDidLeave } from '@ionic/vue';
+import { onIonViewDidLeave, useIonRouter } from '@ionic/vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/composables/useToast';
 import {
@@ -30,7 +29,7 @@ const formData = reactive({
 });
 
 const { showToast } = useToast();
-const router = useRouter();
+const ionRouter = useIonRouter();
 
 const signUp = async () => {
   isLoadingEmail.value = true;
@@ -42,7 +41,7 @@ const signUp = async () => {
 
     formData.name = capitalizeName(formData.name);
     await authStore.register(formData);
-    router.push('/');
+    ionRouter.navigate('/tabs/home', 'root', 'replace');
   } catch (err: unknown) {
     console.error('Registration failed:', err);
     showToast('error', getErrorMessage(err, 'Erro ao criar conta.'));
@@ -128,10 +127,10 @@ onIonViewDidLeave(() => {
         >
           <span class="terms-text">
             Li e concordo com os
-            <router-link to="/about">
+            <router-link to="/about?tab=terms" @click.stop>
               Termos de Uso
             </router-link> e a
-            <router-link to="/about">
+            <router-link to="/about?tab=privacy" @click.stop>
               Política de Privacidade
             </router-link>
           </span>

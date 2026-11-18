@@ -11,6 +11,7 @@ import {
   IonIcon,
   onIonViewWillEnter,
   onIonViewDidEnter,
+  useIonRouter,
 } from '@ionic/vue';
 import { personOutline, gridOutline, exitOutline } from 'ionicons/icons';
 import { useAuthStore } from '@/stores/authStore';
@@ -18,7 +19,6 @@ import { useThemeStore } from '@/stores/themeStore';
 import { useLoading } from '@/composables/useLoading';
 import { useOnboarding } from '@/composables/useOnboarding';
 import { useToast } from '@/composables/useToast';
-import { useHaptics } from '@/composables/useHaptics';
 import { analyticsService } from '@/services/analyticsService';
 import { optionsSteps } from '@/onboarding/optionsSteps';
 import AppHeader from '@/components/app/AppHeader.vue';
@@ -30,10 +30,10 @@ import BaseToggle from '@/components/base/BaseToggle.vue';
 import OnboardingTour from '@/components/features/onboarding/OnboardingTour.vue';
 
 const router = useRouter();
+const ionRouter = useIonRouter();
 const { withLoading } = useLoading();
 const { resetOnboarding } = useOnboarding();
 const { showToast } = useToast();
-const { triggerHaptic } = useHaptics();
 const authStore = useAuthStore();
 const themeStore = useThemeStore();
 
@@ -46,7 +46,6 @@ const analyticsConsent = ref(true);
 
 const handleAnalyticsConsentChange = async (enabled: boolean) => {
   analyticsConsent.value = enabled;
-  await triggerHaptic('light');
   await analyticsService.setConsent(enabled);
 };
 
@@ -54,7 +53,6 @@ const modalRef = ref<InstanceType<typeof AppConfirmModal> | null>(null);
 const onboardingTourRef = ref<InstanceType<typeof OnboardingTour> | null>(null);
 
 const handleReplayTutorial = async () => {
-  await triggerHaptic('light');
   await resetOnboarding(['welcome', 'home', 'day', 'form', 'stats', 'options', 'habits']);
   void analyticsService.logEvent({ name: 'onboarding_reset' });
   showToast('success', 'Tutorial reiniciado!');
@@ -68,7 +66,7 @@ const handleLogOut = () => {
 const logOut = async () => {
   await withLoading(async () => {
     await authStore.logout();
-    router.push('/signin');
+    ionRouter.navigate('/signin', 'root', 'replace');
   }, 'Erro ao encerrar sessão.');
 };
 
@@ -84,7 +82,7 @@ onIonViewDidEnter(async () => {
 <template>
   <ion-page>
     <AppHeader>
-      <AppHeading title="Opções" class="ion-padding-horizontal" />
+      <AppHeading title="Opções" class="ion-padding-horizontal ion-padding-top" />
     </AppHeader>
     <ion-content>
       <AppContainer>
@@ -200,7 +198,6 @@ onIonViewDidEnter(async () => {
 <style scoped>
 ion-list {
   background: var(--color-background-primary);
-  margin-top: 1rem;
 }
 ion-list-header {
   color: var(--color-text-primary);

@@ -93,7 +93,6 @@ const loadHabits = async () => {
 };
 
 const handleRefresh = async (event: RefresherCustomEvent) => {
-  await triggerHaptic('light');
   try {
     await habitStore.fetchAllHabits();
   } catch (err: unknown) {
@@ -105,13 +104,11 @@ const handleRefresh = async (event: RefresherCustomEvent) => {
 
 const handleEditHabit = async (habitId: number) => {
   await closeSlidingItems();
-  await triggerHaptic('light');
   router.push(`/habit/${habitId}`);
 };
 
 const promptDeleteHabit = async (habit: Habit) => {
   await closeSlidingItems();
-  await triggerHaptic('light');
   habitToDelete.value = habit;
   deleteDialogRef.value?.setOpen(true);
 };

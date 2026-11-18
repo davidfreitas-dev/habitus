@@ -2,7 +2,6 @@
 import { ref, watch } from 'vue';
 import { IonDatetime, IonDatetimeButton, IonModal, IonItem, IonLabel } from '@ionic/vue';
 import { useNotifications } from '@/composables/useNotifications';
-import { useHaptics } from '@/composables/useHaptics';
 import {
   FULL_WEEK_DAYS,
   RECURRENCE_PRESETS,
@@ -40,7 +39,6 @@ const props = withDefaults(
 );
 
 const { requestPermission } = useNotifications();
-const { triggerHaptic } = useHaptics();
 
 const formData = ref<{
   title: string;
@@ -98,8 +96,7 @@ const isDayChecked = (index: number) => {
   return formData.value.weekDays.includes(index);
 };
 
-const toggleWeekDay = async (index: number) => {
-  await triggerHaptic('light');
+const toggleWeekDay = (index: number) => {
   const days = formData.value.weekDays;
 
   if (days.includes(index)) {
@@ -137,8 +134,7 @@ const isPresetActive = (presetDays: readonly number[]): boolean => {
   return presetDays.every((day) => formData.value.weekDays.includes(day));
 };
 
-const applyPreset = async (presetDays: readonly number[], event?: MouseEvent) => {
-  await triggerHaptic('light');
+const applyPreset = (presetDays: readonly number[], event?: MouseEvent) => {
   centerChip(presetsScrollRef.value, event);
   if (isPresetActive(presetDays)) {
     formData.value.weekDays = [];
@@ -177,8 +173,7 @@ const habitTemplates: HabitTemplate[] = [
   { emoji: '💻', title: 'Estudar 45 min', weekDays: [1, 2, 3, 4, 5], reminderTime: '19:00' },
 ];
 
-const applyTemplate = async (template: HabitTemplate, event?: MouseEvent) => {
-  await triggerHaptic('light');
+const applyTemplate = (template: HabitTemplate, event?: MouseEvent) => {
   centerChip(templatesScrollRef.value, event);
   formData.value.title = template.title;
   formData.value.weekDays = [...template.weekDays];

@@ -3,8 +3,10 @@ import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { IonTabBar, IonTabButton, IonTabs, IonLabel, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
 import { homeOutline, home, listOutline, list, statsChartOutline, statsChart, cogOutline, cog } from 'ionicons/icons';
+import { useAuthStore } from '@/stores/authStore';
 
 const route = useRoute();
+const authStore = useAuthStore();
 
 const activeTab = computed(() => {
   const path = route.path;
@@ -18,7 +20,7 @@ const activeTab = computed(() => {
 <template>
   <ion-page>
     <ion-tabs>
-      <ion-router-outlet />
+      <ion-router-outlet :key="authStore.sessionId" />
       <ion-tab-bar slot="bottom" class="ion-safe-area-bottom">
         <ion-tab-button tab="home" href="/tabs/home">
           <ion-icon :icon="activeTab === 'home' ? home : homeOutline" />

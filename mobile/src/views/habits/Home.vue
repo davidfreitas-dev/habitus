@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, nextTick, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import {
   IonPage,
   IonContent,
@@ -11,6 +11,7 @@ import {
   IonSkeletonText,
   onIonViewWillEnter,
   onIonViewDidEnter,
+  onIonViewWillLeave,
   type RefresherCustomEvent,
 } from '@ionic/vue';
 import { useGenerateRange } from '@/composables/useGenerateRange';
@@ -18,7 +19,6 @@ import { useDayDimensions } from '@/composables/useDayDimensions';
 import { useProfileStore } from '@/stores/profileStore';
 import { useHabitStore } from '@/stores/habitsStore';
 import { useToast } from '@/composables/useToast';
-import { useHaptics } from '@/composables/useHaptics';
 import { homeSteps } from '@/onboarding/homeSteps';
 import AppHeader from '@/components/app/AppHeader.vue';
 import HabitUserGreeting from '@/components/features/habits/HabitUserGreeting.vue';
@@ -33,7 +33,6 @@ import { getErrorMessage } from '@/types';
 
 const { generateDatesFromYearBeginning } = useGenerateRange();
 const { isHorizontalLayout } = useDayDimensions();
-const { triggerHaptic } = useHaptics();
 const { showToast } = useToast();
 
 const profileStore = useProfileStore();
@@ -57,26 +56,51 @@ const isDaySheetOpen = ref(false);
 const selectedDate = ref<Date | null>(null);
 
 const route = useRoute();
+const router = useRouter();
+
+const clearRouteActions = () => {
+  if (route.query.action || route.query.date || route.query.habitId) {
+    const restQuery = { ...route.query };
+    delete restQuery.action;
+    delete restQuery.date;
+    delete restQuery.habitId;
+    void router.replace({ path: route.path, query: restQuery });
+  }
+};
 
 watch(
   () => [route.query.action, route.query.date],
   ([action, queryDate]) => {
+    let shouldOpen = false;
+
     if (action === 'today') {
       selectedDate.value = new Date();
-      isDaySheetOpen.value = true;
+      shouldOpen = true;
     } else if (queryDate && typeof queryDate === 'string') {
       const parsed = dayjs(queryDate).toDate();
       if (!isNaN(parsed.getTime())) {
         selectedDate.value = parsed;
-        isDaySheetOpen.value = true;
+        shouldOpen = true;
       }
+    }
+
+    if (shouldOpen) {
+      isDaySheetOpen.value = true;
+      void nextTick(() => {
+        clearRouteActions();
+      });
     }
   },
   { immediate: true }
 );
 
-const handleSelectDay = async (date: Date) => {
-  await triggerHaptic('light');
+watch(isDaySheetOpen, (isOpen) => {
+  if (!isOpen) {
+    clearRouteActions();
+  }
+});
+
+const handleSelectDay = (date: Date) => {
   selectedDate.value = date;
   isDaySheetOpen.value = true;
 };
@@ -149,7 +173,6 @@ const getSummary = async (shouldScroll = false) => {
 };
 
 const handleRefresh = async (event: RefresherCustomEvent) => {
-  await triggerHaptic('light');
   try {
     await getSummary(false);
   } catch {
@@ -180,6 +203,13 @@ onIonViewDidEnter(async () => {
     }
   }
   await onboardingTourRef.value?.startIfNotSeen();
+});
+
+onIonViewWillLeave(() => {
+  if (isDaySheetOpen.value) {
+    isDaySheetOpen.value = false;
+  }
+  clearRouteActions();
 });
 </script>
 

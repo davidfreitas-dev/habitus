@@ -17,7 +17,7 @@ withDefaults(
 h1 {
   color: var(--color-text-primary);
   font-weight: 800;
-  font-size: 1.875rem;
+  font-size: 1.75rem;
   margin: 0;
 }
 </style>

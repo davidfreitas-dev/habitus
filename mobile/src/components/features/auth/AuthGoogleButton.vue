@@ -26,8 +26,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { IonButton, IonSpinner } from '@ionic/vue';
+import { IonButton, IonSpinner, useIonRouter } from '@ionic/vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/composables/useToast';
 import { loginWithGoogle } from '@/composables/useSocialAuth';
@@ -44,7 +43,7 @@ withDefaults(
 );
 
 const authStore = useAuthStore();
-const router = useRouter();
+const ionRouter = useIonRouter();
 const { showToast } = useToast();
 const isLoadingGoogle = ref(false);
 
@@ -60,7 +59,7 @@ const doGoogleLogin = async () => {
       isLoadingGoogle.value = true;
       emit('login-start');
       await authStore.socialLogin('google', idToken);
-      router.push('/');
+      ionRouter.navigate('/tabs/home', 'root', 'replace');
     }
   } catch (err) {
     console.error('Google Login failed:', err);

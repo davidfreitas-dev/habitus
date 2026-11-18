@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue';
-import { useRouter } from 'vue-router';
 import { useVuelidate } from '@vuelidate/core';
-import { onIonViewDidLeave } from '@ionic/vue';
+import { onIonViewDidLeave, useIonRouter } from '@ionic/vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/composables/useToast';
 import { emailRules, requiredPasswordRules, getFieldError } from '@/utils/validators';
@@ -20,14 +19,14 @@ const formData = reactive({
 });
 
 const { showToast } = useToast();
-const router = useRouter();
+const ionRouter = useIonRouter();
 
 const signIn = async () => {
   isLoadingEmail.value = true;
 
   try {
     await authStore.login(formData);
-    router.push('/');
+    ionRouter.navigate('/tabs/home', 'root', 'replace');
   } catch (err: unknown) {
     console.error('Login failed:', err);
     showToast('error', getErrorMessage(err, 'Erro ao fazer login.'));

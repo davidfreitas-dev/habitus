@@ -8,7 +8,7 @@
       <AppContainer>
         <BaseSegment v-model="selectedSegment" :segments="segments" />
 
-        <div v-if="selectedSegment === 'first'" class="ion-padding">
+        <div v-if="selectedSegment === 'privacy' || selectedSegment === 'first'" class="ion-padding">
           <h1>Política de Privacidade</h1>
           <p><em>Última atualização: 13 de julho de 2026</em></p>
           <section>
@@ -63,7 +63,7 @@
           </section>
         </div>
 
-        <div v-if="selectedSegment === 'second'" class="ion-padding">
+        <div v-if="selectedSegment === 'terms' || selectedSegment === 'second'" class="ion-padding">
           <h1>Termos de Uso</h1>
           <p><em>Última atualização: 13 de julho de 2026</em></p>
           <section>
@@ -101,25 +101,49 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { IonPage, IonContent } from '@ionic/vue';
+import { ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import { IonPage, IonContent, onIonViewWillEnter } from '@ionic/vue';
 import AppHeader from '@/components/app/AppHeader.vue';
 import AppContainer from '@/components/app/AppContainer.vue';
 import BaseSegment, { type SegmentItem } from '@/components/base/BaseSegment.vue';
 import AppBackButton from '@/components/app/AppBackButton.vue';
 
+const route = useRoute();
+
 const segments = ref<SegmentItem[]>([
   { 
     label: 'Política de Privacidade', 
-    value: 'first' 
+    value: 'privacy' 
   },
   { 
     label: 'Termos de Uso', 
-    value: 'second' 
+    value: 'terms' 
   }
 ]);
 
-const selectedSegment = ref('first');
+const selectedSegment = ref('privacy');
+
+const updateSelectedSegmentFromRoute = () => {
+  const tab = (route.query.tab || route.query.segment || route.query.section) as string | undefined;
+  if (tab === 'terms' || tab === 'second') {
+    selectedSegment.value = 'terms';
+  } else {
+    selectedSegment.value = 'privacy';
+  }
+};
+
+onIonViewWillEnter(() => {
+  updateSelectedSegmentFromRoute();
+});
+
+watch(
+  () => [route.query.tab, route.query.segment, route.query.section],
+  () => {
+    updateSelectedSegmentFromRoute();
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped>

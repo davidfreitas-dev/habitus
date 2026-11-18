@@ -33,6 +33,22 @@ describe('BaseCheckbox.vue', () => {
 
     expect(wrapper.emitted('handleItem')).toBeTruthy();
   });
+
+  it('does not emit handleItem when clicking an anchor link inside label slot', async () => {
+    const wrapper = mount(BaseCheckbox, {
+      props: {
+        isChecked: false,
+      },
+      slots: {
+        default: '<a href="#" id="terms-link">Termos de Uso</a>',
+      },
+    });
+
+    const link = wrapper.find('#terms-link');
+    await link.trigger('click', { preventDefault: () => {} });
+
+    expect(wrapper.emitted('handleItem')).toBeFalsy();
+  });
 });
 
 describe('BaseChip.vue', () => {

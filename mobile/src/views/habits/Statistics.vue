@@ -13,7 +13,6 @@ import {
 import { ref, computed, watch } from 'vue';
 import { useHabitStore } from '@/stores/habitsStore';
 import { useToast } from '@/composables/useToast';
-import { useHaptics } from '@/composables/useHaptics';
 import { statsSteps } from '@/onboarding/statsSteps';
 import AppHeader from '@/components/app/AppHeader.vue';
 import AppHeading from '@/components/app/AppHeading.vue';
@@ -35,7 +34,6 @@ const isLoadingStats = ref(false);
 
 const habitStore = useHabitStore();
 const { showToast } = useToast();
-const { triggerHaptic } = useHaptics();
 
 const chartLabels = computed(() => statsData.value.map(item => item.label));
 const chartValues = computed(() => statsData.value.map(item => item.percentage || 0));
@@ -87,12 +85,10 @@ const loadStats = async (period: StatsPeriod | string) => {
 };
 
 watch(activePeriod, async (period) => {
-  await triggerHaptic('light');
   await loadStats(period);
 });
 
 const handleRefresh = async (event: RefresherCustomEvent) => {
-  await triggerHaptic('light');
   try {
     await loadStats(activePeriod.value);
   } finally {
@@ -127,7 +123,7 @@ onIonViewDidEnter(async () => {
 <template>
   <ion-page>
     <AppHeader>
-      <AppHeading title="Estatísticas" class="ion-padding-horizontal" />
+      <AppHeading title="Estatísticas" class="ion-padding-horizontal ion-padding-top" />
     </AppHeader>
     <ion-content>
       <ion-refresher slot="fixed" @ion-refresh="handleRefresh">
@@ -135,12 +131,13 @@ onIonViewDidEnter(async () => {
       </ion-refresher>
 
       <AppContainer>
-        <HabitPeriodSelector id="onboarding-period-selector" v-model="activePeriod" />
-
         <div class="stats-container">
+          <HabitPeriodSelector id="onboarding-period-selector" v-model="activePeriod" />
+
           <p class="chart-description">
             O gráfico abaixo mostra sua taxa de conclusão média para cada dia da semana no período selecionado.
           </p>
+          
           <div class="chart-card">
             <div class="chart-header">
               <span class="chart-title">Total de Atividades</span>

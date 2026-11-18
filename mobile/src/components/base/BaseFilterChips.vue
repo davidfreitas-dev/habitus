@@ -1,6 +1,5 @@
 <script setup lang="ts" generic="T = string | number | null">
 import { ref, watch, onMounted, nextTick } from 'vue';
-import { useHaptics } from '@/composables/useHaptics';
 import BaseChip from '@/components/base/BaseChip.vue';
 
 export interface FilterChipItem<ValueType = string | number | null> {
@@ -30,7 +29,6 @@ const emit = defineEmits<{
 }>();
 
 const containerRef = ref<HTMLElement | null>(null);
-const { triggerHaptic } = useHaptics();
 
 const scrollToIndex = (index: number) => {
   if (!containerRef.value || props.wrap) return;
@@ -64,9 +62,8 @@ const scrollByValue = (val: T | undefined) => {
   }
 };
 
-const selectChip = async (value: T, index: number, disabled?: boolean) => {
+const selectChip = (value: T, index: number, disabled?: boolean) => {
   if (disabled) return;
-  await triggerHaptic('light');
   emit('update:modelValue', value);
   emit('change', value);
   scrollToIndex(index);

@@ -54,8 +54,6 @@ const selectPeriod = (period: PeriodItem) => {
   background: var(--color-background-secondary);
   padding: 4px;
   border-radius: var(--radius-full);
-  margin-bottom: 24px;
-  margin-top: 16px;
 }
 
 .active-indicator {

@@ -144,7 +144,7 @@ const showSessionExpiredAlertAndRedirect = async () => {
         text: 'OK',
         handler: async () => {
           isAlertShowing = false;
-          router.push('/signin');
+          router.replace('/signin');
         },
       },
     ],
@@ -156,7 +156,7 @@ const showSessionExpiredAlertAndRedirect = async () => {
   if (role === 'backdrop' || role === 'cancel') {
     isAlertShowing = false;
     if (router.currentRoute.value.path !== '/signin') {
-      router.push('/signin');
+      router.replace('/signin');
     }
   }
 };
@@ -212,7 +212,7 @@ router.beforeEach(async (to) => {
     return false;
   }
   
-  return { name: 'Signin' };
+  return { name: 'Signin', replace: true };
 });
 
 router.afterEach(() => {

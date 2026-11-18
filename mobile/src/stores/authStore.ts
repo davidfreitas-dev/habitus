@@ -14,6 +14,7 @@ export const useAuthStore = defineStore('auth', () => {
   const sessionExpired = ref<boolean>(false);
   const resetFlowEmail = ref<string | null>(null);
   const resetFlowCode = ref<string | null>(null);
+  const sessionId = ref<number>(1);
 
   const isAuthenticated = computed(() => !!accessToken.value);
 
@@ -29,15 +30,19 @@ export const useAuthStore = defineStore('auth', () => {
     accessToken.value = null;
     refreshToken.value = null;
     localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+    sessionId.value++;
     useProfileStore().clearProfile();
     useHabitStore().clearHabitsState();
     void syncQueueService.clear();
     void notificationService.cancelAllNotifications();
   };
 
-  const applyAuthResponse = async (response: ApiResponse<AuthTokens>): Promise<boolean> => {
+  const applyAuthResponse = async (response: ApiResponse<AuthTokens>, isNewSession = false): Promise<boolean> => {
     if (response.data?.access_token) {
       setTokens(response.data.access_token, response.data.refresh_token);
+      if (isNewSession) {
+        sessionId.value++;
+      }
       await useProfileStore().fetchProfile();
       return true;
     }
@@ -63,17 +68,17 @@ export const useAuthStore = defineStore('auth', () => {
 
   const login = async (credentials: LoginCredentials) => {
     const response = await authService.login(credentials);
-    return applyAuthResponse(response);
+    return applyAuthResponse(response, true);
   };
 
   const socialLogin = async (provider: SocialProvider | string, idToken: string) => {
     const response = await authService.socialLogin(provider, idToken);
-    return applyAuthResponse(response);
+    return applyAuthResponse(response, true);
   };
 
   const register = async (userData: RegisterUserData) => {
     const response = await authService.register(userData);
-    return applyAuthResponse(response);
+    return applyAuthResponse(response, true);
   };
 
   const refreshAccessToken = async () => {
@@ -139,6 +144,7 @@ export const useAuthStore = defineStore('auth', () => {
     sessionExpired,
     resetFlowEmail,
     resetFlowCode,
+    sessionId,
     setTokens,
     clearTokens,
     login,

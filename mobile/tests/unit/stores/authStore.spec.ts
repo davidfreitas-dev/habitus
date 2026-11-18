@@ -76,6 +76,7 @@ describe('useAuthStore', () => {
     expect(store.accessToken).toBe('acc_123');
     expect(store.refreshToken).toBe('ref_456');
     expect(store.isAuthenticated).toBe(true);
+    expect(store.sessionId).toBe(2);
     expect(localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)).toBe('ref_456');
     expect(useProfileStore().fetchProfile).toHaveBeenCalled();
   });
@@ -83,6 +84,7 @@ describe('useAuthStore', () => {
   it('clears tokens, profile, habits cache, sync queue and notifications on logout', async () => {
     const store = useAuthStore();
     store.setTokens('acc_123', 'ref_456');
+    const prevSessionId = store.sessionId;
 
     vi.mocked(authService.logout).mockResolvedValue({ data: null });
 
@@ -91,6 +93,7 @@ describe('useAuthStore', () => {
     expect(store.accessToken).toBeNull();
     expect(store.refreshToken).toBeNull();
     expect(store.isAuthenticated).toBe(false);
+    expect(store.sessionId).toBe(prevSessionId + 1);
     expect(localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)).toBeNull();
     expect(useProfileStore().clearProfile).toHaveBeenCalled();
     expect(useHabitStore().clearHabitsState).toHaveBeenCalled();

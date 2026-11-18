@@ -6,7 +6,7 @@
       :disabled="isDisabled"
       @ion-change="$emit('handleCheckboxChange')"
     />
-    <ion-label :class="{ disabled: isDisabled }" @click="handleItem">
+    <ion-label :class="{ disabled: isDisabled }" @click="handleItem($event)">
       <slot>{{ label }}</slot>
     </ion-label>
   </ion-row>
@@ -35,7 +35,11 @@ const emit = defineEmits<{
   (e: 'handleItem'): void;
 }>();
 
-const handleItem = () => {
+const handleItem = (event?: Event) => {
+  const target = event?.target as HTMLElement | null | undefined;
+  if (target?.closest?.('a, router-link, button, [role="button"]')) {
+    return;
+  }
   emit('handleItem');
 };
 </script>
