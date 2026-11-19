@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Application\UseCase;
 
 use App\Application\DTO\Habit\CreateHabitRequestDTO;
+use App\Application\DTO\Habit\HabitReminderItemDTO;
 use App\Application\DTO\Habit\HabitResponseDTO;
 use App\Application\Service\ValidationService;
 use App\Domain\Entity\Habit;
@@ -52,11 +53,15 @@ class CreateHabitUseCase
             $habit = new Habit(
                 title: $dto->title,
                 user: $user,
-                reminderTime: $dto->reminderTime,
                 createdAt: new DateTimeImmutable($dto->createdAt),
             );
 
-            $createdHabit = $this->habitRepository->create($habit, $dto->weekDays);
+            $reminders = array_map(
+                fn (HabitReminderItemDTO $item): array => $item->toArray(),
+                $dto->reminders,
+            );
+
+            $createdHabit = $this->habitRepository->create($habit, $dto->weekDays, $reminders);
 
             $this->pdo->commit();
         } catch (Exception $exception) {

@@ -1,13 +1,12 @@
 <template>
   <ion-segment
-    mode="md"
-    :key="modelValue"
+    mode="ios"
     :value="modelValue"
-    @ion-change="$emit('update:modelValue', ($event.detail.value as string))"
+    @ion-change="handleSegmentChange"
   >
-    <ion-segment-button 
-      v-for="segment in segments" 
-      :key="segment.value" 
+    <ion-segment-button
+      v-for="segment in segments"
+      :key="segment.value"
       :value="segment.value"
     >
       <ion-label>{{ segment.label }}</ion-label>
@@ -16,14 +15,14 @@
 </template>
 
 <script setup lang="ts">
-import { IonSegment, IonSegmentButton, IonLabel } from '@ionic/vue';
+import { IonSegment, IonSegmentButton, IonLabel, type SegmentCustomEvent } from '@ionic/vue';
 
 export interface SegmentItem {
   label: string;
   value: string;
 }
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     modelValue: string;
     segments?: SegmentItem[];
@@ -33,48 +32,52 @@ withDefaults(
   }
 );
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void;
 }>();
+
+const handleSegmentChange = (event: SegmentCustomEvent) => {
+  const nextValue = event.detail.value;
+  if (typeof nextValue === 'string' && nextValue !== props.modelValue) {
+    emit('update:modelValue', nextValue);
+  }
+};
 </script>
 
 <style scoped>
-ion-segment {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  padding: 0 .5rem;
-  background: var(--color-background-primary);
+ion-segment.ios {
+  --background: var(--color-background-elevated);
+  background: var(--color-background-elevated);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  padding: 4px;
+  min-height: 48px;
 }
 
-ion-segment-button::part(indicator-background) {
-  background: var(--color-primary);
+ion-segment-button.ios {
+  --color: var(--color-text-secondary);
+  --color-checked: var(--color-neutral-900);
+  --indicator-color: var(--color-primary);
+  --indicator-box-shadow: none;
+  --border-radius: var(--radius-full);
+  --padding-top: 6px;
+  --padding-bottom: 6px;
+  --padding-start: 10px;
+  --padding-end: 10px;
+  min-height: 40px;
+  margin: 0;
+  text-transform: none;
 }
 
-/* Material Design styles */
-ion-segment-button.md::part(native) {
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-
-.segment-button-checked.md::part(native) {
-  color: var(--color-primary);
-}
-
-ion-segment-button.md::part(indicator-background) {
-  height: 4px;
-}
-
-/* iOS styles */
 ion-segment-button.ios::part(native) {
-  color: var(--color-primary);
-}
-
-.segment-button-checked.ios::part(native) {
-  color: var(--color-text-primary);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0;
 }
 
 ion-segment-button.ios::part(indicator-background) {
-  border-radius: 20px;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  box-shadow: none;
 }
 </style>

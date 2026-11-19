@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Persistence\Repository;
 
 use App\Domain\Entity\Habit;
+use App\Domain\Entity\HabitReminder;
 use App\Domain\Entity\HabitWeekDay;
 use App\Domain\Repository\HabitRepositoryInterface;
 use App\Domain\Repository\UserRepositoryInterface;
@@ -48,16 +49,15 @@ class HabitRepository implements HabitRepositoryInterface
         return $data ? $this->hydrate($data) : null;
     }
 
-    public function create(Habit $habit, array $weekDays): Habit
+    public function create(Habit $habit, array $weekDays, array $reminders = []): Habit
     {
-        $sql = 'INSERT INTO habits (user_id, title, reminder_time, created_at, updated_at) 
-                VALUES (:user_id, :title, :reminder_time, :created_at, :updated_at)';
+        $sql = 'INSERT INTO habits (user_id, title, created_at, updated_at) 
+                VALUES (:user_id, :title, :created_at, :updated_at)';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
             'user_id' => $habit->getUser()->getId(),
             'title' => $habit->getTitle(),
-            'reminder_time' => $habit->getReminderTime(),
             'created_at' => $this->formatDateTime($habit->getCreatedAt()),
             'updated_at' => $this->formatDateTime($habit->getUpdatedAt()),
         ]);
@@ -66,8 +66,9 @@ class HabitRepository implements HabitRepositoryInterface
         $habit->setId($habitId);
 
         $this->syncWeekDays($habit, $weekDays);
+        $this->syncReminders($habitId, $reminders);
 
-        // Re-fetch the habit to ensure its weekDays collection is populated
+        // Re-fetch the habit to ensure its weekDays and reminders collections are populated
         $fullyHydratedHabit = $this->findById($habitId, $habit->getUser()->getId());
         if (!$fullyHydratedHabit instanceof \App\Domain\Entity\Habit) {
             throw new RuntimeException("Falha ao buscar novamente o hábito recém-criado.");
@@ -76,11 +77,10 @@ class HabitRepository implements HabitRepositoryInterface
         return $fullyHydratedHabit;
     }
 
-    public function update(Habit $habit, array $weekDays): Habit
+    public function update(Habit $habit, array $weekDays, array $reminders = []): Habit
     {
         $sql = 'UPDATE habits 
                 SET title = :title, 
-                    reminder_time = :reminder_time, 
                     updated_at = :updated_at 
                 WHERE id = :id';
 
@@ -88,13 +88,13 @@ class HabitRepository implements HabitRepositoryInterface
         $stmt->execute([
             'id' => $habit->getId(),
             'title' => $habit->getTitle(),
-            'reminder_time' => $habit->getReminderTime(),
             'updated_at' => $this->formatDateTime($habit->getUpdatedAt()),
         ]);
 
         $this->syncWeekDays($habit, $weekDays);
+        $this->syncReminders($habit->getId(), $reminders);
 
-        // Re-fetch the habit to ensure its weekDays collection and updated timestamp are populated
+        // Re-fetch the habit to ensure its weekDays and reminders collections and updated timestamp are populated
         $fullyHydratedHabit = $this->findById($habit->getId(), $habit->getUser()->getId());
         if (!$fullyHydratedHabit instanceof \App\Domain\Entity\Habit) {
             throw new RuntimeException("Falha ao buscar novamente o hábito recém-atualizado.");
@@ -250,6 +250,28 @@ class HabitRepository implements HabitRepositoryInterface
         }
     }
 
+    private function syncReminders(int $habitId, array $reminders): void
+    {
+        $sqlDelete = 'DELETE FROM habit_reminders WHERE habit_id = :habit_id';
+        $stmtDelete = $this->pdo->prepare($sqlDelete);
+        $stmtDelete->execute(['habit_id' => $habitId]);
+
+        if ($reminders === []) {
+            return;
+        }
+
+        $sqlInsert = 'INSERT INTO habit_reminders (habit_id, week_day, reminder_time) VALUES (:habit_id, :week_day, :reminder_time)';
+        $stmtInsert = $this->pdo->prepare($sqlInsert);
+
+        foreach ($reminders as $reminder) {
+            $stmtInsert->execute([
+                'habit_id' => $habitId,
+                'week_day' => (int) $reminder['week_day'],
+                'reminder_time' => $reminder['time'],
+            ]);
+        }
+    }
+
     private function hydrateMultiple(array $habitsData): array
     {
         $habits = [];
@@ -271,19 +293,44 @@ class HabitRepository implements HabitRepositoryInterface
         }
 
         $weekDays = $this->fetchWeekDaysForHabit((int) $data['id']);
+        $reminders = $this->fetchRemindersForHabit((int) $data['id']);
 
         $habit = new Habit(
             title: $data['title'],
             user: $user,
-            reminderTime: $data['reminder_time'] ?? null,
             createdAt: new DateTimeImmutable($data['created_at']),
             updatedAt: new DateTimeImmutable($data['updated_at']),
         );
 
         $habit->setId((int) $data['id']);
         $this->attachWeekDaysToHabit($habit, $weekDays);
+        $this->attachRemindersToHabit($habit, $reminders);
 
         return $habit;
+    }
+
+    private function fetchRemindersForHabit(int $habitId): array
+    {
+        $sql = 'SELECT id, week_day, reminder_time, created_at, updated_at FROM habit_reminders WHERE habit_id = :habit_id ORDER BY week_day ASC, reminder_time ASC';
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['habit_id' => $habitId]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    private function attachRemindersToHabit(Habit $habit, array $reminders): void
+    {
+        foreach ($reminders as $reminderData) {
+            $habitReminder = new HabitReminder(
+                habitId: $habit->getId(),
+                weekDay: (int) $reminderData['week_day'],
+                reminderTime: (string) $reminderData['reminder_time'],
+                createdAt: new DateTimeImmutable($reminderData['created_at']),
+                updatedAt: new DateTimeImmutable($reminderData['updated_at']),
+            );
+            $habitReminder->setId((int) $reminderData['id']);
+            $habit->addHabitReminder($habitReminder);
+        }
     }
 
     private function fetchWeekDaysForHabit(int $habitId): array

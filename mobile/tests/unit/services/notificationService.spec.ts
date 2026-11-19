@@ -21,6 +21,7 @@ vi.mock('@capacitor/core', () => ({
 describe('notificationService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(LocalNotifications.getPending).mockResolvedValue({ notifications: [] });
   });
 
   it('does nothing when platform is not native', async () => {
@@ -30,26 +31,24 @@ describe('notificationService', () => {
       id: 1,
       title: 'Beber água',
       week_days: [1],
-      reminder_time: '08:00',
+      reminders: [{ week_day: 1, time: '08:00' }],
     });
 
     expect(LocalNotifications.schedule).not.toHaveBeenCalled();
     expect(LocalNotifications.cancel).not.toHaveBeenCalled();
   });
 
-  it('schedules notifications for native platform with mapped capacitor weekdays', async () => {
+  it('schedules multiple notifications per day and per-day times with unique ids', async () => {
     vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
 
     await notificationService.scheduleHabitNotifications({
       id: 5,
-      title: 'Meditar',
+      title: 'Beber 2L de água',
       week_days: [0, 3], // Sunday (0) and Wednesday (3)
-      reminder_time: '07:30',
-    });
-
-    expect(LocalNotifications.cancel).toHaveBeenCalledWith({
-      notifications: [
-        { id: 35 }, { id: 36 }, { id: 37 }, { id: 38 }, { id: 39 }, { id: 40 }, { id: 41 },
+      reminders: [
+        { week_day: 0, time: '07:30' },
+        { week_day: 0, time: '14:00' },
+        { week_day: 3, time: '09:15' },
       ],
     });
 
@@ -57,29 +56,39 @@ describe('notificationService', () => {
     expect(LocalNotifications.schedule).toHaveBeenCalledTimes(1);
 
     const callArgs = vi.mocked(LocalNotifications.schedule).mock.calls[0][0];
-    expect(callArgs.notifications).toHaveLength(2);
+    expect(callArgs.notifications).toHaveLength(3);
 
-    // Weekday 0 mapped to Capacitor 1, id = 5 * 7 + 0 = 35
-    expect(callArgs.notifications[0].id).toBe(35);
-    expect(callArgs.notifications[0].schedule?.on?.weekday).toBe(1);
+    const ids = callArgs.notifications.map((n) => n.id);
+    expect(new Set(ids).size).toBe(3);
+
+    expect(callArgs.notifications[0].schedule?.on?.weekday).toBe(1); // Sunday -> 1
     expect(callArgs.notifications[0].schedule?.on?.hour).toBe(7);
     expect(callArgs.notifications[0].schedule?.on?.minute).toBe(30);
     expect(callArgs.notifications[0].extra?.habitId).toBe(5);
 
-    // Weekday 3 mapped to Capacitor 4, id = 5 * 7 + 3 = 38
-    expect(callArgs.notifications[1].id).toBe(38);
-    expect(callArgs.notifications[1].schedule?.on?.weekday).toBe(4);
+    expect(callArgs.notifications[1].schedule?.on?.weekday).toBe(1);
+    expect(callArgs.notifications[1].schedule?.on?.hour).toBe(14);
+    expect(callArgs.notifications[1].schedule?.on?.minute).toBe(0);
+
+    expect(callArgs.notifications[2].schedule?.on?.weekday).toBe(4); // Wednesday -> 4
+    expect(callArgs.notifications[2].schedule?.on?.hour).toBe(9);
+    expect(callArgs.notifications[2].schedule?.on?.minute).toBe(15);
   });
 
-  it('cancels all 7 possible weekday notifications for a habit id', async () => {
+  it('cancels only pending notifications matching habitId', async () => {
     vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+    vi.mocked(LocalNotifications.getPending).mockResolvedValue({
+      notifications: [
+        { id: 101, title: '', body: '', extra: { habitId: 2 } },
+        { id: 102, title: '', body: '', extra: { habitId: 2 } },
+        { id: 201, title: '', body: '', extra: { habitId: 9 } },
+      ],
+    });
 
     await notificationService.cancelHabitNotifications(2);
 
     expect(LocalNotifications.cancel).toHaveBeenCalledWith({
-      notifications: [
-        { id: 14 }, { id: 15 }, { id: 16 }, { id: 17 }, { id: 18 }, { id: 19 }, { id: 20 },
-      ],
+      notifications: [{ id: 101 }, { id: 102 }],
     });
   });
 
@@ -90,7 +99,7 @@ describe('notificationService', () => {
     });
 
     await notificationService.rescheduleAllNotifications([
-      { id: 1, title: 'Treinar', week_days: [1], reminder_time: '18:00' },
+      { id: 1, title: 'Treinar', week_days: [1], reminders: [{ week_day: 1, time: '18:00' }] },
     ]);
 
     expect(LocalNotifications.cancel).toHaveBeenCalledWith({

@@ -66,18 +66,22 @@ describe('useHabitStore', () => {
 
   it('adds created habit to reactive state and schedules notifications when reminder is set', async () => {
     const store = useHabitStore();
+    const reminders = [
+      { week_day: 1, time: '09:00' },
+      { week_day: 1, time: '15:00' },
+    ];
     const createdHabit: Habit = {
       id: 10,
       title: 'Beber 2L de água',
       week_days: [1, 2, 3, 4, 5],
-      reminder_time: '09:00',
+      reminders,
     };
 
     vi.mocked(habitService.create).mockResolvedValue({
       data: createdHabit,
     });
 
-    const result = await store.createHabit('Beber 2L de água', [1, 2, 3, 4, 5], '09:00');
+    const result = await store.createHabit('Beber 2L de água', [1, 2, 3, 4, 5], reminders);
 
     expect(result).toEqual(createdHabit);
     expect(store.habits).toContainEqual(createdHabit);
@@ -85,7 +89,7 @@ describe('useHabitStore', () => {
       id: 10,
       title: 'Beber 2L de água',
       week_days: [1, 2, 3, 4, 5],
-      reminder_time: '09:00',
+      reminders,
     });
   });
 
@@ -96,7 +100,7 @@ describe('useHabitStore', () => {
       id: 1,
       title: 'Ler 20 páginas',
       week_days: [1, 2, 3],
-      reminder_time: null,
+      reminders: [],
     };
 
     store.dayCache[targetDate] = {
@@ -134,7 +138,7 @@ describe('useHabitStore', () => {
       id: 2,
       title: 'Correr 5km',
       week_days: [2],
-      reminder_time: null,
+      reminders: [],
     };
 
     store.dayCache[targetDate] = {
@@ -173,7 +177,7 @@ describe('useHabitStore', () => {
       id: 3,
       title: 'Dormir cedo',
       week_days: [1, 2],
-      reminder_time: null,
+      reminders: [],
     };
 
     store.dayCache[targetDate] = {
@@ -210,7 +214,7 @@ describe('useHabitStore', () => {
       id: 4,
       title: 'Beber Chá',
       week_days: [1, 2],
-      reminder_time: null,
+      reminders: [],
     };
 
     store.dayCache[targetDate] = {
@@ -253,8 +257,8 @@ describe('useHabitStore', () => {
   it('removes habit from state and cancels notifications on deleteHabit', async () => {
     const store = useHabitStore();
     store.habits = [
-      { id: 5, title: 'Meditar', week_days: [0, 1], reminder_time: '07:00' },
-      { id: 6, title: 'Alongar', week_days: [2, 4], reminder_time: null },
+      { id: 5, title: 'Meditar', week_days: [0, 1], reminders: [{ week_day: 0, time: '07:00' }] },
+      { id: 6, title: 'Alongar', week_days: [2, 4], reminders: [] },
     ];
 
     vi.mocked(habitService.delete).mockResolvedValue({ data: null });

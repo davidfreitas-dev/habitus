@@ -33,9 +33,9 @@ class CachingHabitRepository implements HabitRepositoryInterface
     ) {
     }
 
-    public function create(Habit $habit, array $weekDays): Habit
+    public function create(Habit $habit, array $weekDays, array $reminders = []): Habit
     {
-        $createdHabit = $this->decoratedRepository->create($habit, $weekDays);
+        $createdHabit = $this->decoratedRepository->create($habit, $weekDays, $reminders);
         $this->invalidateHabitCache($createdHabit->getId(), $createdHabit->getUser()->getId());
         $this->invalidateSummaryAndPossibleHabitsCache($createdHabit->getUser()->getId());
         $this->invalidateAllHabitsCache($createdHabit->getUser()->getId());
@@ -87,14 +87,14 @@ class CachingHabitRepository implements HabitRepositoryInterface
         return $habit;
     }
 
-    public function update(Habit $habit, array $weekDays): Habit
+    public function update(Habit $habit, array $weekDays, array $reminders = []): Habit
     {
         // Invalidate old cache entries first
         $this->invalidateHabitCache($habit->getId(), $habit->getUser()->getId());
         $this->invalidateSummaryAndPossibleHabitsCache($habit->getUser()->getId());
         $this->invalidateAllHabitsCache($habit->getUser()->getId());
 
-        $updatedHabit = $this->decoratedRepository->update($habit, $weekDays);
+        $updatedHabit = $this->decoratedRepository->update($habit, $weekDays, $reminders);
 
         // Set cache for the updated habit
         $this->setHabitCache($updatedHabit);

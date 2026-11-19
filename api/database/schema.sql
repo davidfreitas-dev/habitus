@@ -9,6 +9,7 @@ DROP TABLE IF EXISTS roles;
 DROP TABLE IF EXISTS persons;
 DROP TABLE IF EXISTS day_habits;
 DROP TABLE IF EXISTS days;
+DROP TABLE IF EXISTS habit_reminders;
 DROP TABLE IF EXISTS habit_week_days;
 DROP TABLE IF EXISTS habits;
 
@@ -105,7 +106,6 @@ CREATE TABLE habits (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   title VARCHAR(255) NOT NULL,
   user_id BIGINT NOT NULL,
-  reminder_time TIME NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -121,6 +121,18 @@ CREATE TABLE habit_week_days (
   FOREIGN KEY (habit_id) REFERENCES habits(id) ON DELETE CASCADE,
   UNIQUE INDEX idx_habit_id_week_day (habit_id, week_day),
   INDEX idx_habit_id (habit_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE habit_reminders (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  habit_id BIGINT NOT NULL,
+  week_day TINYINT NOT NULL, -- 0 for Sunday, 1 for Monday, ..., 6 for Saturday
+  reminder_time TIME NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (habit_id) REFERENCES habits(id) ON DELETE CASCADE,
+  INDEX idx_habit_reminders_habit_id (habit_id),
+  UNIQUE INDEX idx_habit_week_day_time (habit_id, week_day, reminder_time)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE days (

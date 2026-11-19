@@ -6,7 +6,7 @@ import { analyticsService } from '@/services/analyticsService';
 import { syncQueueService } from '@/services/syncQueueService';
 import { checkIsOnline, isNetworkError } from '@/services/networkUtils';
 import dayjs from '@/lib/dayjs';
-import type { DayInfo, Habit, StatsPeriod, SummaryDay } from '@/types';
+import type { DayInfo, Habit, HabitReminder, StatsPeriod, SummaryDay } from '@/types';
 
 export const useHabitStore = defineStore(
   'habit',
@@ -37,16 +37,16 @@ export const useHabitStore = defineStore(
       pendingSyncCount.value = 0;
     };
 
-    const createHabit = async (title: string, weekDays: number[], reminderTime: string | null) => {
-      const response = await habitService.create(title, weekDays, reminderTime);
+    const createHabit = async (title: string, weekDays: number[], reminders: HabitReminder[]) => {
+      const response = await habitService.create(title, weekDays, reminders);
       const data = response.data;
 
-      if (data.id && reminderTime) {
+      if (data.id && reminders.length > 0) {
         await notificationService.scheduleHabitNotifications({
           id: data.id,
           title: data.title,
           week_days: weekDays,
-          reminder_time: reminderTime,
+          reminders,
         });
       }
 
@@ -57,7 +57,7 @@ export const useHabitStore = defineStore(
         name: 'habit_created',
         params: {
           weekDaysCount: weekDays.length,
-          hasReminder: Boolean(reminderTime),
+          hasReminder: reminders.length > 0,
         },
       });
 
@@ -117,17 +117,17 @@ export const useHabitStore = defineStore(
       id: number | string,
       title: string,
       weekDays: number[],
-      reminder_time: string | null
+      reminders: HabitReminder[]
     ) => {
-      const response = await habitService.update(id, title, weekDays, reminder_time);
+      const response = await habitService.update(id, title, weekDays, reminders);
 
       if (id) {
-        if (reminder_time) {
+        if (reminders.length > 0) {
           await notificationService.scheduleHabitNotifications({
             id: Number(id),
             title,
             week_days: weekDays,
-            reminder_time,
+            reminders,
           });
         } else {
           await notificationService.cancelHabitNotifications(id);
@@ -142,7 +142,7 @@ export const useHabitStore = defineStore(
         name: 'habit_updated',
         params: {
           habitId: id,
-          hasReminder: Boolean(reminder_time),
+          hasReminder: reminders.length > 0,
         },
       });
 

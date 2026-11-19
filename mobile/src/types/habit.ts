@@ -1,9 +1,14 @@
+export interface HabitReminder {
+  week_day: number;
+  time: string; // "HH:mm"
+}
+
 export interface Habit {
   id: number;
   title: string;
   week_days: number[];
   user_id?: number;
-  reminder_time: string | null;
+  reminders: HabitReminder[];
   created_at?: string;
   updated_at?: string;
 }
@@ -12,15 +17,14 @@ export interface HabitDraft {
   id?: number | string | null;
   title: string;
   week_days: number[] | string;
-  reminder_time: string | null;
+  reminders: HabitReminder[];
 }
 
 export interface HabitFormSubmitPayload {
   title: string;
   weekDays: number[];
   reminderEnabled: boolean;
-  reminderTime: string;
-  reminder_time: string | null;
+  reminders: HabitReminder[];
 }
 
 export interface DayInfo {

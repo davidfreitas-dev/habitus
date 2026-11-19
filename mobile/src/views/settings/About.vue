@@ -8,7 +8,7 @@
       <AppContainer>
         <BaseSegment v-model="selectedSegment" :segments="segments" />
 
-        <div v-if="selectedSegment === 'privacy' || selectedSegment === 'first'" class="ion-padding">
+        <div v-if="selectedSegment === 'privacy' || selectedSegment === 'first'">
           <h1>Política de Privacidade</h1>
           <p><em>Última atualização: 13 de julho de 2026</em></p>
           <section>

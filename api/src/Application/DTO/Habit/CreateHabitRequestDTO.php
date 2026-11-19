@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace App\Application\DTO\Habit;
 
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class CreateHabitRequestDTO
 {
+    /**
+     * @param HabitReminderItemDTO[] $reminders
+     */
     public function __construct(
         #[Assert\NotBlank(message: 'O título é obrigatório.')]
         #[Assert\Length(
@@ -25,22 +29,32 @@ class CreateHabitRequestDTO
             new Assert\Type(type: 'integer', message: 'Cada dia da semana deve ser um número inteiro.'),
         ])]
         public readonly array $weekDays,
-        #[Assert\Regex(
-            pattern: '/^([0-1]\d|2[0-3]):[0-5]\d$/',
-            message: 'O horário do lembrete deve estar no formato HH:mm.',
-        )]
-        public readonly ?string $reminderTime,
+        #[Assert\Type(type: 'array', message: 'Os lembretes devem ser um array.')]
+        #[Assert\Valid]
+        public readonly array $reminders,
         #[Assert\NotBlank(message: 'A data de criação é obrigatória.')]
         public readonly string $createdAt,
     ) {
     }
 
+    #[Assert\Callback]
+    public function validateReminders(ExecutionContextInterface $context): void
+    {
+        HabitReminderItemDTO::validateSchedule($this->reminders, $this->weekDays, $context);
+    }
+
     public static function fromArray(array $data): self
     {
+        $rawReminders = is_array($data['reminders'] ?? null) ? $data['reminders'] : [];
+        $reminders = array_map(
+            fn (mixed $item): HabitReminderItemDTO => HabitReminderItemDTO::fromArray(is_array($item) ? $item : []),
+            $rawReminders,
+        );
+
         return new self(
             title: $data['title'] ?? '',
             weekDays: $data['week_days'] ?? [],
-            reminderTime: $data['reminder_time'] ?? null,
+            reminders: $reminders,
             createdAt: $data['created_at'] ?? '',
         );
     }
@@ -50,7 +64,7 @@ class CreateHabitRequestDTO
         return [
             'title' => $this->title,
             'weekDays' => $this->weekDays,
-            'reminder_time' => $this->reminderTime,
+            'reminders' => array_map(fn (HabitReminderItemDTO $r): array => $r->toArray(), $this->reminders),
             'created_at' => $this->createdAt,
         ];
     }

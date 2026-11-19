@@ -2,10 +2,16 @@ import { LocalNotifications, type LocalNotificationSchema } from '@capacitor/loc
 import { Capacitor } from '@capacitor/core';
 import type { Habit } from '@/types';
 
-const generateNotificationId = (habitId: number | string, weekday: number | string): number => {
-  // weekday is 0-6 (0=Sun, 1=Mon, ..., 6=Sat)
-  // We use a formula to avoid collisions: habitId * 7 + weekday
-  return Number(habitId) * 7 + Number(weekday);
+const generateNotificationId = (
+  habitId: number | string,
+  weekday: number | string,
+  hour: number,
+  minute: number
+): number => {
+  // Deterministic 32-bit signed int without collisions for (habitId, weekday 0..6, minuteOfDay 0..1439)
+  const safeHabitId = Number(habitId) % 20000;
+  const minuteOfDay = hour * 60 + minute;
+  return safeHabitId * 100000 + Number(weekday) * 1440 + minuteOfDay;
 };
 
 const titles = [
@@ -48,28 +54,34 @@ export const notificationService = {
     }
   },
 
-  async scheduleHabitNotifications(habit: Pick<Habit, 'id' | 'title' | 'week_days' | 'reminder_time'>) {
+  async scheduleHabitNotifications(habit: Pick<Habit, 'id' | 'title' | 'week_days' | 'reminders'>) {
     if (!Capacitor.isNativePlatform()) return;
 
     await this.cancelHabitNotifications(habit.id);
 
-    if (!habit.reminder_time || !habit.week_days || habit.week_days.length === 0) {
+    if (!habit.reminders || habit.reminders.length === 0 || !habit.week_days || habit.week_days.length === 0) {
       return;
     }
 
     await this.ensureNotificationChannel();
 
-    const [hour, minute] = habit.reminder_time.split(':').map(Number);
+    const activeWeekDays = new Set(habit.week_days.map(Number));
     const notifications: LocalNotificationSchema[] = [];
 
     // habit.week_days from API is [0, 1, 2, 3, 4, 5, 6] (0=Sunday, ..., 6=Saturday)
-    for (const weekDay of habit.week_days) {
-      const notificationId = generateNotificationId(habit.id, weekDay);
+    for (const reminder of habit.reminders) {
+      const weekDay = Number(reminder.week_day);
+      if (!activeWeekDays.has(weekDay)) continue;
+
+      const [hour, minute] = reminder.time.split(':').map(Number);
+      if (Number.isNaN(hour) || Number.isNaN(minute)) continue;
+
+      const notificationId = generateNotificationId(habit.id, weekDay, hour, minute);
       const title = getRandomItem(titles);
       const body = getRandomItem(messages).replace('{title}', habit.title);
-      
+
       // Capacitor weekday is 1-7 (1=Sunday, 2=Monday, ..., 7=Saturday)
-      const capacitorWeekday = Number(weekDay) + 1;
+      const capacitorWeekday = weekDay + 1;
 
       notifications.push({
         id: notificationId,
@@ -101,14 +113,17 @@ export const notificationService = {
 
   async cancelHabitNotifications(habitId: number | string | null | undefined) {
     if (!Capacitor.isNativePlatform() || !habitId) return;
-    
-    const notificationsToCancel: Array<{ id: number }> = [];
-    for (let i = 0; i <= 6; i++) {
-      notificationsToCancel.push({ id: generateNotificationId(habitId, i) });
-    }
-    
+
     try {
-      await LocalNotifications.cancel({ notifications: notificationsToCancel });
+      const pending = await LocalNotifications.getPending();
+      const targetId = Number(habitId);
+      const notificationsToCancel = pending.notifications
+        .filter((n) => Number(n.extra?.habitId) === targetId)
+        .map((n) => ({ id: n.id }));
+
+      if (notificationsToCancel.length > 0) {
+        await LocalNotifications.cancel({ notifications: notificationsToCancel });
+      }
     } catch (error) {
       console.error('Erro ao cancelar notificações:', error);
     }

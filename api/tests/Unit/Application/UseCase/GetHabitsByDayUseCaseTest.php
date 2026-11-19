@@ -50,6 +50,7 @@ class GetHabitsByDayUseCaseTest extends TestCase
         $possibleHabit1->method('getHabitWeekDays')->willReturn(new ArrayCollection([
             new HabitWeekDay(habitId: 1, weekDay: (int)$date->format('w')),
         ]));
+        $possibleHabit1->method('getHabitReminders')->willReturn(new ArrayCollection());
 
         /** @var Habit&MockObject $possibleHabit2 */
         $possibleHabit2 = $this->createMock(Habit::class);
@@ -61,6 +62,7 @@ class GetHabitsByDayUseCaseTest extends TestCase
         $possibleHabit2->method('getHabitWeekDays')->willReturn(new ArrayCollection([
             new HabitWeekDay(habitId: 2, weekDay: (int)$date->format('w')),
         ]));
+        $possibleHabit2->method('getHabitReminders')->willReturn(new ArrayCollection());
 
         $possibleHabits = [$possibleHabit1, $possibleHabit2];
 
@@ -75,6 +77,7 @@ class GetHabitsByDayUseCaseTest extends TestCase
         $completedHabit1->method('getHabitWeekDays')->willReturn(new ArrayCollection([
             new HabitWeekDay(habitId: 1, weekDay: (int)$date->format('w')),
         ]));
+        $completedHabit1->method('getHabitReminders')->willReturn(new ArrayCollection());
 
         $completedHabits = [$completedHabit1];
 

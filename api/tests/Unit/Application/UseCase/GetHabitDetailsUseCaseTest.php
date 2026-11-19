@@ -42,6 +42,7 @@ class GetHabitDetailsUseCaseTest extends TestCase
             new HabitWeekDay(habitId: $habitId, weekDay: 1),
             new HabitWeekDay(habitId: $habitId, weekDay: 3),
         ]));
+        $habit->method('getHabitReminders')->willReturn(new ArrayCollection());
 
         $this->habitRepository->expects($this->once())->method('findById')->with($habitId, $userId)->willReturn($habit);
 

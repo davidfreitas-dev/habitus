@@ -33,7 +33,7 @@ const habit = ref<HabitDraft>({
   id: habitId,
   title: '',
   week_days: '',
-  reminder_time: null,
+  reminders: [],
 });
 
 const { showToast } = useToast();
@@ -71,7 +71,7 @@ const handleFormError = (message: string) => {
 
 const createHabit = async (formData: HabitFormSubmitPayload) => {
   await withLoading(async () => {
-    await habitStore.createHabit(formData.title, formData.weekDays, formData.reminder_time);
+    await habitStore.createHabit(formData.title, formData.weekDays, formData.reminders);
     await triggerHaptic('success');
     habitFormRef.value?.clearFormData();
     showToast('success', 'Hábito criado com sucesso!');
@@ -81,7 +81,7 @@ const createHabit = async (formData: HabitFormSubmitPayload) => {
 const updateHabit = async (formData: HabitFormSubmitPayload) => {
   if (!habit.value.id) return;
   await withLoading(async () => {
-    await habitStore.updateHabit(habit.value.id!, formData.title, formData.weekDays, formData.reminder_time);
+    await habitStore.updateHabit(habit.value.id!, formData.title, formData.weekDays, formData.reminders);
     await triggerHaptic('success');
     showToast('success', 'Hábito atualizado com sucesso!');
     router.go(-1);
@@ -117,8 +117,8 @@ const deleteHabit = async () => {
     </AppHeader>
 
     <ion-content>
-      <AppContainer>
-        <AppHeading :title="pageTitle" />
+      <AppContainer class="habit-page-container">
+        <AppHeading :title="pageTitle" class="habit-page-heading" />
 
         <HabitForm
           v-if="!route.params.id || habit.title"
@@ -132,7 +132,7 @@ const deleteHabit = async () => {
         <BaseButton
           v-if="route.params.id && habit.title"
           color="danger"
-          class="ion-margin-top"
+          class="habit-delete-btn"
           @click="handleDelete"
         >
           Excluir
@@ -154,3 +154,18 @@ const deleteHabit = async () => {
     />
   </ion-page>
 </template>
+
+<style scoped>
+.habit-page-container {
+  padding-top: 0.375rem;
+  padding-bottom: 2rem;
+}
+
+.habit-page-heading {
+  margin-bottom: 1.25rem;
+}
+
+.habit-delete-btn {
+  margin-top: 0.75rem;
+}
+</style>

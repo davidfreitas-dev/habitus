@@ -33,42 +33,42 @@ class HabitSeeder
             [
                 'id' => 100,
                 'title' => 'Beber 2L de água',
-                'reminder_time' => '08:00:00',
+                'reminder_times' => ['08:00', '12:00', '16:00', '20:00'],
                 'interval' => 'P35D',
                 'week_days' => [0, 1, 2, 3, 4, 5, 6],
             ],
             [
                 'id' => 101,
                 'title' => 'Meditar',
-                'reminder_time' => '07:00:00',
+                'reminder_times' => ['07:00'],
                 'interval' => 'P35D',
                 'week_days' => [1, 2, 3, 4, 5],
             ],
             [
                 'id' => 102,
                 'title' => 'Exercício físico',
-                'reminder_time' => '06:30:00',
+                'reminder_times' => ['06:30'],
                 'interval' => 'P35D',
                 'week_days' => [1, 3, 5, 6],
             ],
             [
                 'id' => 103,
                 'title' => 'Ler 30 minutos',
-                'reminder_time' => '21:00:00',
+                'reminder_times' => ['21:00'],
                 'interval' => 'P35D',
                 'week_days' => [0, 1, 2, 3, 4, 5, 6],
             ],
             [
                 'id' => 104,
                 'title' => 'Dormir antes das 23h',
-                'reminder_time' => '22:30:00',
+                'reminder_times' => ['22:30'],
                 'interval' => 'P30D',
                 'week_days' => [1, 2, 3, 4],
             ],
             [
                 'id' => 105,
                 'title' => 'Sem redes sociais até 9h',
-                'reminder_time' => null,
+                'reminder_times' => [],
                 'interval' => 'P20D',
                 'week_days' => [1, 2, 3, 4, 5],
             ],
@@ -88,13 +88,19 @@ class HabitSeeder
                 $habit = new Habit(
                     title: $data['title'],
                     user: $user,
-                    reminderTime: $data['reminder_time'],
                     createdAt: $createdAt,
                     updatedAt: new DateTimeImmutable(),
                 );
 
-                // Usamos o repositório para garantir que a tabela pivô habit_week_days também seja populada
-                $this->habitRepository->create($habit, $data['week_days']);
+                $reminders = [];
+                foreach ($data['week_days'] as $weekDay) {
+                    foreach ($data['reminder_times'] as $time) {
+                        $reminders[] = ['week_day' => $weekDay, 'time' => $time];
+                    }
+                }
+
+                // Usamos o repositório para garantir que as tabelas habit_week_days e habit_reminders sejam populadas
+                $this->habitRepository->create($habit, $data['week_days'], $reminders);
             }
 
             $this->pdo->commit();

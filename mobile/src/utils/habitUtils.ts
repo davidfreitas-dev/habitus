@@ -1,6 +1,10 @@
-import type { Habit } from '@/types';
+import type { Habit, HabitReminder } from '@/types';
+
+export const MAX_REMINDERS_PER_DAY = 6;
 
 export const SHORT_WEEK_DAYS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'] as const;
+
+export const SHORT_DAY_NAMES = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'] as const;
 
 export const FULL_WEEK_DAYS = [
   'Domingo',
@@ -55,6 +59,16 @@ export function formatReminderTime(time: string | null | undefined): string | nu
     return time.split('T')[1].substring(0, 5);
   }
   return time.substring(0, 5);
+}
+
+export function formatHabitRemindersSummary(reminders: HabitReminder[] | undefined | null): string | null {
+  if (!reminders || reminders.length === 0) return null;
+
+  const uniqueTimes = Array.from(new Set(reminders.map((r) => r.time.substring(0, 5)))).sort();
+  if (uniqueTimes.length === 0) return null;
+  if (uniqueTimes.length === 1) return uniqueTimes[0];
+
+  return `${uniqueTimes[0]} +${uniqueTimes.length - 1}`;
 }
 
 export function getLocalISOString(date: Date = new Date()): string {

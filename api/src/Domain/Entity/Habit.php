@@ -22,16 +22,21 @@ class Habit implements JsonSerializable
      */
     private readonly Collection $habitWeekDays;
 
+    /**
+     * @var Collection<int, HabitReminder>
+     */
+    private readonly Collection $habitReminders;
+
     public function __construct(
         string $title,
         private readonly User $user,
-        private ?string $reminderTime = null,
         private readonly ?DateTimeImmutable $createdAt = new DateTimeImmutable(),
         private ?DateTimeImmutable $updatedAt = new DateTimeImmutable(),
     ) {
         $this->validateTitle($title);
         $this->title = $title;
         $this->habitWeekDays = new ArrayCollection();
+        $this->habitReminders = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -57,17 +62,6 @@ class Habit implements JsonSerializable
     {
         $this->validateTitle($title);
         $this->title = $title;
-        $this->touch();
-    }
-
-    public function getReminderTime(): ?string
-    {
-        return $this->reminderTime;
-    }
-
-    public function setReminderTime(?string $reminderTime): void
-    {
-        $this->reminderTime = $reminderTime;
         $this->touch();
     }
 
@@ -106,6 +100,28 @@ class Habit implements JsonSerializable
         $this->touch();
     }
 
+    /**
+     * @return Collection<int, HabitReminder>
+     */
+    public function getHabitReminders(): Collection
+    {
+        return $this->habitReminders;
+    }
+
+    public function addHabitReminder(HabitReminder $habitReminder): void
+    {
+        if (!$this->habitReminders->contains($habitReminder)) {
+            $this->habitReminders->add($habitReminder);
+            $this->touch();
+        }
+    }
+
+    public function clearHabitReminders(): void
+    {
+        $this->habitReminders->clear();
+        $this->touch();
+    }
+
     public function getCreatedAt(): DateTimeImmutable
     {
         return $this->createdAt;
@@ -122,7 +138,6 @@ class Habit implements JsonSerializable
             'id' => $this->id,
             'title' => $this->title,
             'user_id' => $this->user->getId(),
-            'reminder_time' => $this->reminderTime,
             'created_at' => $this->createdAt->format('Y-m-d H:i:s'),
             'updated_at' => $this->updatedAt->format('Y-m-d H:i:s'),
         ];
@@ -143,7 +158,6 @@ class Habit implements JsonSerializable
         $habit = new self(
             $data['title'],
             $user,
-            $data['reminder_time'] ?? null,
             new DateTimeImmutable($data['created_at']),
             new DateTimeImmutable($data['updated_at']),
         );

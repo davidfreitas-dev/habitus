@@ -17,7 +17,7 @@ import {
   SHORT_WEEK_DAYS,
   isHabitDayActive,
   getFrequencySummary,
-  formatReminderTime,
+  formatHabitRemindersSummary,
 } from '@/utils/habitUtils';
 import type { Habit } from '@/types';
 
@@ -37,7 +37,7 @@ const emit = defineEmits<{
 }>();
 
 const frequencyLabel = computed(() => getFrequencySummary(props.habit));
-const formattedReminder = computed(() => formatReminderTime(props.habit.reminder_time));
+const formattedReminder = computed(() => formatHabitRemindersSummary(props.habit.reminders));
 </script>
 
 <template>

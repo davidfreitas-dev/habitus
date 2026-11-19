@@ -183,6 +183,7 @@ abstract class DatabaseTestCase extends TestCase
                 'user_verifications',
                 'error_logs',
                 'day_habits',
+                'habit_reminders',
                 'habit_week_days',
                 'habits',
                 'days',
@@ -244,6 +245,7 @@ abstract class DatabaseTestCase extends TestCase
                     'user_verifications',
                     'error_logs',
                     'day_habits', // Add this
+                    'habit_reminders',
                     'habit_week_days', // Add this
                     'habits', // Add this
                     'days', // Add this

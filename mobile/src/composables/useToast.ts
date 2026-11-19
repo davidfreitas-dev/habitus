@@ -45,7 +45,27 @@ export function useToast() {
     await toast.present();
   };
 
+  const showUndoToast = async (message: string, onUndo: () => void) => {
+    const toast = await toastController.create({
+      message,
+      color: 'dark',
+      duration: 3500,
+      buttons: [
+        {
+          text: 'Desfazer',
+          role: 'cancel',
+          handler: () => {
+            onUndo();
+          },
+        },
+      ],
+    });
+
+    await toast.present();
+  };
+
   return {
     showToast,
+    showUndoToast,
   };
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\UseCase;
 
+use App\Application\DTO\Habit\HabitReminderItemDTO;
 use App\Application\DTO\Habit\HabitResponseDTO;
 use App\Application\DTO\Habit\UpdateHabitRequestDTO;
 use App\Application\Service\ValidationService;
@@ -48,9 +49,13 @@ class UpdateHabitUseCase
 
         try {
             $habit->setTitle($dto->title);
-            $habit->setReminderTime($dto->reminderTime);
 
-            $updatedHabit = $this->habitRepository->update($habit, $dto->weekDays);
+            $reminders = array_map(
+                fn (HabitReminderItemDTO $item): array => $item->toArray(),
+                $dto->reminders,
+            );
+
+            $updatedHabit = $this->habitRepository->update($habit, $dto->weekDays, $reminders);
 
             $this->pdo->commit();
         } catch (Exception $exception) {

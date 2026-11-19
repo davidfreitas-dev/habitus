@@ -115,6 +115,14 @@ body.dark {
 .habit-day-80  { background: var(--habit-bg-80); border-color: var(--habit-border-80); }
 .habit-day-100 { background: var(--habit-bg-100); border-color: var(--habit-border-100); }
 
+body.dark .time-picker-wheel {
+  --background: #18181b;
+  --background-rgb: 24, 24, 27;
+  --ion-background-color: #18181b;
+  --ion-background-color-rgb: 24, 24, 27;
+  --wheel-fade-background-rgb: 24, 24, 27;
+}
+
 * {
   font-family: 'Inter', sans-serif;
 }

@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Tests\Unit\Application\UseCase;
 
 use App\Application\DTO\Habit\CreateHabitRequestDTO;
+use App\Application\DTO\Habit\HabitReminderItemDTO;
 use App\Application\DTO\Habit\HabitResponseDTO;
 use App\Application\Service\ValidationService;
 use App\Application\UseCase\CreateHabitUseCase;
 use App\Domain\Entity\Habit;
+use App\Domain\Entity\HabitReminder;
 use App\Domain\Entity\User;
 use App\Domain\Exception\HabitAlreadyExistsException;
 use App\Domain\Exception\NotFoundException;
@@ -53,10 +55,14 @@ class CreateHabitUseCaseTest extends TestCase
     public function testShouldCreateHabitSuccessfully(): void
     {
         $userId = 1;
+        $remindersDto = [
+            new HabitReminderItemDTO(weekDay: 1, time: '08:00'),
+            new HabitReminderItemDTO(weekDay: 1, time: '14:00'),
+        ];
         $dto = new CreateHabitRequestDTO(
             'Read a book',
             [0, 1, 2, 3, 4, 5, 6],
-            '10:30',
+            $remindersDto,
             new \DateTimeImmutable()->format('Y-m-d H:i:s')
         );
 
@@ -68,7 +74,6 @@ class CreateHabitUseCaseTest extends TestCase
         $habit = $this->createMock(Habit::class);
         $habit->method('getTitle')->willReturn($dto->title);
         $habit->method('getUser')->willReturn($user);
-        $habit->method('getReminderTime')->willReturn($dto->reminderTime);
 
         $mockHabitWeekDays = [];
         foreach ($dto->weekDays as $weekDay) {
@@ -80,13 +85,18 @@ class CreateHabitUseCaseTest extends TestCase
 
         $habit->method('getHabitWeekDays')->willReturn(new ArrayCollection($mockHabitWeekDays));
 
+        $mockReminders = new ArrayCollection([
+            new HabitReminder(habitId: 1, weekDay: 1, reminderTime: '08:00'),
+            new HabitReminder(habitId: 1, weekDay: 1, reminderTime: '14:00'),
+        ]);
+
         /** @var Habit&MockObject $createdHabit */
         $createdHabit = $this->createMock(Habit::class);
         $createdHabit->method('getId')->willReturn(1);
         $createdHabit->method('getTitle')->willReturn($dto->title);
         $createdHabit->method('getUser')->willReturn($user);
         $createdHabit->method('getHabitWeekDays')->willReturn(new ArrayCollection($mockHabitWeekDays));
-        $createdHabit->method('getReminderTime')->willReturn($dto->reminderTime);
+        $createdHabit->method('getHabitReminders')->willReturn($mockReminders);
 
         $this->validationService->expects($this->once())->method('validate')->with($dto);
         $this->userRepository->expects($this->once())->method('findById')->with($userId)->willReturn($user);
@@ -106,7 +116,11 @@ class CreateHabitUseCaseTest extends TestCase
         $this->assertSame(1, $response->id);
         $this->assertEquals($createdHabit->getTitle(), $response->title);
         $this->assertEquals($createdHabit->getUser()->getId(), $response->userId);
-        $this->assertEquals($createdHabit->getReminderTime(), $response->reminderTime);
+        $this->assertCount(2, $response->reminders);
+        $this->assertSame([
+            ['week_day' => 1, 'time' => '08:00'],
+            ['week_day' => 1, 'time' => '14:00'],
+        ], $response->reminders);
     }
 
     public function testShouldThrowNotFoundExceptionIfUserNotFound(): void
@@ -118,7 +132,7 @@ class CreateHabitUseCaseTest extends TestCase
         $dto = new CreateHabitRequestDTO(
             'Read a book',
             [0],
-            null,
+            [],
             new \DateTimeImmutable()->format('Y-m-d H:i:s')
         );
 
@@ -139,7 +153,7 @@ class CreateHabitUseCaseTest extends TestCase
         $dto = new CreateHabitRequestDTO(
             'Read a book',
             [0],
-            null,
+            [],
             new \DateTimeImmutable()->format('Y-m-d H:i:s')
         );
 
@@ -163,7 +177,7 @@ class CreateHabitUseCaseTest extends TestCase
         $this->expectException(ValidationException::class);
 
         $userId = 1;
-        $dto = new CreateHabitRequestDTO('', [], null, ''); // Invalid DTO
+        $dto = new CreateHabitRequestDTO('', [], [], ''); // Invalid DTO
 
         $this->validationService->expects($this->once())->method('validate')->with($dto)->willThrowException(new ValidationException('Validation failed.'));
         $this->userRepository->expects($this->never())->method('findById');
@@ -181,7 +195,7 @@ class CreateHabitUseCaseTest extends TestCase
         $dto = new CreateHabitRequestDTO(
             'Read a book',
             [0],
-            null,
+            [],
             new \DateTimeImmutable()->format('Y-m-d H:i:s')
         );
 

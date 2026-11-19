@@ -14,10 +14,11 @@ interface HabitRepositoryInterface
      *
      * @param Habit $habit The habit entity to create.
      * @param array $weekDays An array of weekdays associated with the habit.
+     * @param array<int, array{week_day: int, time: string}> $reminders Reminders associated with the habit.
      *
      * @return Habit The created habit entity.
      */
-    public function create(Habit $habit, array $weekDays): Habit;
+    public function create(Habit $habit, array $weekDays, array $reminders = []): Habit;
 
     /**
      * Finds a habit by its ID and user ID.
@@ -44,10 +45,11 @@ interface HabitRepositoryInterface
      *
      * @param Habit $habit The habit entity with updated data.
      * @param array $weekDays An array of updated weekdays associated with the habit.
+     * @param array<int, array{week_day: int, time: string}> $reminders Updated reminders associated with the habit.
      *
      * @return Habit The updated habit entity.
      */
-    public function update(Habit $habit, array $weekDays): Habit;
+    public function update(Habit $habit, array $weekDays, array $reminders = []): Habit;
 
     /**
      * Deletes a habit record by its ID and user ID.

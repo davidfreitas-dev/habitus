@@ -1,14 +1,14 @@
 import api from '@/api';
 import { HABIT_ENDPOINTS } from '@/constants/endpoints';
 import dayjs from '@/lib/dayjs';
-import type { ApiResponse, DayInfo, Habit, HabitStats, StatsPeriod, SummaryDay } from '@/types';
+import type { ApiResponse, DayInfo, Habit, HabitReminder, HabitStats, StatsPeriod, SummaryDay } from '@/types';
 
 export const habitService = {
-  create(title: string, weekDays: number[], reminder_time: string | null) {
+  create(title: string, weekDays: number[], reminders: HabitReminder[]) {
     return api.post<ApiResponse<Habit>>(HABIT_ENDPOINTS.BASE, {
       title,
       week_days: weekDays,
-      reminder_time,
+      reminders,
       created_at: dayjs().format(),
     });
   },
@@ -39,11 +39,11 @@ export const habitService = {
     return api.get<ApiResponse<Habit>>(HABIT_ENDPOINTS.DETAILS(id));
   },
   
-  update(id: number | string, title: string, weekDays: number[], reminder_time: string | null) {
+  update(id: number | string, title: string, weekDays: number[], reminders: HabitReminder[]) {
     return api.put<ApiResponse<Habit>>(HABIT_ENDPOINTS.DETAILS(id), {
       title,
       week_days: weekDays,
-      reminder_time,
+      reminders,
     });
   },
   
