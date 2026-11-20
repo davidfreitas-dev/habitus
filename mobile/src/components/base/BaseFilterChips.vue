@@ -1,5 +1,6 @@
 <script setup lang="ts" generic="T = string | number | null">
 import { ref, watch, onMounted, nextTick } from 'vue';
+import { centerElementInScrollContainer } from '@/utils/domUtils';
 import BaseChip from '@/components/base/BaseChip.vue';
 
 export interface FilterChipItem<ValueType = string | number | null> {
@@ -32,26 +33,8 @@ const containerRef = ref<HTMLElement | null>(null);
 
 const scrollToIndex = (index: number) => {
   if (!containerRef.value || props.wrap) return;
-
-  const container = containerRef.value;
-  const chipEl = container.children[index] as HTMLElement | undefined;
-
-  if (!chipEl) return;
-
-  const chipLeft = chipEl.offsetLeft;
-  const chipWidth = chipEl.offsetWidth;
-  const containerWidth = container.offsetWidth;
-
-  const targetScrollLeft = chipLeft - (containerWidth / 2) + (chipWidth / 2);
-
-  if (typeof container.scrollTo === 'function') {
-    container.scrollTo({
-      left: Math.max(0, targetScrollLeft),
-      behavior: 'smooth',
-    });
-  } else {
-    container.scrollLeft = Math.max(0, targetScrollLeft);
-  }
+  const chipEl = containerRef.value.children[index] as HTMLElement | undefined;
+  centerElementInScrollContainer(containerRef.value, chipEl ?? null);
 };
 
 const scrollByValue = (val: T | undefined) => {

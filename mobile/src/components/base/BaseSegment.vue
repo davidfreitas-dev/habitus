@@ -60,6 +60,8 @@ ion-segment-button.ios {
   --indicator-color: var(--color-primary);
   --indicator-box-shadow: none;
   --border-radius: var(--radius-full);
+  --border-width: 0;
+  --border-color: transparent;
   --padding-top: 6px;
   --padding-bottom: 6px;
   --padding-start: 10px;
