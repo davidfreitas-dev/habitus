@@ -5,14 +5,14 @@ import {
   IonRefresher,
   IonRefresherContent,
   IonSkeletonText,
-  onIonViewWillEnter,
-  onIonViewDidEnter,
   onIonViewDidLeave,
   type RefresherCustomEvent,
 } from '@ionic/vue';
 import { ref, computed, watch } from 'vue';
 import { useHabitStore } from '@/stores/habitsStore';
 import { useToast } from '@/composables/useToast';
+import { useAnimatedNumber } from '@/composables/useAnimatedNumber';
+import { useDeferredTour } from '@/composables/useDeferredTour';
 import { statsSteps } from '@/onboarding/statsSteps';
 import AppHeader from '@/components/app/AppHeader.vue';
 import AppHeading from '@/components/app/AppHeading.vue';
@@ -48,26 +48,7 @@ const averagePercentage = computed(() => {
   return Math.round((totalCompleted / totalHabits) * 100);
 });
 
-const displayedPercentage = ref(0);
-
-watch(averagePercentage, (newVal) => {
-  const duration = 1000;
-  const startValue = displayedPercentage.value;
-  const diff = newVal - startValue;
-  const startTime = Date.now();
-
-  const step = () => {
-    const elapsed = Date.now() - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    const ease = 1 - Math.pow(1 - progress, 4);
-
-    displayedPercentage.value = Math.round(startValue + diff * ease);
-
-    if (progress < 1) requestAnimationFrame(step);
-  };
-
-  requestAnimationFrame(step);
-}, { immediate: true });
+const displayedPercentage = useAnimatedNumber(averagePercentage);
 
 const loadStats = async (period: StatsPeriod | string) => {
   isLoadingStats.value = true;
@@ -96,27 +77,12 @@ const handleRefresh = async (event: RefresherCustomEvent) => {
   }
 };
 
-let statsLoaded: Promise<void> | null = null;
+const onboardingTourRef = ref<InstanceType<typeof OnboardingTour> | null>(null);
 
-onIonViewWillEnter(() => {
-  statsLoaded = loadStats(activePeriod.value);
-});
+useDeferredTour(onboardingTourRef, () => loadStats(activePeriod.value));
 
 onIonViewDidLeave(() => {
   statsData.value = [];
-});
-
-const onboardingTourRef = ref<InstanceType<typeof OnboardingTour> | null>(null);
-
-onIonViewDidEnter(async () => {
-  if (statsLoaded) {
-    try {
-      await statsLoaded;
-    } catch {
-      // Ignora o erro
-    }
-  }
-  await onboardingTourRef.value?.startIfNotSeen();
 });
 </script>
 

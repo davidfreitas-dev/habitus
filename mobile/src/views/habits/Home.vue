@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, computed, nextTick, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
 import {
   IonPage,
   IonContent,
@@ -19,6 +18,7 @@ import { useDayDimensions } from '@/composables/useDayDimensions';
 import { useProfileStore } from '@/stores/profileStore';
 import { useHabitStore } from '@/stores/habitsStore';
 import { useToast } from '@/composables/useToast';
+import { useDaySheetRoute } from '@/composables/useDaySheetRoute';
 import { homeSteps } from '@/onboarding/homeSteps';
 import AppHeader from '@/components/app/AppHeader.vue';
 import HabitUserGreeting from '@/components/features/habits/HabitUserGreeting.vue';
@@ -52,58 +52,12 @@ const contentRef = ref<IonContentElement | null>(null);
 const summaryScrollRef = ref<HTMLElement | null>(null);
 const onboardingTourRef = ref<InstanceType<typeof OnboardingTour> | null>(null);
 const isLoadingSummary = ref(false);
-const isDaySheetOpen = ref(false);
-const selectedDate = ref<Date | null>(null);
-
-const route = useRoute();
-const router = useRouter();
-
-const clearRouteActions = () => {
-  if (route.query.action || route.query.date || route.query.habitId) {
-    const restQuery = { ...route.query };
-    delete restQuery.action;
-    delete restQuery.date;
-    delete restQuery.habitId;
-    void router.replace({ path: route.path, query: restQuery });
-  }
-};
-
-watch(
-  () => [route.query.action, route.query.date],
-  ([action, queryDate]) => {
-    let shouldOpen = false;
-
-    if (action === 'today') {
-      selectedDate.value = new Date();
-      shouldOpen = true;
-    } else if (queryDate && typeof queryDate === 'string') {
-      const parsed = dayjs(queryDate).toDate();
-      if (!isNaN(parsed.getTime())) {
-        selectedDate.value = parsed;
-        shouldOpen = true;
-      }
-    }
-
-    if (shouldOpen) {
-      isDaySheetOpen.value = true;
-      void nextTick(() => {
-        clearRouteActions();
-      });
-    }
-  },
-  { immediate: true }
-);
-
-watch(isDaySheetOpen, (isOpen) => {
-  if (!isOpen) {
-    clearRouteActions();
-  }
-});
-
-const handleSelectDay = (date: Date) => {
-  selectedDate.value = date;
-  isDaySheetOpen.value = true;
-};
+const {
+  isDaySheetOpen,
+  selectedDate,
+  openDaySheet: handleSelectDay,
+  clearRouteActions,
+} = useDaySheetRoute();
 
 const skeletonCount = computed(() => (isHorizontalLayout.value ? 126 : 35));
 
