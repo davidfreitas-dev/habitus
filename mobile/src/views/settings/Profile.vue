@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { reactive, watch } from 'vue';
+import { watch } from 'vue';
 import { IonPage, IonContent, onIonViewWillEnter } from '@ionic/vue';
-import { useVuelidate } from '@vuelidate/core';
 import { required, helpers } from '@vuelidate/validators';
 import { useProfileStore } from '@/stores/profileStore';
 import { useToast } from '@/composables/useToast';
 import { useLoading } from '@/composables/useLoading';
+import { useValidatedForm } from '@/composables/useValidatedForm';
 import { emailRules, getFieldError } from '@/utils/validators';
 import AppHeader from '@/components/app/AppHeader.vue';
 import AppHeading from '@/components/app/AppHeading.vue';
@@ -15,11 +15,6 @@ import BaseInput from '@/components/base/BaseInput.vue';
 import BaseButton from '@/components/base/BaseButton.vue';
 
 const profileStore = useProfileStore();
-
-const formData = reactive({
-  name: '',
-  email: '',
-});
 
 const { showToast } = useToast();
 const { isLoading, withLoading } = useLoading();
@@ -31,7 +26,11 @@ const rules = {
   email: emailRules(),
 };
 
-const v$ = useVuelidate(rules, formData);
+const { formData, v$, handleSubmit } = useValidatedForm(
+  () => ({ name: '', email: '' }),
+  rules,
+  { resetOnLeave: false }
+);
 
 const loadProfileData = () => {
   if (profileStore.user) {
@@ -64,16 +63,7 @@ const updateProfile = async () => {
   }, 'Erro ao atualizar dados do perfil.');
 };
 
-const submitForm = async () => {
-  const isFormCorrect = await v$.value.$validate();
-
-  if (!isFormCorrect) {
-    showToast('info', 'Preencha todos os campos corretamente');
-    return;
-  }
-
-  updateProfile();
-};
+const submitForm = () => handleSubmit(updateProfile);
 </script>
 
 <template>

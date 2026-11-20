@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { reactive, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { useVuelidate } from '@vuelidate/core';
-import { IonContent, IonPage, onIonViewDidLeave } from '@ionic/vue';
+import { IonContent, IonPage } from '@ionic/vue';
 import { useProfileStore } from '@/stores/profileStore';
 import { useToast } from '@/composables/useToast';
 import { useLoading } from '@/composables/useLoading';
+import { useValidatedForm } from '@/composables/useValidatedForm';
 import {
   requiredPasswordRules,
   passwordRules,
@@ -22,37 +22,30 @@ import BaseButton from '@/components/base/BaseButton.vue';
 const profileStore = useProfileStore();
 const router = useRouter();
 
-const formData = reactive({
-  currentPassword: '',
-  newPassword: '',
-  confNewPassword: ''
-});
-
 const { showToast } = useToast();
 const { isLoading, withLoading } = useLoading();
 
-const resetData = () => {
-  formData.currentPassword = '';
-  formData.newPassword = '';
-  formData.confNewPassword = '';
-  v$.value.$reset();
-};
-
-onIonViewDidLeave(() => {
-  resetData();
-});
-
+const newPasswordRef = ref('');
 const rules = computed(() => ({
   currentPassword: requiredPasswordRules('Informe sua senha atual'),
   newPassword: passwordRules('Informe a nova senha'),
   confNewPassword: confirmPasswordRules(
-    computed(() => formData.newPassword),
+    newPasswordRef,
     'Confirme a nova senha',
     'A confirmação não coincide com a nova senha'
   ),
 }));
 
-const v$ = useVuelidate(rules, formData);
+const { formData, v$, handleSubmit } = useValidatedForm(
+  () => ({
+    currentPassword: '',
+    newPassword: '',
+    confNewPassword: '',
+  }),
+  rules
+);
+
+watch(() => formData.newPassword, (val) => { newPasswordRef.value = val; }, { immediate: true });
 
 const updatePassword = async () => {
   await withLoading(async () => {
@@ -66,16 +59,7 @@ const updatePassword = async () => {
   }, 'Erro ao alterar a senha.');
 };
 
-const submitForm = async () => {
-  const isFormCorrect = await v$.value.$validate();
-
-  if (!isFormCorrect) {
-    showToast('info', 'Preencha todos os campos corretamente');
-    return;
-  }
-
-  updatePassword();
-};
+const submitForm = () => handleSubmit(updatePassword);
 </script>
 
 <template>

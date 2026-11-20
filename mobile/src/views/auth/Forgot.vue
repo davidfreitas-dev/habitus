@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { useVuelidate } from '@vuelidate/core';
-import { onIonViewDidLeave } from '@ionic/vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/composables/useToast';
+import { useValidatedForm } from '@/composables/useValidatedForm';
 import { emailRules, getFieldError } from '@/utils/validators';
 import { getErrorMessage } from '@/types';
 import AuthLayout from '@/components/features/auth/AuthLayout.vue';
@@ -14,11 +13,17 @@ import BaseButton from '@/components/base/BaseButton.vue';
 const router = useRouter();
 const authStore = useAuthStore();
 const isLoading = ref(false);
-const formData = reactive({
-  email: ''
-});
-
 const { showToast } = useToast();
+
+const rules = computed(() => ({
+  email: emailRules(),
+}));
+
+const { formData, v$, handleSubmit } = useValidatedForm(
+  () => ({ email: '' }),
+  rules,
+  { invalidMessage: 'Informe um e-mail válido' }
+);
 
 const handleContinue = async () => {
   isLoading.value = true;
@@ -35,27 +40,7 @@ const handleContinue = async () => {
   }
 };
 
-const rules = computed(() => ({
-  email: emailRules(),
-}));
-
-const v$ = useVuelidate(rules, formData);
-
-const submitForm = async () => {
-  const isFormCorrect = await v$.value.$validate();
-
-  if (!isFormCorrect) {
-    showToast('info', 'Informe um e-mail válido');
-    return;
-  }
-
-  handleContinue();
-};
-
-onIonViewDidLeave(() => {
-  formData.email = '';
-  v$.value.$reset();
-});
+const submitForm = () => handleSubmit(handleContinue);
 </script>
 
 <template>

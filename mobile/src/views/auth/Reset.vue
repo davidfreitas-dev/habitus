@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { ref, reactive, computed } from 'vue';
-import { useVuelidate } from '@vuelidate/core';
-import { onIonViewDidLeave } from '@ionic/vue';
+import { ref, computed, watch } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/composables/useToast';
+import { useValidatedForm } from '@/composables/useValidatedForm';
 import { passwordRules, confirmPasswordRules, getFieldError } from '@/utils/validators';
 import { getErrorMessage } from '@/types';
 import AuthLayout from '@/components/features/auth/AuthLayout.vue';
@@ -13,13 +12,27 @@ import BaseButton from '@/components/base/BaseButton.vue';
 
 const authStore = useAuthStore();
 const isLoading = ref(false);
-const formData = reactive({
-  password: '',
-  confPassword: ''
-});
-
 const { showToast } = useToast();
 const router = useRouter();
+
+const passwordRef = ref('');
+const rules = computed(() => ({
+  password: passwordRules('Informe uma senha'),
+  confPassword: confirmPasswordRules(
+    passwordRef,
+    'Confirme a senha',
+    'As senhas não coincidem'
+  ),
+}));
+
+const { formData, v$, handleSubmit } = useValidatedForm(
+  () => ({ password: '', confPassword: '' }),
+  rules,
+  { invalidMessage: 'Preencha os campos com senhas válidas e idênticas' }
+);
+
+// Keep passwordRef synced for confirmPasswordRules
+watch(() => formData.password, (val) => { passwordRef.value = val; }, { immediate: true });
 
 const handleConfirm = async () => {
   isLoading.value = true;
@@ -36,33 +49,7 @@ const handleConfirm = async () => {
   }
 };
 
-const rules = computed(() => ({
-  password: passwordRules('Informe uma senha'),
-  confPassword: confirmPasswordRules(
-    computed(() => formData.password),
-    'Confirme a senha',
-    'As senhas não coincidem'
-  ),
-}));
-
-const v$ = useVuelidate(rules, formData);
-
-const submitForm = async () => {
-  const isFormCorrect = await v$.value.$validate();
-
-  if (!isFormCorrect) {
-    showToast('info', 'Preencha os campos com senhas válidas e idênticas');
-    return;
-  }
-
-  handleConfirm();
-};
-
-onIonViewDidLeave(() => {
-  formData.password = '';
-  formData.confPassword = '';
-  v$.value.$reset();
-});
+const submitForm = () => handleSubmit(handleConfirm);
 </script>
 
 <template>

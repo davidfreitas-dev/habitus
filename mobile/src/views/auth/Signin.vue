@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue';
-import { useVuelidate } from '@vuelidate/core';
-import { onIonViewDidLeave, useIonRouter } from '@ionic/vue';
+import { ref, computed } from 'vue';
+import { useIonRouter } from '@ionic/vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/composables/useToast';
+import { useValidatedForm } from '@/composables/useValidatedForm';
 import { emailRules, requiredPasswordRules, getFieldError } from '@/utils/validators';
 import { getErrorMessage } from '@/types';
 import AuthLayout from '@/components/features/auth/AuthLayout.vue';
@@ -13,13 +13,19 @@ import AuthGoogleButton from '@/components/features/auth/AuthGoogleButton.vue';
 
 const authStore = useAuthStore();
 const isLoadingEmail = ref(false);
-const formData = reactive({
-  email: '',
-  password: ''
-});
-
 const { showToast } = useToast();
 const ionRouter = useIonRouter();
+
+const rules = computed(() => ({
+  email: emailRules(),
+  password: requiredPasswordRules(),
+}));
+
+const { formData, v$, handleSubmit } = useValidatedForm(
+  () => ({ email: '', password: '' }),
+  rules,
+  { invalidMessage: 'Informe um e-mail válido e a senha' }
+);
 
 const signIn = async () => {
   isLoadingEmail.value = true;
@@ -35,29 +41,7 @@ const signIn = async () => {
   }
 };
 
-const rules = computed(() => ({
-  email: emailRules(),
-  password: requiredPasswordRules(),
-}));
-
-const v$ = useVuelidate(rules, formData);
-
-const submitForm = async () => {
-  const isFormCorrect = await v$.value.$validate();
-
-  if (!isFormCorrect) {
-    showToast('info', 'Informe um e-mail válido e a senha');
-    return;
-  }
-
-  signIn();
-};
-
-onIonViewDidLeave(() => {
-  formData.email = '';
-  formData.password = '';
-  v$.value.$reset();
-});
+const submitForm = () => handleSubmit(signIn);
 </script>
 
 <template>

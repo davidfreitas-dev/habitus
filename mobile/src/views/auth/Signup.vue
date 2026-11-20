@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue';
-import { useVuelidate } from '@vuelidate/core';
-import { onIonViewDidLeave, useIonRouter } from '@ionic/vue';
+import { ref, computed } from 'vue';
+import { useIonRouter } from '@ionic/vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/composables/useToast';
+import { useValidatedForm } from '@/composables/useValidatedForm';
 import {
   fullNameRules,
   emailRules,
@@ -20,16 +20,25 @@ import AuthGoogleButton from '@/components/features/auth/AuthGoogleButton.vue';
 
 const authStore = useAuthStore();
 const isLoadingEmail = ref(false);
-const formData = reactive({
-  name: '',
-  email: '',
-  password: '',
-  website: '', // honeypot
-  agreeToTerms: false
-});
-
 const { showToast } = useToast();
 const ionRouter = useIonRouter();
+
+const rules = computed(() => ({
+  name: fullNameRules(),
+  email: emailRules(),
+  password: passwordRules(),
+}));
+
+const { formData, v$, handleSubmit } = useValidatedForm(
+  () => ({
+    name: '',
+    email: '',
+    password: '',
+    website: '', // honeypot
+    agreeToTerms: false,
+  }),
+  rules
+);
 
 const signUp = async () => {
   isLoadingEmail.value = true;
@@ -50,32 +59,7 @@ const signUp = async () => {
   }
 };
 
-const rules = computed(() => ({
-  name: fullNameRules(),
-  email: emailRules(),
-  password: passwordRules(),
-}));
-
-const v$ = useVuelidate(rules, formData);
-
-const submitForm = async () => {
-  const isFormCorrect = await v$.value.$validate();
-
-  if (!isFormCorrect) {
-    showToast('info', 'Preencha todos os campos corretamente');
-    return;
-  }
-
-  signUp();
-};
-
-onIonViewDidLeave(() => {
-  formData.name = '';
-  formData.email = '';
-  formData.password = '';
-  formData.website = '';
-  v$.value.$reset();
-});
+const submitForm = () => handleSubmit(signUp);
 </script>
 
 <template>
