@@ -216,12 +216,16 @@ router.beforeEach(async (to) => {
 });
 
 router.afterEach(() => {
-  if (
-    typeof document !== 'undefined' &&
-    document.activeElement instanceof HTMLElement &&
-    document.activeElement !== document.body
-  ) {
-    if (document.activeElement.closest('[aria-hidden="true"]')) {
+  if (typeof document !== 'undefined') {
+    if (document.body.style.pointerEvents === 'none' && !document.querySelector('[data-v-onboarding-wrapper]')) {
+      document.body.style.removeProperty('pointer-events');
+    }
+
+    if (
+      document.activeElement instanceof HTMLElement &&
+      document.activeElement !== document.body &&
+      document.activeElement.closest('[aria-hidden="true"]')
+    ) {
       document.activeElement.blur();
     }
   }

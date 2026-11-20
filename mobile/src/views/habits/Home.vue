@@ -156,10 +156,19 @@ onIonViewDidEnter(async () => {
       // Ignora o erro
     }
   }
-  await onboardingTourRef.value?.startIfNotSeen();
+  if (!isDaySheetOpen.value) {
+    await onboardingTourRef.value?.startIfNotSeen();
+  }
+});
+
+watch(isDaySheetOpen, (isOpen) => {
+  if (isOpen) {
+    onboardingTourRef.value?.dismiss();
+  }
 });
 
 onIonViewWillLeave(() => {
+  onboardingTourRef.value?.dismiss();
   if (isDaySheetOpen.value) {
     isDaySheetOpen.value = false;
   }

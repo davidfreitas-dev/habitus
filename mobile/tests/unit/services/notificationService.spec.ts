@@ -65,6 +65,8 @@ describe('notificationService', () => {
     expect(callArgs.notifications[0].schedule?.on?.hour).toBe(7);
     expect(callArgs.notifications[0].schedule?.on?.minute).toBe(30);
     expect(callArgs.notifications[0].extra?.habitId).toBe(5);
+    expect(callArgs.notifications[0].smallIcon).toBe('ic_stat_habitus');
+    expect(callArgs.notifications[0].largeIcon).toBe('ic_notification_large');
 
     expect(callArgs.notifications[1].schedule?.on?.weekday).toBe(1);
     expect(callArgs.notifications[1].schedule?.on?.hour).toBe(14);

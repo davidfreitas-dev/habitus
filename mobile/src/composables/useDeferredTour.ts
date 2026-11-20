@@ -1,8 +1,10 @@
 import type { Ref } from 'vue';
-import { onIonViewDidEnter, onIonViewWillEnter } from '@ionic/vue';
+import { onIonViewDidEnter, onIonViewWillEnter, onIonViewWillLeave } from '@ionic/vue';
 
 interface TourHandle {
   startIfNotSeen: () => Promise<void>;
+  dismiss?: () => void;
+  finish?: () => void;
 }
 
 /**
@@ -29,5 +31,13 @@ export function useDeferredTour(
       }
     }
     await tourRef.value?.startIfNotSeen();
+  });
+
+  onIonViewWillLeave(() => {
+    if (tourRef.value?.dismiss) {
+      tourRef.value.dismiss();
+    } else {
+      tourRef.value?.finish?.();
+    }
   });
 }

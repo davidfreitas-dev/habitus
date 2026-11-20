@@ -11,6 +11,8 @@ const assetsPath = path.resolve(__dirname, '../assets');
 
 const foregroundInput = path.join(assetsPath, 'icon-foreground.png');
 const backgroundInput = path.join(assetsPath, 'icon-background.png');
+const iconOnlyInput = path.join(assetsPath, 'icon-only.png');
+const statIconInput = path.join(assetsPath, 'ic_stat_habitus.png');
 
 if (!fs.existsSync(resPath)) {
   console.log('Diretório res do Android não encontrado. Pulando fix-android-icons.');
@@ -110,7 +112,39 @@ async function run() {
       await renderPaddedForeground(foregroundInput, size, splashLogoDest);
     }
 
-    // 4. Remover vetores legados de template do Android Studio se existirem
+    // 4. Gerar ícone colorido para largeIcon de notificações locais em drawable-nodpi
+    // (evita que o Android multiplique a resolução pela densidade da tela e estoure o limite de 1MB do Binder no AlarmManager)
+    const baseDrawableDir = path.join(resPath, 'drawable');
+    const nodpiDrawableDir = path.join(resPath, 'drawable-nodpi');
+    fs.mkdirSync(baseDrawableDir, { recursive: true });
+    fs.mkdirSync(nodpiDrawableDir, { recursive: true });
+
+    const legacyLargeIcon = path.join(baseDrawableDir, 'ic_notification_large.png');
+    if (fs.existsSync(legacyLargeIcon)) {
+      fs.unlinkSync(legacyLargeIcon);
+    }
+
+    if (fs.existsSync(iconOnlyInput)) {
+      await sharp(iconOnlyInput)
+        .resize(128, 128, { fit: 'cover', kernel: sharp.kernel.lanczos3 })
+        .png({ compressionLevel: 9 })
+        .toFile(path.join(nodpiDrawableDir, 'ic_notification_large.png'));
+    }
+
+    if (fs.existsSync(statIconInput)) {
+      fs.copyFileSync(statIconInput, path.join(baseDrawableDir, 'ic_stat_habitus.png'));
+    }
+
+    // Preservar ícones de notificação quando shrinkResources=true estiver ativo no build release
+    const rawDir = path.join(resPath, 'raw');
+    fs.mkdirSync(rawDir, { recursive: true });
+    const keepXml = `<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/ic_stat_habitus,@drawable/ic_notification_large" />
+`;
+    fs.writeFileSync(path.join(rawDir, 'keep.xml'), keepXml, 'utf8');
+
+    // 5. Remover vetores legados de template do Android Studio se existirem
     const legacyVectors = [
       path.join(resPath, 'drawable/ic_launcher_background.xml'),
       path.join(resPath, 'drawable-v24/ic_launcher_foreground.xml'),
@@ -121,7 +155,7 @@ async function run() {
       }
     }
 
-    console.log('✓ Adaptive Icons (108dp) e Splash Screen Icon (288dp) gerados em alta definição.');
+    console.log('✓ Adaptive Icons (108dp), Splash Screen Icon (288dp) e Notification Icons gerados em alta definição.');
   } catch (error) {
     console.error('Erro ao corrigir ícones do Android:', error);
     process.exit(1);

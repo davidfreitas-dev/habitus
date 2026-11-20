@@ -100,7 +100,7 @@ export const notificationService = {
         extra: {
           habitId: habit.id,
         },
-        largeIcon: 'ic_stat_habitus',
+        largeIcon: 'ic_notification_large',
         smallIcon: 'ic_stat_habitus',
         sound: 'default',
       });

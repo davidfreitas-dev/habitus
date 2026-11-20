@@ -55,6 +55,7 @@ const {
 const formattedDate = computed(() => parsedDate.value.format('YYYY-MM-DD'));
 
 const isLoading = ref(false);
+const isModalPresented = ref(false);
 const isToggling = ref<Record<string, boolean>>({});
 const onboardingTourRef = ref<InstanceType<typeof OnboardingTour> | null>(null);
 
@@ -76,10 +77,15 @@ const progressPercentage = computed(() => {
 });
 
 const startTourIfPossible = async () => {
-  if (props.isOpen && canStartTour.value) {
+  if (props.isOpen && isModalPresented.value && canStartTour.value) {
     await nextTick();
     await onboardingTourRef.value?.startIfNotSeen();
   }
+};
+
+const handleModalDidPresent = () => {
+  isModalPresented.value = true;
+  void startTourIfPossible();
 };
 
 const fetchDayData = async () => {
@@ -106,10 +112,11 @@ watch(
 );
 
 const closeModal = () => {
+  isModalPresented.value = false;
   if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
     document.activeElement.blur();
   }
-  onboardingTourRef.value?.finish();
+  onboardingTourRef.value?.dismiss();
   emit('update:isOpen', false);
 };
 
@@ -170,7 +177,7 @@ const handleCreateHabit = () => {
     :initial-breakpoint="0.5"
     handle-behavior="cycle"
     class="day-sheet-modal"
-    @did-present="startTourIfPossible"
+    @did-present="handleModalDidPresent"
     @did-dismiss="closeModal"
   >
     <ion-content class="sheet-content ion-padding-horizontal">

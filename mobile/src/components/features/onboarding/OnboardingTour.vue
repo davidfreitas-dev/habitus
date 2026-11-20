@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, nextTick } from 'vue';
+import { ref, nextTick, onBeforeUnmount, onDeactivated } from 'vue';
 import { useVOnboarding, VOnboardingStep, VOnboardingWrapper, type StepEntity } from 'v-onboarding';
 import { useOnboarding, type OnboardingStepKey } from '@/composables/useOnboarding';
 import OnboardingStep from '@/components/features/onboarding/OnboardingStep.vue';
@@ -20,13 +20,34 @@ const props = withDefaults(
 const { isStepSeen, markStepSeen } = useOnboarding();
 const onboardingWrapper = ref<InstanceType<typeof VOnboardingWrapper> | null>(null);
 const { start, finish } = useVOnboarding(onboardingWrapper);
+let isProgrammaticDismiss = false;
+
+const restoreBodyPointerEvents = () => {
+  if (typeof document !== 'undefined' && document.body.style.pointerEvents === 'none') {
+    document.body.style.removeProperty('pointer-events');
+  }
+};
 
 const onComplete = () => {
-  markStepSeen(props.stepKey);
+  if (!isProgrammaticDismiss) {
+    markStepSeen(props.stepKey);
+  }
+  restoreBodyPointerEvents();
 };
 
 const onExit = () => {
   finish();
+  restoreBodyPointerEvents();
+};
+
+const dismiss = () => {
+  isProgrammaticDismiss = true;
+  try {
+    finish();
+  } finally {
+    isProgrammaticDismiss = false;
+    restoreBodyPointerEvents();
+  }
 };
 
 const startIfNotSeen = async (): Promise<void> => {
@@ -36,13 +57,18 @@ const startIfNotSeen = async (): Promise<void> => {
   try {
     start();
   } catch (err) {
+    restoreBodyPointerEvents();
     console.warn(`[OnboardingTour] Failed to start step '${props.stepKey}':`, err);
   }
 };
 
+onBeforeUnmount(dismiss);
+onDeactivated(dismiss);
+
 defineExpose({
   startIfNotSeen,
   finish,
+  dismiss,
 });
 </script>
 
