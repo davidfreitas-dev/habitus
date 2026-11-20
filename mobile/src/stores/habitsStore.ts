@@ -269,6 +269,22 @@ export const useHabitStore = defineStore(
       return { synced: syncedCount, failed: failedCount };
     };
 
+    const enqueueToggleAction = async (
+      habitId: number | string,
+      targetDate: string,
+      eventName: 'habit_toggled_offline' | 'habit_toggled_offline_fallback' | null = null
+    ) => {
+      const { queue } = await syncQueueService.enqueueToggle(habitId, targetDate);
+      pendingSyncCount.value = queue.length;
+      if (eventName) {
+        void analyticsService.logEvent({
+          name: eventName,
+          params: { habitId, date: targetDate },
+        });
+      }
+      return { queued: true };
+    };
+
     const toggleHabit = async (habitId: number | string, date: string | null = null) => {
       const targetDate = date || dayjs().format('YYYY-MM-DD');
       const rollback = applyOptimisticToggle(habitId, targetDate);
@@ -276,21 +292,14 @@ export const useHabitStore = defineStore(
       const isOnline = await checkIsOnline();
 
       if (!isOnline) {
-        const { queue } = await syncQueueService.enqueueToggle(habitId, targetDate);
-        pendingSyncCount.value = queue.length;
-        void analyticsService.logEvent({
-          name: 'habit_toggled_offline',
-          params: { habitId, date: targetDate },
-        });
-        return { queued: true };
+        return enqueueToggleAction(habitId, targetDate, 'habit_toggled_offline');
       }
 
       // If there are already items waiting in the sync queue, enqueue this toggle too to preserve FIFO
       if (pendingSyncCount.value > 0) {
-        const { queue } = await syncQueueService.enqueueToggle(habitId, targetDate);
-        pendingSyncCount.value = queue.length;
+        const queued = await enqueueToggleAction(habitId, targetDate);
         void syncPendingHabits();
-        return { queued: true };
+        return queued;
       }
 
       try {
@@ -303,13 +312,7 @@ export const useHabitStore = defineStore(
       } catch (error) {
         // Sudden network loss during the request: enqueue instead of rolling back
         if (isNetworkError(error)) {
-          const { queue } = await syncQueueService.enqueueToggle(habitId, targetDate);
-          pendingSyncCount.value = queue.length;
-          void analyticsService.logEvent({
-            name: 'habit_toggled_offline_fallback',
-            params: { habitId, date: targetDate },
-          });
-          return { queued: true };
+          return enqueueToggleAction(habitId, targetDate, 'habit_toggled_offline_fallback');
         }
 
         // Server validation/business error: rollback optimistic state

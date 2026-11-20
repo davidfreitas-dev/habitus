@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { IonPage, IonContent, onIonViewWillEnter, onIonViewDidEnter } from '@ionic/vue';
+import { IonPage, IonContent } from '@ionic/vue';
 import { useHabitStore } from '@/stores/habitsStore';
 import { useLoading } from '@/composables/useLoading';
 import { useToast } from '@/composables/useToast';
 import { useHaptics } from '@/composables/useHaptics';
+import { useDeferredTour } from '@/composables/useDeferredTour';
 import { formSteps } from '@/onboarding/formSteps';
 import AppHeader from '@/components/app/AppHeader.vue';
 import AppHeading from '@/components/app/AppHeading.vue';
@@ -38,28 +39,14 @@ const habit = ref<HabitDraft>({
 
 const { showToast } = useToast();
 const { isLoading, withLoading } = useLoading();
+const onboardingTourRef = ref<InstanceType<typeof OnboardingTour> | null>(null);
 
-let detailsLoaded: Promise<void> | null = null;
-
-onIonViewWillEnter(() => {
+useDeferredTour(onboardingTourRef, () => {
   if (!habit.value.id) return;
-  detailsLoaded = withLoading(async () => {
+  return withLoading(async () => {
     const fetchedHabit = await habitStore.getHabitDetails(habit.value.id!);
     habit.value = fetchedHabit;
   }, 'Erro ao carregar detalhes do hábito.');
-});
-
-const onboardingTourRef = ref<InstanceType<typeof OnboardingTour> | null>(null);
-
-onIonViewDidEnter(async () => {
-  if (detailsLoaded) {
-    try {
-      await detailsLoaded;
-    } catch {
-      // Ignora o erro
-    }
-  }
-  await onboardingTourRef.value?.startIfNotSeen();
 });
 
 const habitFormRef = ref<InstanceType<typeof HabitForm> | null>(null);

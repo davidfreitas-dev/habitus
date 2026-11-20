@@ -3,6 +3,22 @@ export interface HabitReminder {
   time: string; // "HH:mm"
 }
 
+export type ReminderMode = 'all' | 'perDay';
+
+export interface ReminderScheduleState {
+  enabled: boolean;
+  mode: ReminderMode;
+  times: string[];
+  perDay: Record<number, string[]>;
+}
+
+export interface HabitTemplate {
+  title: string;
+  emoji: string;
+  weekDays: number[];
+  reminderTimes: string[];
+}
+
 export interface Habit {
   id: number;
   title: string;

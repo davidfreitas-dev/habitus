@@ -11,14 +11,13 @@ import {
   IonRefresher,
   IonRefresherContent,
   IonSkeletonText,
-  onIonViewWillEnter,
-  onIonViewDidEnter,
   type RefresherCustomEvent,
 } from '@ionic/vue';
 import { calendarOutline } from 'ionicons/icons';
 import { useHabitStore } from '@/stores/habitsStore';
 import { useToast } from '@/composables/useToast';
 import { useHaptics } from '@/composables/useHaptics';
+import { useDeferredTour } from '@/composables/useDeferredTour';
 import { isHabitDayActive } from '@/utils/habitUtils';
 import AppHeader from '@/components/app/AppHeader.vue';
 import AppHeading from '@/components/app/AppHeading.vue';
@@ -45,7 +44,6 @@ const habitToDelete = ref<Habit | null>(null);
 const deleteDialogRef = ref<InstanceType<typeof AppConfirmModal> | null>(null);
 const ionListRef = ref<InstanceType<typeof IonList> | null>(null);
 const onboardingTourRef = ref<InstanceType<typeof OnboardingTour> | null>(null);
-let habitsLoaded: Promise<void> | null = null;
 
 const closeSlidingItems = async () => {
   try {
@@ -138,20 +136,9 @@ const activeHabitsSteps = computed(() => {
   });
 });
 
-onIonViewWillEnter(() => {
+useDeferredTour(onboardingTourRef, () => {
   closeSlidingItems();
-  habitsLoaded = loadHabits();
-});
-
-onIonViewDidEnter(async () => {
-  if (habitsLoaded) {
-    try {
-      await habitsLoaded;
-    } catch {
-      // Ignora erro
-    }
-  }
-  await onboardingTourRef.value?.startIfNotSeen();
+  return loadHabits();
 });
 </script>
 
